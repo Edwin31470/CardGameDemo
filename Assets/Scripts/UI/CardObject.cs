@@ -42,7 +42,6 @@ namespace Assets.Scripts.UI
             CardReference = cardReference;
 
             var colour = CardReference.Colour.ToString();
-            var type = CardReference.Type == CardType.Creature ? "Creature" : "NonCreature";
             var cost = CardReference.Cost;
 
             // Small Card
@@ -59,7 +58,7 @@ namespace Assets.Scripts.UI
             CardSymbol = SmallCard.transform.Find("CardSymbol").GetComponent<SpriteRenderer>();
             CostSymbol = SmallCard.transform.Find("CostSymbol").GetComponent<SpriteRenderer>();
 
-            Background.sprite = Resources.Load<Sprite>($"Sprites/{colour}CardSmall{type}");
+            Background.sprite = Resources.Load<Sprite>($"Sprites/{colour}CardSmall{CardReference.Type}");
 
             CostSymbol.sprite = cost != 0 ? Resources.Load<Sprite>($"Sprites/Symbols/Cost{cost}") : null;
 
