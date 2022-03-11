@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Assets.Scripts.Cards
 {
-    public class PermanentCard : BaseCard
+    public class PermanentCard : FieldCard
     {
         public PermanentCard(Player owner, CardInfo cardInfo) : base(owner, cardInfo)
         {
