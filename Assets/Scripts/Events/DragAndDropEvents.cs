@@ -1,13 +1,9 @@
-﻿using Assets.Scripts.Cards;
-using Assets.Scripts.Enums;
+﻿using Assets.Scripts.Enums;
 using Assets.Scripts.Extensions;
 using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 
 namespace Assets.Scripts.Events
 {
@@ -25,12 +21,12 @@ namespace Assets.Scripts.Events
             OtherPlayerPassed = otherPlayerPassed;
         }
 
-        public override void Process(UIManager uIManager)
+        public override IEnumerable<BaseEvent> Process(UIManager uIManager, Func<PlayerType, Player> getPlayer)
         {
-            if (MainController.GetPlayer(PlayingPlayer).GetHand().Count() == 0)
+            // If no cards in hand, automatically pass
+            if (!getPlayer(PlayingPlayer).GetHand().Any())
             {
-                PassTurn();
-                return;
+                return PassTurn();
             }
 
             var conditions = new TargetConditions
@@ -41,28 +37,31 @@ namespace Assets.Scripts.Events
 
             uIManager.SetTurn(PlayingPlayer);
             uIManager.BeginDragAndDrop(conditions, PlayCard, PassTurn);
+
+            // resulting events of PlayCard and PassTurn are handled in DragAndDropManager.Finish()
+            return Enumerable.Empty<BaseEvent>();
         }
 
-        protected IEnumerable<BaseEvent> PlayCard(CardObject selectedCard, Slot slot)
+        protected IEnumerable<BaseEvent> PlayCard(CardObject droppedCard, Slot slot)
         {
-            var player = MainController.GetPlayer(PlayingPlayer);
+            var player = droppedCard.CardReference.Owner;
 
             // Eliminate card if dropping in the mana slot
             if (slot.SlotType == SlotType.Mana)
             {
-                yield return new EliminateCardEvent(selectedCard.CardReference, false);
-                selectedCard.Destroy();
+                yield return new EliminateCardEvent(droppedCard.CardReference, false);
+                droppedCard.Destroy();
             }
             // Don't play if unable to pay for card
-            else if (player.GetManaAmount(selectedCard.CardReference.Colour) < selectedCard.CardReference.Cost)
+            else if (player.GetManaAmount(droppedCard.CardReference.Colour) < droppedCard.CardReference.Cost)
             {
                 yield break;
             }
             else
             {
                 // Pay and play card
-                player.RemoveMana(selectedCard.CardReference.Colour, selectedCard.CardReference.Cost);
-                yield return new EnterFieldEvent(selectedCard.CardReference);
+                player.RemoveMana(droppedCard.CardReference.Colour, droppedCard.CardReference.Cost);
+                yield return new EnterFieldEvent(droppedCard.CardReference);
             }
 
             yield return new NewTurnEvent(PlayingPlayer.GetOpposite(), false);

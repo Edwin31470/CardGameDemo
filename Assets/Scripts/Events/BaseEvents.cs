@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Enums;
 
 namespace Assets.Scripts.Events
 {
@@ -15,7 +16,7 @@ namespace Assets.Scripts.Events
         /// <returns>Enumerable of events to queue</returns>
         public virtual IEnumerable<BaseEvent> Process()
         {
-            throw new MethodAccessException($"BaseEvent.Process() should not be being called. Called by {GetType()}");
+            throw new MethodAccessException($"{nameof(BaseEvent.Process)} should not be being called. Called by {GetType()}");
         }
     }
 
@@ -27,12 +28,24 @@ namespace Assets.Scripts.Events
     // Gameplay events are events that go in to the normal queue
     public abstract class BaseGameplayEvent : BaseEvent
     {
+
     }
 
+    // A board event is something that affects the board state (card ownership, player stats)
+    public abstract class BaseBoardEvent : BaseGameplayEvent
+    {
+        public virtual IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
+        {
+            throw new MethodAccessException($"{nameof(BaseBoardEvent.Process)} should not be being called. Called by {GetType()}");
+        }
+    }
 
     public abstract class BaseUIInteractionEvent : BaseGameplayEvent
     {
-        public abstract void Process(UIManager uIManager);
+        public virtual IEnumerable<BaseEvent> Process(UIManager uIManager, Func<PlayerType, Player> getPlayer)
+        {
+            throw new MethodAccessException($"{nameof(BaseUIInteractionEvent.Process)} should not be being called. Called by {GetType()}");
+        }
     }
 
     public abstract class BasePhaseEvent : BaseEvent

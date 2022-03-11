@@ -78,65 +78,6 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public class SummonCardEvent : BaseActiveEvent
-    {
-        public override float Delay => 1f;
-        public override string EventTitle => $"Summoning {SummonedCard.Name}";
-
-        private BaseCard SummonedCard { get; set; }
-
-        public SummonCardEvent(CardInfo cardInfo, PlayerType playerType)
-        {
-            cardInfo.IsSummoned = true;
-
-            switch (cardInfo.CardType)
-            {
-                case CardType.Creature:
-                    SummonedCard = new CreatureCard(playerType, cardInfo);
-                    break;
-                case CardType.Action:
-                    SummonedCard = new ActionCard(playerType, cardInfo);
-                    break;
-                case CardType.Permanent:
-                    SummonedCard = new PermanentCard(playerType, cardInfo);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(cardInfo.CardType), $"Type must be {CardType.Creature}, {CardType.Action} or {CardType.Permanent}");
-            }
-        }
-
-        public override IEnumerable<BaseEvent> Process()
-        {
-            if (SummonedCard.Type != CardType.Action)
-                yield return new CreateCardInSlotUIEvent(SummonedCard);
-
-            yield return new EnterFieldEvent(SummonedCard);
-        }
-    }
-
-    public class GainControlEvent : BaseActiveEvent
-    {
-        private BaseCard Card { get; set; }
-
-        public GainControlEvent(BaseCard baseCard)
-        {
-            Card = baseCard;
-        }
-
-        public override IEnumerable<BaseEvent> Process()
-        {
-            var originalPlayer = MainController.GetPlayer(Card.Owner);
-            originalPlayer.RemoveFromField(Card);
-
-            Card.Owner = Card.Owner.GetOpposite();
-
-            var newPlayer = MainController.GetPlayer(Card.Owner);
-            newPlayer.AddToField(Card);
-
-            yield return new MoveCardToFieldUIEvent(Card);
-        }
-    }
-
     public class CustomActiveEvent : BaseActiveEvent
     {
         public BaseCard Card { get; set; }

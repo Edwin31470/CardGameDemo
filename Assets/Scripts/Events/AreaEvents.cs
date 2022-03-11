@@ -2,18 +2,18 @@
 using Assets.Scripts.Enums;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Assets.Scripts.Extensions;
 
 namespace Assets.Scripts.Events
 {
-    // Any event that may move cards from or to UI piles (hand, deck, discard, eliminated)
-    public abstract class BasePileEvent : BaseGameplayEvent
+    // Any event that may move cards from or to areas (hand, field, deck, destroyed, eliminated)
+    // Usually returns a UI event
+    public abstract class BaseAreaEvent : BaseBoardEvent
     {
+
     }
 
-    public class DrawCardEvent : BasePileEvent
+    public class DrawCardEvent : BaseAreaEvent
     {
         private PlayerType PlayerType { get; set; }
 
@@ -22,9 +22,9 @@ namespace Assets.Scripts.Events
             PlayerType = playerType;
         }
 
-        public override IEnumerable<BaseEvent> Process()
+        public override IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
         {
-            var player = MainController.GetPlayer(PlayerType);
+            var player = getPlayer(PlayerType);
 
             var card = player.TakeFromDeck();
             player.AddToHand(card);
@@ -33,7 +33,7 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public class ReturnToDeckEvent : BasePileEvent
+    public class ReturnToDeckEvent : BaseAreaEvent
     {
         private BaseCard Card { get; set; }
 
@@ -42,9 +42,9 @@ namespace Assets.Scripts.Events
             Card = card;
         }
 
-        public override IEnumerable<BaseEvent> Process()
+        public override IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
         {
-            var player = MainController.GetPlayer(Card.Owner);
+            var player = Card.Owner;
 
             player.RemoveFromHand(Card);
             player.AddToDeck(Card);
@@ -53,7 +53,7 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public class ReturnToHandEvent : BasePileEvent
+    public class ReturnToHandEvent : BaseAreaEvent
     {
         private BaseCard Card { get; set; }
 
@@ -62,9 +62,9 @@ namespace Assets.Scripts.Events
             Card = card;
         }
 
-        public override IEnumerable<BaseEvent> Process()
+        public override IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
         {
-            var player = MainController.GetPlayer(Card.Owner);
+            var player = Card.Owner;
 
             player.RemoveFromField(Card);
             player.AddToHand(Card);
@@ -73,8 +73,7 @@ namespace Assets.Scripts.Events
         }
     }
 
-
-    public class EnterFieldEvent : BasePileEvent
+    public class EnterFieldEvent : BaseAreaEvent
     {
         public BaseCard Card { get; set; }
 
@@ -83,9 +82,9 @@ namespace Assets.Scripts.Events
             Card = card;
         }
 
-        public override IEnumerable<BaseEvent> Process()
+        public override IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
         {
-            var player = MainController.GetPlayer(Card.Owner);
+            var player = Card.Owner;
 
             if (Card.Area == Area.Hand)
                 player.RemoveFromHand(Card);
@@ -106,7 +105,7 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public class DestroyCardEvent : BasePileEvent
+    public class DestroyCardEvent : BaseAreaEvent
     {
         public BaseCard Card { get; set; }
 
@@ -115,13 +114,13 @@ namespace Assets.Scripts.Events
             Card = card;
         }
 
-        public override IEnumerable<BaseEvent> Process()
+        public override IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
         {
             // stop duplicate destroys - a better way to do this?
             if (Card.Area != Area.None && Area.Pile.HasFlag(Card.Area))
                 yield break;
 
-            var player = MainController.GetPlayer(Card.Owner);
+            var player = Card.Owner;
             var cardArea = Card.Area;
 
             if (cardArea == Area.Hand)
@@ -143,7 +142,7 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public class DestroyCreatureByDamageEvent : BasePileEvent
+    public class DestroyCreatureByDamageEvent : BaseAreaEvent
     {
         public CreatureCard Card { get; set; }
 
@@ -152,7 +151,7 @@ namespace Assets.Scripts.Events
             Card = card;
         }
 
-        public override IEnumerable<BaseEvent> Process()
+        public override IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
         {
             // Check card hasn't now got more defence
             if (Card.Defence > 0)
@@ -162,7 +161,7 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public class EliminateCardEvent : BasePileEvent
+    public class EliminateCardEvent : BaseAreaEvent
     {
         private BaseCard Card { get; set; }
         private bool CreateUIEvent { get; set; }
@@ -173,9 +172,9 @@ namespace Assets.Scripts.Events
             CreateUIEvent = createUIEvent;
         }
 
-        public override IEnumerable<BaseEvent> Process()
+        public override IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
         {
-            var player = MainController.GetPlayer(Card.Owner);
+            var player = Card.Owner;
             var cardArea = Card.Area;
 
             if (cardArea == Area.Hand)
@@ -197,7 +196,7 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public class EmptyDestroyPileEvent : BasePileEvent
+    public class EmptyDestroyPileEvent : BaseAreaEvent
     {
         public override float Delay => 1f;
         public override string EventTitle => $"Emptying Destroyed pile for {Player} Player" ;
@@ -209,12 +208,61 @@ namespace Assets.Scripts.Events
             Player = player;
         }
 
-        public override IEnumerable<BaseEvent> Process()
+        public override IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
         {
-            foreach (var card in MainController.GetPlayer(Player).GetDestroyed())
+            foreach (var card in getPlayer(Player).GetDestroyed())
             {
                 yield return new EliminateCardEvent(card, false);
             }
         }
     }
+
+    public class GainControlEvent : BaseAreaEvent
+    {
+        private BaseCard Card { get; set; }
+
+        public GainControlEvent(BaseCard baseCard)
+        {
+            Card = baseCard;
+        }
+
+        public override IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
+        {
+            var originalPlayer = Card.Owner;
+            originalPlayer.RemoveFromField(Card);
+
+            var newPlayer = getPlayer(Card.Owner.PlayerType.GetOpposite());
+            Card.Owner = newPlayer;
+            newPlayer.AddToField(Card);
+
+            yield return new MoveCardToFieldUIEvent(Card);
+        }
+    }
+
+    public class SummonCardEvent : BaseAreaEvent
+    {
+        public override float Delay => 1f;
+        public override string EventTitle => $"Summoning {CardInfo.Name}";
+
+        private CardInfo CardInfo { get; set; }
+        private PlayerType PlayerType { get; set; }
+
+        public SummonCardEvent(CardInfo cardInfo, PlayerType playerType)
+        {
+            cardInfo.IsSummoned = true;
+            CardInfo = cardInfo;
+            PlayerType = playerType;
+        }
+
+        public override IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
+        {
+            var summonedCard = BaseCard.Create(getPlayer(PlayerType), CardInfo);
+
+            if (summonedCard.Type != CardType.Action)
+                yield return new CreateCardInSlotUIEvent(summonedCard);
+
+            yield return new EnterFieldEvent(summonedCard);
+        }
+    }
+
 }

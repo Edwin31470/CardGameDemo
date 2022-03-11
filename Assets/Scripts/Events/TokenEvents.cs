@@ -1,52 +1,54 @@
-﻿using Assets.Scripts.Enums;
-using System;
+﻿using System;
+using Assets.Scripts.Enums;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Assets.Scripts.Events
 {
-    public class AddTokensEvent : BaseGameplayEvent
+    public class BaseTokenEvent : BasePlayerEvent
     {
-        //public override float Delay => 1f;
-        //public override string EventTitle => $"{PlayerType} Player gets {Amount} {TokenType} Tokens";
+        public BaseTokenEvent(PlayerType playerType) : base(playerType)
+        {
+        }
+    }
 
-        private PlayerType PlayerType { get; set; }
+    public class AddTokensEvent : BaseTokenEvent
+    {
+        public override float Delay => 1f;
+        public override string EventTitle => $"{PlayerType} Player gets {Amount} {TokenType} Tokens";
+
         private TokenType TokenType { get; set; }
         private int Amount { get; set; }
 
-        public AddTokensEvent(PlayerType playerType, TokenType tokenType, int amount)
+        public AddTokensEvent(PlayerType playerType, TokenType tokenType, int amount) : base(playerType)
         {
             PlayerType = playerType;
             TokenType = tokenType;
             Amount = amount;
         }
 
-        public override IEnumerable<BaseEvent> Process()
+        public override IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
         {
-            var player = MainController.GetPlayer(PlayerType);
+            var player = getPlayer(PlayerType);
             player.AddTokens(TokenType, Amount);
             yield break;
         }
     }
 
-    public class RemoveTokensEvent : BaseGameplayEvent
+    public class RemoveTokensEvent : BaseTokenEvent
     {
-        private PlayerType PlayerType { get; set; }
         private TokenType TokenType { get; set; }
         private int Amount { get; set; }
 
-        public RemoveTokensEvent(PlayerType playerType, TokenType tokenType, int amount)
+        public RemoveTokensEvent(PlayerType playerType, TokenType tokenType, int amount) : base(playerType)
         {
             PlayerType = playerType;
             TokenType = tokenType;
             Amount = amount;
         }
 
-        public override IEnumerable<BaseEvent> Process()
+        public override IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
         {
-            var player = MainController.GetPlayer(PlayerType);
+            var player = getPlayer(PlayerType);
             player.RemoveTokens(TokenType, Amount);
             yield break;
         }

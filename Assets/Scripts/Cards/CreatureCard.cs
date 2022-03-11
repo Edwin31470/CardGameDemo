@@ -21,7 +21,7 @@ namespace Assets.Scripts.Cards
         public int Attack => BaseAttack.Get() + BonusAttack.Get();
         public int Defence => BaseDefence.Get() + BonusDefence.Get();
 
-        public CreatureCard(PlayerType player, CardInfo cardInfo) : base(player, cardInfo)
+        public CreatureCard(Player owner, CardInfo cardInfo) : base(owner, cardInfo)
         {
             BaseAttack = new Stat(-99, 99, cardInfo.Attack);
             BaseDefence = new Stat(-99, 99, cardInfo.Defence);

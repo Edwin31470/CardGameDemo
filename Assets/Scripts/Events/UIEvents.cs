@@ -75,7 +75,7 @@ namespace Assets.Scripts.Events
 
         public override void Process(UIManager uIManager)
         {
-            uIManager.UpdateHand(Card.Owner);
+            uIManager.UpdateHand(Card.Owner.PlayerType);
         }
     }
 

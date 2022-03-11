@@ -1,29 +1,34 @@
-﻿using Assets.Scripts.Enums;
-using System;
+﻿using System;
+using Assets.Scripts.Enums;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Assets.Scripts.Events
 {
-    public class DamagePlayerEvent : BaseGameplayEvent
+    public class BasePlayerEvent : BaseBoardEvent
+    {
+        protected PlayerType PlayerType { get; set; }
+
+        public BasePlayerEvent(PlayerType playerType)
+        {
+            PlayerType = playerType;
+        }
+    }
+
+    public class DamagePlayerEvent : BasePlayerEvent
     {
         public override float Delay => 1f;
         public override string EventTitle => $"{PlayerType} Player takes {Amount} damage";
 
-        private PlayerType PlayerType { get; set; }
         private int Amount { get; set; }
 
-        public DamagePlayerEvent(PlayerType playerType, int amount)
+        public DamagePlayerEvent(PlayerType playerType, int amount) : base(playerType)
         {
-            PlayerType = playerType;
             Amount = amount;
         }
 
-        public override IEnumerable<BaseEvent> Process()
+        public override IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
         {
-            var player = MainController.GetPlayer(PlayerType);
+            var player = getPlayer(PlayerType);
             player.Health.Remove(Amount);
 
             if (player.Health.Get() <= 0)
@@ -31,47 +36,43 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public class AddLifePlayerEvent : BaseGameplayEvent
+    public class AddLifePlayerEvent : BasePlayerEvent
     {
-        //public override float Delay => 1f;
-        //public override string EventTitle => $"{PlayerType} Player heals for {Amount}";
+        public override float Delay => 1f;
+        public override string EventTitle => $"{PlayerType} Player heals for {Amount}";
 
-        private PlayerType Player { get; set; }
         private int Amount { get; set; }
 
-        public AddLifePlayerEvent(PlayerType player, int amount)
+        public AddLifePlayerEvent(PlayerType playerType, int amount) : base(playerType)
         {
-            Player = player;
             Amount = amount;
         }
 
-        public override IEnumerable<BaseEvent> Process()
+        public override IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
         {
-            var player = MainController.GetPlayer(Player);
+            var player = getPlayer(PlayerType);
             player.Health.Add(Amount);
             yield break;
         }
     }
 
-    public class AddManaPlayerEvent : BaseGameplayEvent
+    public class AddManaPlayerEvent : BasePlayerEvent
     {
-        //public override float Delay => 1f;
-        //public override string EventTitle => $"{PlayerType} Player heals for {Amount}";
+        public override float Delay => 1f;
+        public override string EventTitle => $"{PlayerType} Player gains {Amount} {Colour} mana";
 
-        private PlayerType Player { get; set; }
         private Colour Colour { get; set; }
         private int Amount { get; set; }
 
-        public AddManaPlayerEvent(PlayerType player, Colour colour, int amount)
+        public AddManaPlayerEvent(PlayerType playerType, Colour colour, int amount) : base(playerType)
         {
-            Player = player;
             Colour = colour;
             Amount = amount;
         }
 
-        public override IEnumerable<BaseEvent> Process()
+        public override IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
         {
-            var player = MainController.GetPlayer(Player);
+            var player = getPlayer(PlayerType);
             player.AddMana(Colour, Amount);
             yield break;
         }

@@ -4,8 +4,6 @@ using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Assets.Scripts.Events
 {
@@ -24,9 +22,10 @@ namespace Assets.Scripts.Events
             SelectionType = selectionType;
         }
 
-        public override void Process(UIManager uIManager)
+        public override IEnumerable<BaseEvent> Process(UIManager uIManager, Func<PlayerType, Player> getPlayer)
         {
             uIManager.BeginCardSelection(TargetConditions, OverrideTargets, Count, FinishSelection, SelectionType);
+            return Enumerable.Empty<BaseEvent>();
         }
 
         public abstract IEnumerable<BaseEvent> FinishSelection(IEnumerable<BaseCard> selectedCards);

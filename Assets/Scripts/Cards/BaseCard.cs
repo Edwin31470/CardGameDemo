@@ -1,18 +1,14 @@
-﻿using Assets.Scripts.Enums;
+﻿using System;
+using Assets.Scripts.Enums;
 using Assets.Scripts.Events;
-using Assets.Scripts.Managers;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Assets.Scripts.Cards
 {
     public abstract class BaseCard
     {
         public string Id { get; set; }
-        public PlayerType Owner { get; set; }
+        public Player Owner { get; set; }
         public Area Area { get; set; }
         public Colour Colour { get; set; }
         public int Cost { get; set; }
@@ -27,9 +23,9 @@ namespace Assets.Scripts.Cards
         public bool IsSummoned { get; set; }
         public bool HasPersistence { get; set; }
 
-        public BaseCard(PlayerType player, CardInfo cardInfo)
+        protected BaseCard(Player owner, CardInfo cardInfo)
         {
-            Owner = player;
+            Owner = owner;
             Colour = cardInfo.Colour;
             Cost = cardInfo.Cost;
             Name = cardInfo.Name;
@@ -62,6 +58,22 @@ namespace Assets.Scripts.Cards
             }
 
             return cardInfo;
+        }
+
+        // Factory method to create
+        public static BaseCard Create(Player player, CardInfo cardInfo)
+        {
+            switch (cardInfo.CardType)
+            {
+                case CardType.Creature:
+                    return new CreatureCard(player, cardInfo);
+                case CardType.Action:
+                    return new ActionCard(player, cardInfo);
+                case CardType.Permanent:
+                    return new PermanentCard(player, cardInfo);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(cardInfo.CardType), $"Type must be {CardType.Creature}, {CardType.Action} or {CardType.Permanent}");
+            }
         }
     }
 }
