@@ -1,14 +1,10 @@
 ﻿using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
-using Assets.Scripts.Events;
 using Assets.Scripts.Extensions;
 using Assets.Scripts.Items;
-using Assets.Scripts.Managers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Assets.Scripts
 {
@@ -28,11 +24,13 @@ namespace Assets.Scripts
 
         private Queue<BaseCard> Deck { get; set; }
         private HashSet<BaseCard> Hand { get; set; }
-        private HashSet<BaseCard> Field { get; set; }
+        private FieldSlot[] Field { get; set; }
         private List<BaseCard> DestroyedPile { get; set; }
         private List<BaseCard> EliminatedPile { get; set; }
 
-        public IEnumerable<CreatureCard> FieldCreatures => Field.OfType<CreatureCard>();
+        public IEnumerable<CreatureCard> FieldCreatures => Field
+            .Select(x => x.Card)
+            .OfType<CreatureCard>();
 
 
         public List<TokenType> Tokens { get; set; }
@@ -59,7 +57,10 @@ namespace Assets.Scripts
 
             Deck = new Queue<BaseCard>();
             Hand = new HashSet<BaseCard>();
-            Field = new HashSet<BaseCard>();
+            Field = new FieldSlot[5];
+            for (var i = 0; i < Field.Length; i++) {
+                Field[i] = new FieldSlot();
+            }
             DestroyedPile = new List<BaseCard>();
             EliminatedPile = new List<BaseCard>();
             Tokens = new List<TokenType>();
@@ -88,9 +89,18 @@ namespace Assets.Scripts
             return Hand;
         }
 
-        public HashSet<BaseCard> GetField()
+        public FieldSlot[] GetField()
         {
             return Field;
+        }
+
+        public int GetRandomEmptySlot()
+        {
+            var randomSlot = Field.Where(x => x.Card == null)
+                .OrderBy(x => Guid.NewGuid())
+                .FirstOrDefault();
+
+            return randomSlot != null ? Array.IndexOf(Field, randomSlot) : -1;
         }
 
         public List<BaseCard> GetDestroyed()
@@ -108,28 +118,52 @@ namespace Assets.Scripts
             return Tokens.ToList();
         }
 
+        // Exists
+        public bool IsInDeck(BaseCard card)
+        {
+            return Deck.Contains(card);
+        }
+
+        public bool IsInHand(BaseCard card)
+        {
+            return Hand.Contains(card);
+        }
+
+        public bool IsOnField(BaseCard card)
+        {
+            return Field.Select(x => x.Card).Contains(card);
+        }
+
+        public bool IsInDestroyed(BaseCard card)
+        {
+            return DestroyedPile.Contains(card);
+        }
+
+        public bool IsInEliminated(BaseCard card)
+        {
+            return EliminatedPile.Contains(card);
+        }
+
+
         // Adding
         public void AddToDeck(BaseCard card)
         {
-            card.Area = Area.Deck;
             Deck.Enqueue(card);
         }
 
         public void AddToHand(BaseCard card)
         {
-            card.Area = Area.Hand;
             Hand.Add(card);
         }
 
-        public void AddToField(BaseCard card)
+        // Should never try to add to an occupied slot
+        public void AddToField(FieldCard card, int index)
         {
-            card.Area = Area.Field;
-            Field.Add(card);
+            Field[index].Add(card);
         }
 
         public void AddToDestroyed(BaseCard card)
         {
-            card.Area = Area.Destroyed;
             DestroyedPile.Add(card);
         }
 
@@ -138,7 +172,6 @@ namespace Assets.Scripts
             if(gainMana)
                 AddMana(card.Colour, 1);
 
-            card.Area = Area.Eliminated;
             EliminatedPile.Add(card);
         }
 
@@ -147,32 +180,32 @@ namespace Assets.Scripts
         public BaseCard TakeFromDeck()
         {
             var card = Deck.Dequeue();
-            card.Area = Area.None;
             return card;
         }
 
         public void RemoveFromHand(BaseCard card)
         {
             Hand.Remove(card);
-            card.Area = Area.None;
         }
 
-        public void RemoveFromField(BaseCard card)
+        public FieldCard RemoveFromField(int index)
         {
-            Field.Remove(card);
-            card.Area = Area.None;
+            return Field[index].Take();
+        }
+
+        public FieldCard RemoveFromField(FieldCard card)
+        {
+            return Field.Single(x => x.Card == card).Take();
         }
 
         public void RemoveFromDeck(BaseCard card)
         {
             Deck = new Queue<BaseCard>(Deck.Where(x => x != card));
-            card.Area = Area.None;
         }
 
         public void RemoveFromDestroyed(BaseCard card)
         {
             DestroyedPile.Remove(card);
-            card.Area = Area.None;
         }
 
 
@@ -190,7 +223,7 @@ namespace Assets.Scripts
                 case Colour.Purple:
                     return PurpleMana.Get();
                 default:
-                    throw new ArgumentOutOfRangeException("colour", $"Colour must be either {Colour.Red}, {Colour.Green}, {Colour.Blue} or {Colour.Purple}");
+                    throw new ArgumentOutOfRangeException(nameof(colour), $"Colour must be either {Colour.Red}, {Colour.Green}, {Colour.Blue} or {Colour.Purple}");
             }
         }
 
@@ -211,7 +244,7 @@ namespace Assets.Scripts
                     PurpleMana.Add(amount);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("colour", $"Colour must be either {Colour.Red}, {Colour.Green}, {Colour.Blue} or {Colour.Purple}");
+                    throw new ArgumentOutOfRangeException(nameof(colour), $"Colour must be either {Colour.Red}, {Colour.Green}, {Colour.Blue} or {Colour.Purple}");
             }
         }
 
@@ -232,7 +265,7 @@ namespace Assets.Scripts
                     PurpleMana.Remove(amount);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("colour", $"Colour must be either {Colour.Red}, {Colour.Green}, {Colour.Blue} or {Colour.Purple}");
+                    throw new ArgumentOutOfRangeException(nameof(colour), $"Colour must be either {Colour.Red}, {Colour.Green}, {Colour.Blue} or {Colour.Purple}");
             }
         }
 
