@@ -8,7 +8,12 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.Events
 {
-    public class DrawCardEvent : BaseCardEvent
+    // Any event that may move cards from or to UI piles (hand, deck, discard, eliminated)
+    public abstract class BasePileEvent : BaseGameplayEvent
+    {
+    }
+
+    public class DrawCardEvent : BasePileEvent
     {
         private PlayerType PlayerType { get; set; }
 
@@ -17,18 +22,18 @@ namespace Assets.Scripts.Events
             PlayerType = playerType;
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             var player = MainController.GetPlayer(PlayerType);
 
             var card = player.TakeFromDeck();
             player.AddToHand(card);
 
-            MainController.AddEvent(new DrawCardUIEvent(card));
+            yield return new DrawCardUIEvent(card);
         }
     }
 
-    public class ReturnToDeckEvent : BaseCardEvent
+    public class ReturnToDeckEvent : BasePileEvent
     {
         private BaseCard Card { get; set; }
 
@@ -37,18 +42,18 @@ namespace Assets.Scripts.Events
             Card = card;
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             var player = MainController.GetPlayer(Card.Owner);
 
             player.RemoveFromHand(Card);
             player.AddToDeck(Card);
 
-            MainController.AddEvent(new ReturnToDeckUIEvent(Card));
+            yield return new ReturnToDeckUIEvent(Card);
         }
     }
 
-    public class ReturnToHandEvent : BaseCardEvent
+    public class ReturnToHandEvent : BasePileEvent
     {
         private BaseCard Card { get; set; }
 
@@ -57,19 +62,19 @@ namespace Assets.Scripts.Events
             Card = card;
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             var player = MainController.GetPlayer(Card.Owner);
 
             player.RemoveFromField(Card);
             player.AddToHand(Card);
 
-            MainController.AddEvent(new AddToHandUIEvent(Card));
+            yield return new AddToHandUIEvent(Card);
         }
     }
 
 
-    public class EnterFieldEvent : BaseCardEvent
+    public class EnterFieldEvent : BasePileEvent
     {
         public BaseCard Card { get; set; }
 
@@ -78,7 +83,7 @@ namespace Assets.Scripts.Events
             Card = card;
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             var player = MainController.GetPlayer(Card.Owner);
 
@@ -91,17 +96,17 @@ namespace Assets.Scripts.Events
             }
             else
             {
-                MainController.AddEvent(new DestroyCardEvent(Card));
+                yield return new DestroyCardEvent(Card);
             }
 
             foreach (var baseEvent in Card.CardEvents)
             {
-                MainController.AddEvent(baseEvent);
+                yield return baseEvent;
             }
         }
     }
 
-    public class DestroyCardEvent : BaseCardEvent
+    public class DestroyCardEvent : BasePileEvent
     {
         public BaseCard Card { get; set; }
 
@@ -110,11 +115,11 @@ namespace Assets.Scripts.Events
             Card = card;
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             // stop duplicate destroys - a better way to do this?
             if (Card.Area != Area.None && Area.Pile.HasFlag(Card.Area))
-                return;
+                yield break;
 
             var player = MainController.GetPlayer(Card.Owner);
             var cardArea = Card.Area;
@@ -134,11 +139,11 @@ namespace Assets.Scripts.Events
             }
 
             if (Area.PlayArea.HasFlag(cardArea))
-                MainController.AddEvent(new DestroyCardUIEvent(Card));
+                yield return new DestroyCardUIEvent(Card);
         }
     }
 
-    public class DestroyCreatureByDamageEvent : BaseCardEvent
+    public class DestroyCreatureByDamageEvent : BasePileEvent
     {
         public CreatureCard Card { get; set; }
 
@@ -147,17 +152,17 @@ namespace Assets.Scripts.Events
             Card = card;
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             // Check card hasn't now got more defence
             if (Card.Defence > 0)
-                return;
+                yield break;
 
-            MainController.AddEvent(new DestroyCardEvent(Card));
+            yield return new DestroyCardEvent(Card);
         }
     }
 
-    public class EliminateCardEvent : BaseCardEvent
+    public class EliminateCardEvent : BasePileEvent
     {
         private BaseCard Card { get; set; }
         private bool CreateUIEvent { get; set; }
@@ -168,7 +173,7 @@ namespace Assets.Scripts.Events
             CreateUIEvent = createUIEvent;
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             var player = MainController.GetPlayer(Card.Owner);
             var cardArea = Card.Area;
@@ -188,11 +193,11 @@ namespace Assets.Scripts.Events
             player.AddToEliminated(Card);
 
             if (CreateUIEvent && Area.PlayArea.HasFlag(cardArea))
-                MainController.AddEvent(new DestroyCardUIEvent(Card));
+                yield return new DestroyCardUIEvent(Card);
         }
     }
 
-    public class EmptyDestroyPileEvent : BaseCardEvent
+    public class EmptyDestroyPileEvent : BasePileEvent
     {
         public override float Delay => 1f;
         public override string EventTitle => $"Emptying Destroyed pile for {Player} Player" ;
@@ -204,11 +209,11 @@ namespace Assets.Scripts.Events
             Player = player;
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             foreach (var card in MainController.GetPlayer(Player).GetDestroyed())
             {
-                MainController.AddEvent(new EliminateCardEvent(card, false));
+                yield return new EliminateCardEvent(card, false);
             }
         }
     }

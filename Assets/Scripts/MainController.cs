@@ -35,6 +35,12 @@ namespace Assets.Scripts
         private int RoundNumber { get; set; }
         private Phase CurrentPhase { get; set; }
 
+        // Only to be used by scripts requiring Update()
+        public static MainController Get()
+        {
+            return GameObject.Find("MainController").GetComponent<MainController>();
+        }
+
         // Helper Methods
         public static Player GetPlayer(PlayerType playerType)
         {
@@ -76,34 +82,6 @@ namespace Assets.Scripts
             return new HashSet<T>(allCards.Cast<T>());
         }
 
-        public static EventQueue<BaseGameplayEvent> GetEventQueue()
-        {
-            var controller = GameObject.Find("MainController").GetComponent<MainController>();
-
-            return controller.EventQueue;
-        }
-
-        public static List<BasePassiveEvent> GetPassiveEvents()
-        {
-            var controller = GameObject.Find("MainController").GetComponent<MainController>();
-
-            return controller.PassiveEvents;
-        }
-
-        public static List<BaseInteruptEvent> GetInteruptEvents()
-        {
-            var controller = GameObject.Find("MainController").GetComponent<MainController>();
-
-            return controller.InteruptEvents;
-        }
-
-        public static List<BaseTriggerEvent> GetTriggerEvents()
-        {
-            var controller = GameObject.Find("MainController").GetComponent<MainController>();
-
-            return controller.TriggerEvents;
-        }
-
         public static void ClearPhaseQueue()
         {
             var controller = GameObject.Find("MainController").GetComponent<MainController>();
@@ -122,13 +100,6 @@ namespace Assets.Scripts
             {
                 controller.EventQueue.DequeueEvent();
             }
-        }
-
-        public static void AddEvent(BaseEvent baseEvent)
-        {
-            var controller = GameObject.Find("MainController").GetComponent<MainController>();
-
-            controller.AddEventToQueue(baseEvent);
         }
 
         public static void RemoveEvent(BaseEvent baseEvent)
@@ -210,7 +181,7 @@ namespace Assets.Scripts
             Timer.Initialize(0.1f, NextEvent);
 
 
-            AddEventToQueue(new NewPhaseEvent(Phase.GameStart));
+            EnqueueEvent(new NewPhaseEvent(Phase.GameStart));
             Timer.StartTimer();
         }
 
@@ -240,7 +211,7 @@ namespace Assets.Scripts
             controller.ShowTokensManager.ShowTokens(tokens);
         }
 
-        private void AddEventToQueue(BaseEvent baseEvent)
+        public void EnqueueEvent(BaseEvent baseEvent)
         {
             if (baseEvent is BaseUIEvent uiEvent)
             {
@@ -269,6 +240,14 @@ namespace Assets.Scripts
             else
             {
                 throw new ArgumentOutOfRangeException("baseEvent", "Event not queued, something is wrong with the inheritance of events");
+            }
+        }
+
+        public void EnqueueEvents(IEnumerable<BaseEvent> events)
+        {
+            foreach (var @event in events)
+            {
+                EnqueueEvent(@event);
             }
         }
 
@@ -304,7 +283,7 @@ namespace Assets.Scripts
 
         private void StartGame()
         {
-            AddEventToQueue(new NewPhaseEvent(Phase.Draw));
+            EnqueueEvent(new NewPhaseEvent(Phase.Draw));
         }
 
         private void DrawPhase()
@@ -313,26 +292,26 @@ namespace Assets.Scripts
 
             for (int i = 0; i < 7; i++)
             {
-                AddEventToQueue(new DrawCardEvent(PlayerType.Front));
-                AddEventToQueue(new DrawCardEvent(PlayerType.Back));
+                EnqueueEvent(new DrawCardEvent(PlayerType.Front));
+                EnqueueEvent(new DrawCardEvent(PlayerType.Back));
             }
 
-            AddEventToQueue(new NewPhaseEvent(Phase.Redraw));
+            EnqueueEvent(new NewPhaseEvent(Phase.Redraw));
         }
 
         private void RedrawPhase()
         {
             //Timer.SetTickLength(0.5f);
 
-            AddEventToQueue(new RedrawCardsEvent(PlayerType.Front, 3));
-            AddEventToQueue(new RedrawCardsEvent(PlayerType.Back, 3));
+            EnqueueEvent(new RedrawCardsEvent(PlayerType.Front, 3));
+            EnqueueEvent(new RedrawCardsEvent(PlayerType.Back, 3));
 
-            AddEventToQueue(new NewPhaseEvent(Phase.Play));
+            EnqueueEvent(new NewPhaseEvent(Phase.Play));
         }
 
         private void PlayPhase()
         {
-            AddEventToQueue(new NewTurnEvent(PlayerType.Front, false));
+            EnqueueEvent(new NewTurnEvent(PlayerType.Front, false));
         }
 
         private void DamagePhase()
@@ -340,10 +319,10 @@ namespace Assets.Scripts
             var frontTaken = Math.Max(BackPlayer.TotalAttack - FrontPlayer.TotalDefence, 0);
             var backTaken = Math.Max(FrontPlayer.TotalAttack - BackPlayer.TotalDefence, 0);
 
-            AddEventToQueue(new DamagePlayerEvent(PlayerType.Front, frontTaken));
-            AddEventToQueue(new DamagePlayerEvent(PlayerType.Back, backTaken));
+            EnqueueEvent(new DamagePlayerEvent(PlayerType.Front, frontTaken));
+            EnqueueEvent(new DamagePlayerEvent(PlayerType.Back, backTaken));
 
-            AddEventToQueue(new NewPhaseEvent(Phase.Mana));
+            EnqueueEvent(new NewPhaseEvent(Phase.Mana));
         }
 
         private void ManaPhase()
@@ -356,7 +335,7 @@ namespace Assets.Scripts
                 if (card.HasPersistence)
                     continue;
 
-                AddEventToQueue(new DestroyCardEvent(card));
+                EnqueueEvent(new DestroyCardEvent(card));
             }
 
             foreach (var card in BackPlayer.GetField())
@@ -364,28 +343,28 @@ namespace Assets.Scripts
                 if (card.HasPersistence)
                     continue;
 
-                AddEventToQueue(new DestroyCardEvent(card));
+                EnqueueEvent(new DestroyCardEvent(card));
             }
 
 
             // Return Hand to Deck
             foreach (var card in FrontPlayer.GetHand())
             {
-                AddEventToQueue(new ReturnToDeckEvent(card));
+                EnqueueEvent(new ReturnToDeckEvent(card));
             }
 
             foreach (var card in BackPlayer.GetHand())
             {
-                AddEventToQueue(new ReturnToDeckEvent(card));
+                EnqueueEvent(new ReturnToDeckEvent(card));
             }
 
 
             // Empty Destroyed
-            AddEventToQueue(new EmptyDestroyPileEvent(FrontPlayer.PlayerType));
-            AddEventToQueue(new EmptyDestroyPileEvent(BackPlayer.PlayerType));
+            EnqueueEvent(new EmptyDestroyPileEvent(FrontPlayer.PlayerType));
+            EnqueueEvent(new EmptyDestroyPileEvent(BackPlayer.PlayerType));
 
 
-            AddEventToQueue(new NewPhaseEvent(Phase.Draw));
+            EnqueueEvent(new NewPhaseEvent(Phase.Draw));
         }
 
         private void EndGame()
@@ -399,15 +378,15 @@ namespace Assets.Scripts
 
             if (lowestHealthPlayer.Health.Get() <= 0)
             {
-                AddEventToQueue(new MessageEvent($"{lowestHealthPlayer.PlayerType} Player has run out of life!", 10000));
+                EnqueueEvent(new MessageEvent($"{lowestHealthPlayer.PlayerType} Player has run out of life!", 10000));
             }
             else if (frontPlayerDeckEmpty && lowestHealthPlayer.PlayerType == PlayerType.Front)
             {
-                AddEventToQueue(new MessageEvent($"{PlayerType.Front} Player has run out of cards!", 10000));
+                EnqueueEvent(new MessageEvent($"{PlayerType.Front} Player has run out of cards!", 10000));
             }
             else if (backPlayerDeckEmpty && lowestHealthPlayer.PlayerType == PlayerType.Back)
             {
-                AddEventToQueue(new MessageEvent($"{PlayerType.Back} Player has run out of cards!", 10000));
+                EnqueueEvent(new MessageEvent($"{PlayerType.Back} Player has run out of cards!", 10000));
             }
         }
 
@@ -431,6 +410,10 @@ namespace Assets.Scripts
             }
         }
 
+        /// <summary>
+        /// Pop and then process the next item in the next available queue
+        /// </summary>
+        /// <returns>The event that has been processed</returns>
         private BaseEvent ProcessNextEvent()
         {
             // Process the UI queue until empty
@@ -453,7 +436,8 @@ namespace Assets.Scripts
                 }
                 else
                 {
-                    gameplayEvent.Process();
+                    var newEvents = gameplayEvent.Process();
+                    EnqueueEvents(newEvents);
                 }
 
                 return gameplayEvent;
@@ -505,7 +489,7 @@ namespace Assets.Scripts
             {
                 if(creatureCard.Defence <= 0)
                 {
-                    AddEvent(new DestroyCreatureByDamageEvent(creatureCard));
+                    EnqueueEvent(new DestroyCreatureByDamageEvent(creatureCard));
                 }
             }
         }
@@ -531,10 +515,15 @@ namespace Assets.Scripts
         {
             foreach(var triggerEvent in TriggerEvents.ToList())
             {
-                var triggered = triggerEvent.Process(triggeringEvent);
+                if (triggerEvent.Conditions(triggeringEvent))
+                {
+                    if (triggerEvent.TriggerOnce || !triggerEvent.IsValid()) {
+                        TriggerEvents.Remove(triggerEvent);
+                    }
 
-                if ((triggered && triggerEvent is BaseTriggerOnceEvent) || !triggerEvent.IsValid())
-                    TriggerEvents.Remove(triggerEvent);
+                    var newEvents = triggerEvent.Process(triggeringEvent);
+                    EnqueueEvents(newEvents);
+                }
             }
         }
     }

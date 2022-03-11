@@ -21,13 +21,13 @@ namespace Assets.Scripts.Events
             Amount = amount;
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             var player = MainController.GetPlayer(PlayerType);
             player.Health.Remove(Amount);
 
             if (player.Health.Get() <= 0)
-                MainController.AddEvent(new GameEndEvent());
+                yield return new GameEndEvent();
         }
     }
 
@@ -45,11 +45,11 @@ namespace Assets.Scripts.Events
             Amount = amount;
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             var player = MainController.GetPlayer(Player);
-
             player.Health.Add(Amount);
+            yield break;
         }
     }
 
@@ -69,11 +69,11 @@ namespace Assets.Scripts.Events
             Amount = amount;
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             var player = MainController.GetPlayer(Player);
-
             player.AddMana(Colour, Amount);
+            yield break;
         }
     }
 }

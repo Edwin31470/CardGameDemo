@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.Events
 {
-    public abstract class BaseAllEvent : BaseCardEvent
+    public abstract class BaseAllEvent : BaseGameplayEvent
     {
         protected TargetConditions TargetConditions { get; set; }
 
-        public BaseAllEvent(TargetConditions targetConditions)
+        protected BaseAllEvent(TargetConditions targetConditions)
         {
             TargetConditions = targetConditions;
         }
@@ -21,18 +21,19 @@ namespace Assets.Scripts.Events
     // Targets all field creatures
     public class CustomAllCreaturesEvent : BaseAllEvent
     {
-        Action<IEnumerable<CreatureCard>> Action { get; set; }
+        Func<IEnumerable<CreatureCard>,IEnumerable<BaseEvent>> Func { get; set; }
 
-        public CustomAllCreaturesEvent(TargetConditions targetConditions, Action<IEnumerable<CreatureCard>> action) : base(targetConditions)
+        public CustomAllCreaturesEvent(TargetConditions targetConditions, Func<IEnumerable<CreatureCard>,IEnumerable<BaseEvent>> func) : base(targetConditions)
         {
             targetConditions.CardType = CardType.Creature;
-            Action = action;
+            Func = func;
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
+            //TODO: should be able to use a target event with all cards already targeted
             var cards = MainController.GetCardsInPlay<CreatureCard>(TargetConditions);
-            Action.Invoke(cards);
+            return Func.Invoke(cards);
         }
     }
 }

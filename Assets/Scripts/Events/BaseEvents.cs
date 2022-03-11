@@ -1,6 +1,6 @@
 ﻿using Assets.Scripts.UI;
 using System;
-using UnityEngine;
+using System.Collections.Generic;
 
 namespace Assets.Scripts.Events
 {
@@ -9,7 +9,11 @@ namespace Assets.Scripts.Events
         public virtual string EventTitle => null;
         public virtual float Delay => 0;
 
-        public virtual void Process()
+        /// <summary>
+        /// Actions a delegate
+        /// </summary>
+        /// <returns>Enumerable of events to queue</returns>
+        public virtual IEnumerable<BaseEvent> Process()
         {
             throw new MethodAccessException($"BaseEvent.Process() should not be being called. Called by {GetType()}");
         }
@@ -20,15 +24,11 @@ namespace Assets.Scripts.Events
         public abstract void Process(UIManager uIManager);
     }
 
+    // Gameplay events are events that go in to the normal queue
     public abstract class BaseGameplayEvent : BaseEvent
     {
-
     }
 
-    // Drawing, Discarding etc. plus card effects
-    public abstract class BaseCardEvent : BaseGameplayEvent
-    {
-    }
 
     public abstract class BaseUIInteractionEvent : BaseGameplayEvent
     {
@@ -56,9 +56,9 @@ namespace Assets.Scripts.Events
             Time = time;
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
-            
+            yield break;
         }
     }
 }

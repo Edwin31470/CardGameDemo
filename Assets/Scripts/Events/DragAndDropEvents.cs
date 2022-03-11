@@ -43,42 +43,41 @@ namespace Assets.Scripts.Events
             uIManager.BeginDragAndDrop(conditions, PlayCard, PassTurn);
         }
 
-        protected bool PlayCard(CardObject selectedCard, Slot slot)
+        protected IEnumerable<BaseEvent> PlayCard(CardObject selectedCard, Slot slot)
         {
             var player = MainController.GetPlayer(PlayingPlayer);
 
             // Eliminate card if dropping in the mana slot
             if (slot.SlotType == SlotType.Mana)
             {
-                MainController.AddEvent(new EliminateCardEvent(selectedCard.CardReference, false));
+                yield return new EliminateCardEvent(selectedCard.CardReference, false);
                 selectedCard.Destroy();
             }
             // Don't play if unable to pay for card
             else if (player.GetManaAmount(selectedCard.CardReference.Colour) < selectedCard.CardReference.Cost)
             {
-                return false;
-
+                yield break;
             }
             else
             {
+                // Pay and play card
                 player.RemoveMana(selectedCard.CardReference.Colour, selectedCard.CardReference.Cost);
-                MainController.AddEvent(new EnterFieldEvent(selectedCard.CardReference));
+                yield return new EnterFieldEvent(selectedCard.CardReference);
             }
 
-            MainController.AddEvent(new NewTurnEvent(PlayingPlayer.GetOpposite(), false));
-            return true;
+            yield return new NewTurnEvent(PlayingPlayer.GetOpposite(), false);
         }
 
-        protected void PassTurn()
+        protected IEnumerable<BaseEvent> PassTurn()
         {
             // If both players have now passed, go to the next phase
             if (OtherPlayerPassed)
             {
-                MainController.AddEvent(new NewPhaseEvent(Phase.Damage));
-                return;
+                yield return new NewPhaseEvent(Phase.Damage);
+                yield break;
             }
 
-            MainController.AddEvent(new NewTurnEvent(PlayingPlayer.GetOpposite(), true));
+            yield return new NewTurnEvent(PlayingPlayer.GetOpposite(), true);
         }
     }
 }

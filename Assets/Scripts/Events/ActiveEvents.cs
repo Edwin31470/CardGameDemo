@@ -3,9 +3,6 @@ using Assets.Scripts.Enums;
 using Assets.Scripts.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Assets.Scripts.Events
 {
@@ -32,9 +29,10 @@ namespace Assets.Scripts.Events
         {
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             Card.BaseDefence.Remove(Value);
+            yield break;
         }
     }
 
@@ -45,9 +43,10 @@ namespace Assets.Scripts.Events
         }
 
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             Card.BaseDefence.Add(Value);
+            yield break;
         }
     }
 
@@ -58,9 +57,10 @@ namespace Assets.Scripts.Events
         }
 
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             Card.BaseAttack.Remove(Value);
+            yield break;
         }
     }
 
@@ -71,16 +71,17 @@ namespace Assets.Scripts.Events
         }
 
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             Card.BaseAttack.Add(Value);
+            yield break;
         }
     }
 
     public class SummonCardEvent : BaseActiveEvent
     {
         public override float Delay => 1f;
-        public override string EventTitle => $"Summoing {SummonedCard.Name}";
+        public override string EventTitle => $"Summoning {SummonedCard.Name}";
 
         private BaseCard SummonedCard { get; set; }
 
@@ -100,16 +101,16 @@ namespace Assets.Scripts.Events
                     SummonedCard = new PermanentCard(playerType, cardInfo);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("cardInfo.Type", $"Type must be {CardType.Creature}, {CardType.Action} or {CardType.Permanent}");
+                    throw new ArgumentOutOfRangeException(nameof(cardInfo.CardType), $"Type must be {CardType.Creature}, {CardType.Action} or {CardType.Permanent}");
             }
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             if (SummonedCard.Type != CardType.Action)
-                MainController.AddEvent(new CreateCardInSlotUIEvent(SummonedCard));
+                yield return new CreateCardInSlotUIEvent(SummonedCard);
 
-            MainController.AddEvent(new EnterFieldEvent(SummonedCard));
+            yield return new EnterFieldEvent(SummonedCard);
         }
     }
 
@@ -122,7 +123,7 @@ namespace Assets.Scripts.Events
             Card = baseCard;
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             var originalPlayer = MainController.GetPlayer(Card.Owner);
             originalPlayer.RemoveFromField(Card);
@@ -132,24 +133,24 @@ namespace Assets.Scripts.Events
             var newPlayer = MainController.GetPlayer(Card.Owner);
             newPlayer.AddToField(Card);
 
-            MainController.AddEvent(new MoveCardToFieldUIEvent(Card));
+            yield return new MoveCardToFieldUIEvent(Card);
         }
     }
 
     public class CustomActiveEvent : BaseActiveEvent
     {
         public BaseCard Card { get; set; }
-        public Action Action { get; set; }
+        public Func<IEnumerable<BaseEvent>> Func { get; set; }
 
-        public CustomActiveEvent(BaseCard baseCard, Action action)
+        public CustomActiveEvent(BaseCard baseCard, Func<IEnumerable<BaseEvent>> func)
         {
             Card = baseCard;
-            Action = action;
+            Func = func;
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
-            Action.Invoke();
+            return Func.Invoke();
         }
     }
 }
