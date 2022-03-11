@@ -48,14 +48,14 @@ namespace Assets.Scripts
             PlayerType = playerType;
 
             Health = new Stat(-99, 99, 50);
-            RedMana = new Stat(0, 99, 0);
-            BlueMana = new Stat(0, 99, 0);
-            GreenMana = new Stat(0, 99, 0);
-            PurpleMana = new Stat(0, 99, 0);
-            //RedMana = new Stat(0, 99, 10);
-            //BlueMana = new Stat(0, 99, 10);
-            //GreenMana = new Stat(0, 99, 10);
-            //PurpleMana = new Stat(0, 99, 10);
+            //RedMana = new Stat(0, 99, 0);
+            //BlueMana = new Stat(0, 99, 0);
+            //GreenMana = new Stat(0, 99, 0);
+            //PurpleMana = new Stat(0, 99, 0);
+            RedMana = new Stat(0, 99, 10);
+            BlueMana = new Stat(0, 99, 10);
+            GreenMana = new Stat(0, 99, 10);
+            PurpleMana = new Stat(0, 99, 10);
 
             Deck = new Queue<BaseCard>();
             Hand = new HashSet<BaseCard>();
@@ -66,27 +66,14 @@ namespace Assets.Scripts
 
             foreach (var cardInfo in cardInfos.OrderBy(x => Guid.NewGuid()))
             {
-                switch (cardInfo.CardType)
-                {
-                    case CardType.Creature:
-                        Deck.Enqueue(new CreatureCard(PlayerType, cardInfo));
-                        break;
-                    case CardType.Action:
-                        Deck.Enqueue(new ActionCard(PlayerType, cardInfo));
-                        break;
-                    case CardType.Permanent:
-                        Deck.Enqueue(new PermanentCard(PlayerType, cardInfo));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException("cardInfo.Type", $"Type must be {CardType.Creature}, {CardType.Action} or {CardType.Permanent}");
-                }
+                Deck.Enqueue(BaseCard.Create(this, cardInfo));
             }
         }
 
         // Counts
         public int DeckCount()
         {
-            return Deck.Count();
+            return Deck.Count;
         }
 
 

@@ -73,7 +73,7 @@ namespace Assets.Scripts.UI
 
             // Set Large Card Position
             LargeCard.SetActive(false);
-            if (cardReference.Owner == PlayerType.Back)
+            if (cardReference.Owner.PlayerType == PlayerType.Back)
                 LargeCard.transform.localPosition = new Vector3(LargeCard.transform.localPosition.x, -LargeCard.transform.localPosition.y, LargeCard.transform.localPosition.z);
 
             NameLabel = LargeCard.transform.Find("Canvas/Name").GetComponent<Text>();

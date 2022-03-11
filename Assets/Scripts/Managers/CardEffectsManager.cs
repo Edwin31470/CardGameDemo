@@ -42,7 +42,6 @@ namespace Assets.Scripts.Managers
                     yield break;
 
                 case "Smouldering Draug":
-
                     IEnumerable<BaseEvent> SmoulderingDraug()
                     {
                         if (MainController.GetCurrentPhase() == Phase.Play)
@@ -51,7 +50,7 @@ namespace Assets.Scripts.Managers
                             cardInfo.Attack = 2;
                             cardInfo.Defence = 2;
                             
-                            yield return new SummonCardEvent(cardInfo, card.Owner);
+                            yield return new SummonCardEvent(cardInfo, card.Owner.PlayerType);
                         }
                     }
 
@@ -61,7 +60,7 @@ namespace Assets.Scripts.Managers
                     yield break;
 
                 case "Flame-Tongue Kijiti":
-                    yield return new AddTokensEvent(card.Owner, TokenType.Claw, 2);
+                    yield return new AddTokensEvent(card.Owner.PlayerType, TokenType.Claw, 2);
                     yield break;
 
                 case "Boiling Elemental":
@@ -99,7 +98,7 @@ namespace Assets.Scripts.Managers
                     yield return new CustomAllCreaturesEvent(
                         new TargetConditions
                         {
-                            PlayerType = card.Owner.GetOpposite()
+                            PlayerType = card.Owner.PlayerType.GetOpposite()
                         },
                         EruptionIdol);
                     yield break;
@@ -107,7 +106,7 @@ namespace Assets.Scripts.Managers
 
                 #region Green Creatures
                 case "Bird of Paradise":
-                    yield return new AddManaPlayerEvent(card.Owner, Colour.Green, 1);
+                    yield return new AddManaPlayerEvent(card.Owner.PlayerType, Colour.Green, 1);
                     yield break;
 
                 case "Chromatic Basilisk":
@@ -168,18 +167,18 @@ namespace Assets.Scripts.Managers
                     yield break;
 
                 case "Turtleshield Vanguard":
-                    yield return new AddTokensEvent(card.Owner, TokenType.Shell, 2);
+                    yield return new AddTokensEvent(card.Owner.PlayerType, TokenType.Shell, 2);
                     yield break;
 
                 case "Tailwing Moth":
-                    yield return new AddLifePlayerEvent(card.Owner, 5);
+                    yield return new AddLifePlayerEvent(card.Owner.PlayerType, 5);
                     yield break;
 
                 case "Bride of the Forest":
                     // TODO: can't use yield return in lambdas
                     IEnumerable<BaseEvent> BrideOfTheForest(BaseCard target)
                     {
-                        if (MainController.GetPlayer(card.Owner).GetField().Count() < 5)
+                        if (card.Owner.GetField().Count < 5)
                         {
                             yield return new GainControlEvent(target);
                         }
@@ -191,7 +190,7 @@ namespace Assets.Scripts.Managers
 
                     yield return new CustomSingleTargetEvent(new TargetConditions
                     {
-                        PlayerType = card.Owner.GetOpposite(),
+                        PlayerType = card.Owner.PlayerType.GetOpposite(),
                         CardType = CardType.Creature,
                         MaxDefence = 8
                     },
@@ -203,7 +202,7 @@ namespace Assets.Scripts.Managers
                 case "Arishi, King of Leaves":
                     IEnumerable<BaseEvent> ArishiKingOfLeaves()
                     {
-                        var player = MainController.GetPlayer(card.Owner);
+                        var player = card.Owner;
 
                         var greenMana = player.GetManaAmount(Colour.Green);
 
@@ -240,8 +239,8 @@ namespace Assets.Scripts.Managers
                 case "Unexpected Protégé":
                     IEnumerable<BaseEvent> UnexpectedProtege()
                     {
-                        var thisPlayer = MainController.GetPlayer(card.Owner);
-                        var otherPlayer = MainController.GetPlayer(card.Owner.GetOpposite());
+                        var thisPlayer = card.Owner;
+                        var otherPlayer = card.Owner;
 
                         if (thisPlayer.TotalAttack < otherPlayer.TotalAttack && thisPlayer.TotalDefence < otherPlayer.TotalDefence)
                         {
@@ -290,7 +289,7 @@ namespace Assets.Scripts.Managers
                         card,
                         new TargetConditions
                         {
-                            PlayerType = card.Owner
+                            PlayerType = card.Owner.PlayerType
                         },
                         (targets) =>
                         {
@@ -332,7 +331,7 @@ namespace Assets.Scripts.Managers
                     yield return new CustomAllCreaturesEvent(
                         new TargetConditions
                         {
-                            PlayerType = card.Owner.GetOpposite()
+                            PlayerType = card.Owner.PlayerType.GetOpposite()
                         },
                         FeasterOfWill);
                     yield break;
@@ -352,7 +351,7 @@ namespace Assets.Scripts.Managers
                     yield return new CustomAllCreaturesEvent(
                         new TargetConditions
                         {
-                            PlayerType = card.Owner.GetOpposite()
+                            PlayerType = card.Owner.PlayerType.GetOpposite()
                         },
                         ItThatSpeaksInWhispers);
                     yield break;
