@@ -170,6 +170,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SlotType: 2
   Owner: 2
+  Index: -1
 --- !u!50 &4580976
 Rigidbody2D:
   serializedVersion: 4
@@ -455,6 +456,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SlotType: 1
   Owner: 1
+  Index: 3
 --- !u!1 &296723625
 GameObject:
   m_ObjectHideFlags: 0
@@ -549,6 +551,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SlotType: 1
   Owner: 1
+  Index: 0
 --- !u!1 &308847252
 GameObject:
   m_ObjectHideFlags: 0
@@ -1295,6 +1298,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SlotType: 1
   Owner: 2
+  Index: 1
 --- !u!50 &630265230
 Rigidbody2D:
   serializedVersion: 4
@@ -1800,6 +1804,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SlotType: 1
   Owner: 1
+  Index: 1
 --- !u!1 &941058658
 GameObject:
   m_ObjectHideFlags: 0
@@ -2168,6 +2173,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SlotType: 1
   Owner: 1
+  Index: 4
 --- !u!1 &1161295048
 GameObject:
   m_ObjectHideFlags: 0
@@ -2215,6 +2221,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SlotType: 1
   Owner: 2
+  Index: 2
 --- !u!50 &1161295051
 Rigidbody2D:
   serializedVersion: 4
@@ -2356,6 +2363,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SlotType: 2
   Owner: 1
+  Index: -1
 --- !u!1 &1310940353
 GameObject:
   m_ObjectHideFlags: 0
@@ -2527,6 +2535,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SlotType: 1
   Owner: 2
+  Index: 0
 --- !u!50 &1421727170
 Rigidbody2D:
   serializedVersion: 4
@@ -3331,6 +3340,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SlotType: 1
   Owner: 2
+  Index: 4
 --- !u!50 &1613575029
 Rigidbody2D:
   serializedVersion: 4
@@ -3849,6 +3859,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SlotType: 1
   Owner: 1
+  Index: 2
 --- !u!1 &1970465375
 GameObject:
   m_ObjectHideFlags: 0
@@ -4041,6 +4052,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SlotType: 1
   Owner: 2
+  Index: 3
 --- !u!50 &1998480615
 Rigidbody2D:
   serializedVersion: 4
