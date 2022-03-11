@@ -35,23 +35,21 @@ namespace Assets.Scripts
         private int RoundNumber { get; set; }
         private Phase CurrentPhase { get; set; }
 
-        // Only to be used by scripts requiring Update()
+        // Static method to be used by scripts requiring Update()
         public static MainController Get()
         {
             return GameObject.Find("MainController").GetComponent<MainController>();
         }
 
         // Helper Methods
-        public static Player GetPlayer(PlayerType playerType)
+        private Player GetPlayer(PlayerType playerType)
         {
-            var controller = GameObject.Find("MainController").GetComponent<MainController>();
-
             if (playerType == PlayerType.Front)
-                return controller.FrontPlayer;
-            else if (playerType == PlayerType.Back)
-                return controller.BackPlayer;
-            else
-                throw new ArgumentOutOfRangeException("playerType", $"Must be either {PlayerType.Front} or {PlayerType.Back}");
+                return FrontPlayer;
+            if (playerType == PlayerType.Back)
+                return BackPlayer;
+
+            throw new ArgumentOutOfRangeException(nameof(playerType), $"Must be either {PlayerType.Front} or {PlayerType.Back}");
         }
 
         public static Phase GetCurrentPhase()
@@ -188,7 +186,6 @@ namespace Assets.Scripts
         // Main Scene methods (buttons etc.)
         public void ShowPile(Area area, PlayerType playerType)
         {
-            var controller = GameObject.Find("MainController").GetComponent<MainController>();
             var player = GetPlayer(playerType);
 
             var cards = new List<BaseCard>();
@@ -198,17 +195,16 @@ namespace Assets.Scripts
             else if (area == Area.Destroyed)
                 cards = player.GetDestroyed();
 
-            controller.PileManager.ShowPile(cards);
+            PileManager.ShowPile(cards);
         }
 
         public void ShowTokens(StatType statType, PlayerType playerType)
         {
-            var controller = GameObject.Find("MainController").GetComponent<MainController>();
             var player = GetPlayer(playerType);
 
             var tokens = player.GetTokens(statType);
 
-            controller.ShowTokensManager.ShowTokens(tokens);
+            ShowTokensManager.ShowTokens(tokens);
         }
 
         public void EnqueueEvent(BaseEvent baseEvent)
@@ -430,15 +426,8 @@ namespace Assets.Scripts
             {
                 ProcessInteruptEvents(gameplayEvent);
 
-                if (gameplayEvent is BaseUIInteractionEvent uIInteractionEvent)
-                {
-                    uIInteractionEvent.Process(UIManager);
-                }
-                else
-                {
-                    var newEvents = gameplayEvent.Process();
-                    EnqueueEvents(newEvents);
-                }
+                var newEvents = ProcessGameplayEvent(gameplayEvent);
+                EnqueueEvents(newEvents);
 
                 return gameplayEvent;
             }
@@ -508,6 +497,19 @@ namespace Assets.Scripts
 
                 if (interupted && interuptEvent is BaseInteruptOnceEvent)
                     InteruptEvents.Remove(interuptEvent);
+            }
+        }
+
+        private IEnumerable<BaseEvent> ProcessGameplayEvent(BaseGameplayEvent gameplayEvent)
+        {
+            switch (gameplayEvent)
+            {
+                case BaseUIInteractionEvent uIInteractionEvent:
+                    return uIInteractionEvent.Process(UIManager, GetPlayer);
+                case BaseBoardEvent boardEvent:
+                    return boardEvent.Process(GetPlayer);
+                default:
+                    return gameplayEvent.Process();
             }
         }
 
