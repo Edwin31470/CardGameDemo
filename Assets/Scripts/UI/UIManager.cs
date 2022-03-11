@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Assets.Scripts.Events;
 using UnityEngine;
 
 namespace Assets.Scripts.UI
@@ -142,33 +143,27 @@ namespace Assets.Scripts.UI
             BackTurnLight.enabled = playerType == PlayerType.Back;
         }
 
-        public void BeginCardSelection(TargetConditions targetConditions, IEnumerable<BaseCard> overrideTargets, int count, Action<IEnumerable<BaseCard>> action, SelectionType selectionType)
+        public void BeginCardSelection(TargetConditions targetConditions, IEnumerable<BaseCard> overrideTargets, int count, OnFinishSelection onFinishSelection, SelectionType selectionType)
         {
-            HashSet<CardObject> targets;
-
-            if (overrideTargets == null)
-            {
-                targets = GetAvailableCards(targetConditions);
-            }
-            else
-            {
-                targets = new HashSet<CardObject>(GetCardObjects(overrideTargets));
-            }
+            // TODO: null or empty?
+            var targets = overrideTargets != null ?
+                new HashSet<CardObject>(GetCardObjects(overrideTargets)) :
+                GetAvailableCards(targetConditions);
 
             SelectionManager.Begin(
                 targets,
                 count,
-                action,
+                onFinishSelection,
                 selectionType);
         }
 
-        public void BeginDragAndDrop(TargetConditions targetConditions, Func<CardObject, Slot, bool> playAction, Action passAction)
+        public void BeginDragAndDrop(TargetConditions targetConditions, Func<CardObject, Slot, IEnumerable<BaseEvent>> onDrop, Func<IEnumerable<BaseEvent>> onPass)
         {
             DragAndDropManager.Begin(
                 GetAvailableCards(targetConditions),
                 GetAvailableSlots(targetConditions.PlayerType),
-                playAction,
-                passAction);
+                onDrop,
+                onPass);
         }
 
         public void CreateInHand(BaseCard card)
