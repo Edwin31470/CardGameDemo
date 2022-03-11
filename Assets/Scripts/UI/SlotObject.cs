@@ -1,17 +1,18 @@
 ﻿using Assets.Scripts.Enums;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Assets.Scripts
+namespace Assets.Scripts.UI
 {
-    public class Slot : MonoBehaviour
+    /// <summary>
+    /// Unity object to 
+    /// </summary>
+    public class SlotObject : MonoBehaviour
     {
         public SlotType SlotType;
         public PlayerType Owner;
+        public int Index;
+        public FieldSlot FieldSlot { get; set; } // null for mana slot
 
         public bool IsOccupied()
         {

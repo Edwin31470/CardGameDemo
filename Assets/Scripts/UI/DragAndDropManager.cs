@@ -13,8 +13,8 @@ namespace Assets.Scripts.UI
         private MainController MainController { get; set; }
 
         private HashSet<CardObject> AvailableCards { get; set; }
-        private HashSet<Slot> AvailableSlots { get; set; }
-        private Func<CardObject, Slot, IEnumerable<BaseEvent>> OnDrop { get; set; }
+        private HashSet<SlotObject> AvailableSlots { get; set; }
+        private Func<CardObject, SlotObject, IEnumerable<BaseEvent>> OnDrop { get; set; }
         private Func<IEnumerable<BaseEvent>> OnPass { get; set; }
 
         private CardObject SelectedCard { get; set; }
@@ -22,7 +22,7 @@ namespace Assets.Scripts.UI
 
         public bool IsProcessing { get; set; }
 
-        public void Begin(HashSet<CardObject> availableCards, HashSet<Slot> availableSlots, Func<CardObject, Slot, IEnumerable<BaseEvent>> onDrop, Func<IEnumerable<BaseEvent>> onPass)
+        public void Begin(HashSet<CardObject> availableCards, HashSet<SlotObject> availableSlots, Func<CardObject, SlotObject, IEnumerable<BaseEvent>> onDrop, Func<IEnumerable<BaseEvent>> onPass)
         {
             MainController = MainController.Get();
             AvailableCards = availableCards;
@@ -32,7 +32,7 @@ namespace Assets.Scripts.UI
             IsProcessing = true;
         }
 
-        public void Finish(Slot slot)
+        public void Finish(SlotObject slot)
         {
             var newEvents = OnDrop.Invoke(SelectedCard, slot).ToArray();
 
@@ -66,7 +66,7 @@ namespace Assets.Scripts.UI
             SelectedCard = null;
         }
 
-        private void DropInSlot(Slot slot)
+        private void DropInSlot(SlotObject slot)
         {
             // Drop non-action cards
             if (SelectedCard.CardReference.Type != CardType.Action)
@@ -124,7 +124,7 @@ namespace Assets.Scripts.UI
                     var touchingSlots = new List<Collider2D>();
 
                     cardCollider.OverlapCollider(contactFilter, touchingSlots);
-                    var validSlots = touchingSlots.Select(x => x.GetComponent<Slot>());
+                    var validSlots = touchingSlots.Select(x => x.GetComponent<SlotObject>());
 
                     // If not an action card only allow empty slots
                     if (SelectedCard.CardReference.Type != CardType.Action)
