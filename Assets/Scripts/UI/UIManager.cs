@@ -48,6 +48,15 @@ namespace Assets.Scripts.UI
             BackTurnLight = GameObject.Find("BackPlayer/ActiveTurnLight").GetComponent<SpriteRenderer>();
         }
 
+        public void RegisterSlots(Player player)
+        {
+            var slots = GetAvailableSlots(player.PlayerType).Where(x => x.SlotType == SlotType.Field);
+            foreach (var slot in slots)
+            {
+                slot.FieldSlot = player.GetField()[slot.Index];
+            }
+        }
+
         private CardObject CreateCard(BaseCard card)
         {
             var newCard = Instantiate(CardObject, card.Owner.PlayerType == PlayerType.Front ? FrontDeckOrigin : BackDeckOrigin, Quaternion.identity);
@@ -56,13 +65,13 @@ namespace Assets.Scripts.UI
             return newCard;
         }
 
-        private HashSet<Slot> GetAvailableSlots(PlayerType playerType)
+        private HashSet<SlotObject> GetAvailableSlots(PlayerType playerType)
         {
             // TODO: UIManager should keep track of slot references
-            var slots = FindObjectsOfType<Slot>()
+            var slots = FindObjectsOfType<SlotObject>()
                 .Where(x => x.Owner == playerType && !x.IsOccupied());
 
-            return new HashSet<Slot>(slots);
+            return new HashSet<SlotObject>(slots);
         }
 
         private HashSet<CardObject> GetAvailableCards(TargetConditions targetConditions)
@@ -159,7 +168,7 @@ namespace Assets.Scripts.UI
                 selectionType);
         }
 
-        public void BeginDragAndDrop(TargetConditions targetConditions, Func<CardObject, Slot, IEnumerable<BaseEvent>> onDrop, Func<IEnumerable<BaseEvent>> onPass)
+        public void BeginDragAndDrop(TargetConditions targetConditions, Func<CardObject, SlotObject, IEnumerable<BaseEvent>> onDrop, Func<IEnumerable<BaseEvent>> onPass)
         {
             DragAndDropManager.Begin(
                 GetAvailableCards(targetConditions),

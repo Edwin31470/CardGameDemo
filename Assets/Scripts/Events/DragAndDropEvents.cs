@@ -4,6 +4,7 @@ using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Cards;
 
 namespace Assets.Scripts.Events
 {
@@ -42,7 +43,7 @@ namespace Assets.Scripts.Events
             return Enumerable.Empty<BaseEvent>();
         }
 
-        protected IEnumerable<BaseEvent> PlayCard(CardObject droppedCard, Slot slot)
+        protected IEnumerable<BaseEvent> PlayCard(CardObject droppedCard, SlotObject slot)
         {
             var player = droppedCard.CardReference.Owner;
 
@@ -61,7 +62,8 @@ namespace Assets.Scripts.Events
             {
                 // Pay and play card
                 player.RemoveMana(droppedCard.CardReference.Colour, droppedCard.CardReference.Cost);
-                yield return new EnterFieldEvent(droppedCard.CardReference);
+                var fieldIndex = Array.IndexOf(player.GetField(), slot.FieldSlot);
+                yield return new EnterFieldEvent(droppedCard.CardReference, fieldIndex);
             }
 
             yield return new NewTurnEvent(PlayingPlayer.GetOpposite(), false);

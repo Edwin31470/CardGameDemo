@@ -175,17 +175,9 @@ namespace Assets.Scripts.Managers
                     yield break;
 
                 case "Bride of the Forest":
-                    // TODO: can't use yield return in lambdas
                     IEnumerable<BaseEvent> BrideOfTheForest(BaseCard target)
                     {
-                        if (card.Owner.GetField().Count < 5)
-                        {
-                            yield return new GainControlEvent(target);
-                        }
-                        else
-                        {
-                            yield return new DestroyCardEvent(target);
-                        }
+                        yield return new GainControlEvent(target as CreatureCard);
                     }
 
                     yield return new CustomSingleTargetEvent(new TargetConditions

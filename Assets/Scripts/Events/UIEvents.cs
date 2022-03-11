@@ -20,15 +20,18 @@ namespace Assets.Scripts.Events
 
     public class CreateCardInSlotUIEvent : BaseUIEvent
     {
-        public BaseCard Card { get; set; }
+        private FieldCard Card { get; set; }
+        private int Index { get; set; }
 
-        public CreateCardInSlotUIEvent(BaseCard card)
+        public CreateCardInSlotUIEvent(FieldCard card, int index)
         {
             Card = card;
+            Index = index;
         }
 
         public override void Process(UIManager uIManager)
         {
+            // TODO: create in index slot instead
             uIManager.CreateInRandomSlot(Card);
         }
     }
@@ -36,14 +39,17 @@ namespace Assets.Scripts.Events
     public class MoveCardToFieldUIEvent : BaseUIEvent
     {
         private BaseCard Card { get; set; }
+        private int Index { get; set; }
 
-        public MoveCardToFieldUIEvent(BaseCard card)
+        public MoveCardToFieldUIEvent(BaseCard card, int index)
         {
             Card = card;
+            Index = index;
         }
 
         public override void Process(UIManager uIManager)
         {
+            // TODO: Move to index instead
             uIManager.MoveToRandomSlot(Card);
         }
     }

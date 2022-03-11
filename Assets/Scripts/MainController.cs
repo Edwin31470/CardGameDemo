@@ -71,9 +71,9 @@ namespace Assets.Scripts
             var controller = GameObject.Find("MainController").GetComponent<MainController>();
 
             var frontHandCards = controller.FrontPlayer.GetHand().Where(x => targetConditions.IsMatch(x));
-            var frontFieldCards = controller.FrontPlayer.GetField().Where(x => targetConditions.IsMatch(x));
-            var backHandCards = controller.BackPlayer.GetHand().Where(x => targetConditions.IsMatch(x));
-            var backFieldCards = controller.BackPlayer.GetField().Where(x => targetConditions.IsMatch(x));
+            var frontFieldCards = controller.FrontPlayer.GetField().Select(x => x.Card as BaseCard).Where(x => x != null && targetConditions.IsMatch(x));
+            var backHandCards = controller.BackPlayer.GetHand().Where(x => x != null && targetConditions.IsMatch(x));
+            var backFieldCards = controller.BackPlayer.GetField().Select(x => x.Card as BaseCard).Where(x => x != null && targetConditions.IsMatch(x));
 
             var allCards = frontHandCards.Concat(frontFieldCards).Concat(backHandCards).Concat(backFieldCards);
 
@@ -137,8 +137,12 @@ namespace Assets.Scripts
 
             // Register GameObject Managers
             UIManager = gameObject.AddComponent(typeof(UIManager)) as UIManager;
+            UIManager.RegisterSlots(FrontPlayer);
+            UIManager.RegisterSlots(BackPlayer);
+
             LabelManager = gameObject.AddComponent(typeof(LabelManager)) as LabelManager;
             LabelManager.Initialize(FrontPlayer, BackPlayer);
+
             PileManager = gameObject.AddComponent(typeof(PileManager)) as PileManager;
             ShowTokensManager = gameObject.AddComponent(typeof(ShowTokensManager)) as ShowTokensManager;
 
@@ -326,20 +330,20 @@ namespace Assets.Scripts
             Timer.SetTickLength(0.1f);
 
             // Clear Board
-            foreach (var card in FrontPlayer.GetField())
+            foreach (var slot in FrontPlayer.GetField())
             {
-                if (card.HasPersistence)
+                if (slot.Card == null || slot.Card.HasPersistence)
                     continue;
 
-                EnqueueEvent(new DestroyCardEvent(card));
+                EnqueueEvent(new DestroyCardEvent(slot.Card));
             }
 
-            foreach (var card in BackPlayer.GetField())
+            foreach (var slot in BackPlayer.GetField())
             {
-                if (card.HasPersistence)
+                if (slot.Card == null || slot.Card.HasPersistence)
                     continue;
 
-                EnqueueEvent(new DestroyCardEvent(card));
+                EnqueueEvent(new DestroyCardEvent(slot.Card));
             }
 
 

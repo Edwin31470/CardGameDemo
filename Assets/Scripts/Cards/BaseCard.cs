@@ -9,7 +9,6 @@ namespace Assets.Scripts.Cards
     {
         public string Id { get; set; }
         public Player Owner { get; set; }
-        public Area Area { get; set; }
         public Colour Colour { get; set; }
         public int Cost { get; set; }
         public abstract CardType Type { get; }
