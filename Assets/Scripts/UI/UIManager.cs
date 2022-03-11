@@ -50,25 +50,27 @@ namespace Assets.Scripts.UI
 
         private CardObject CreateCard(BaseCard card)
         {
-            var newCard = Instantiate(CardObject, card.Owner == PlayerType.Front ? FrontDeckOrigin : BackDeckOrigin, Quaternion.identity);
+            var newCard = Instantiate(CardObject, card.Owner.PlayerType == PlayerType.Front ? FrontDeckOrigin : BackDeckOrigin, Quaternion.identity);
             newCard.Initialize(card);
             newCard.SetSortingLayer("Card");
             return newCard;
         }
 
-        private HashSet<CardObject> GetAvailableCards(TargetConditions targetConditions)
-        {
-            var cardObjects = FindObjectsOfType<CardObject>().Where(x => targetConditions.IsMatch(x.CardReference));
-
-            return new HashSet<CardObject>(cardObjects);
-        }
-
         private HashSet<Slot> GetAvailableSlots(PlayerType playerType)
         {
+            // TODO: UIManager should keep track of slot references
             var slots = FindObjectsOfType<Slot>()
                 .Where(x => x.Owner == playerType && !x.IsOccupied());
 
             return new HashSet<Slot>(slots);
+        }
+
+        private HashSet<CardObject> GetAvailableCards(TargetConditions targetConditions)
+        {
+            // TODO: UIManager should keep track of card references
+            var cardObjects = FindObjectsOfType<CardObject>().Where(x => targetConditions.IsMatch(x.CardReference));
+
+            return new HashSet<CardObject>(cardObjects);
         }
 
         public void UpdateHand(PlayerType player)
@@ -169,40 +171,40 @@ namespace Assets.Scripts.UI
         public void CreateInHand(BaseCard card)
         {
             CreateCard(card);
-            UpdateHand(card.Owner);
+            UpdateHand(card.Owner.PlayerType);
         }
 
         public void CreateInRandomSlot(BaseCard card)
         {
             var cardObject = CreateCard(card);
-            var slot = GetAvailableSlots(card.Owner).Where(x => x.SlotType != SlotType.Mana).OrderBy(x => Guid.NewGuid()).First();
+            var slot = GetAvailableSlots(card.Owner.PlayerType).Where(x => x.SlotType != SlotType.Mana).OrderBy(x => Guid.NewGuid()).First();
             cardObject.SetTargetPosition(slot.transform.position);
         }
 
         public void MoveToRandomSlot(BaseCard card)
         {
             var cardObject = GetCardObject(card);
-            var slot = GetAvailableSlots(card.Owner).Where(x => x.SlotType != SlotType.Mana).OrderBy(x => Guid.NewGuid()).First();
+            var slot = GetAvailableSlots(card.Owner.PlayerType).Where(x => x.SlotType != SlotType.Mana).OrderBy(x => Guid.NewGuid()).First();
             cardObject.SetTargetPosition(slot.transform.position);
         }
 
         public void ReturnToDeck(CardObject cardObject)
         {
-            cardObject.SetTargetPosition(cardObject.CardReference.Owner == PlayerType.Front ? FrontDeckOrigin : BackDeckOrigin);
+            cardObject.SetTargetPosition(cardObject.CardReference.Owner.PlayerType == PlayerType.Front ? FrontDeckOrigin : BackDeckOrigin);
             cardObject.DestroyWhenInPosition = true;
         }
 
         public void Destroy(CardObject cardObject)
         {
-            cardObject.SetTargetPosition(cardObject.CardReference.Owner == PlayerType.Front ? FrontDestroyLocation : BackDestroyLocation);
+            cardObject.SetTargetPosition(cardObject.CardReference.Owner.PlayerType == PlayerType.Front ? FrontDestroyLocation : BackDestroyLocation);
             cardObject.DestroyWhenInPosition = true;
         }
 
         public CardObject GetCardObject(BaseCard card)
         {
-            var cardObject = GetAvailableCards(new TargetConditions { PlayerType = card.Owner, Area = Area.Any }) // Any to get None cards as well
-                .Where(x => x.CardReference == card)
-                .FirstOrDefault();
+            var targetConditions = new TargetConditions {PlayerType = card.Owner.PlayerType, Area = Area.Any};
+
+            var cardObject = GetAvailableCards(targetConditions).FirstOrDefault(x => x.CardReference == card);
 
             return cardObject;
         }

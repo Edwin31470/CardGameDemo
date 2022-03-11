@@ -1,7 +1,6 @@
 ﻿using Assets.Scripts.Enums;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.Scripts.Events;
 using UnityEngine;
 
 namespace Assets.Scripts.UI
