@@ -11,18 +11,19 @@ namespace Assets.Scripts.Events
     // Like Triggers but modifies an event before it goes off
     public abstract class BaseInteruptEvent : BaseEvent
     {
-        public BaseCard Owner { get; set; }
+        public BaseCard Source { get; set; }
 
-        protected BaseInteruptEvent(BaseCard owner)
+        protected BaseInteruptEvent(BaseCard source)
         {
-            Owner = owner;
+            Source = source;
         }
 
         public abstract bool Process(BaseGameplayEvent baseEvent);
 
+        // Interupt events are only valid when their source is on the field
         public bool IsValid()
         {
-            return Owner.Area == Area.Field;
+            return Source.Owner.IsOnField(Source);
         }
     }
 

@@ -10,21 +10,22 @@ namespace Assets.Scripts.Events
 {
     public abstract class BaseTriggerEvent : BaseEvent
     {
-        public BaseCard Owner { get; set; }
+        public BaseCard Source { get; set; }
         public bool TriggerOnce { get; set; }
 
-        protected BaseTriggerEvent(BaseCard owner, bool triggerOnce = false)
+        protected BaseTriggerEvent(BaseCard source, bool triggerOnce = false)
         {
-            Owner = owner;
+            Source = source;
             TriggerOnce = triggerOnce;
         }
 
         public abstract bool Conditions(BaseEvent triggeringEvent);
         public abstract IEnumerable<BaseEvent> Process(BaseEvent triggeringEvent);
 
+        // Trigger events are only valid when their source is on the field
         public bool IsValid()
         {
-            return Owner.Area == Area.Field;
+            return Source.Owner.IsOnField(Source);
         }
     }
 
@@ -41,7 +42,7 @@ namespace Assets.Scripts.Events
 
         public override bool Conditions(BaseEvent triggeringEvent)
         {
-            return triggeringEvent is DestroyCardEvent destroyCardEvent && destroyCardEvent.Card == Owner;
+            return triggeringEvent is DestroyCardEvent destroyCardEvent && destroyCardEvent.Card == Source;
         }
 
         public override IEnumerable<BaseEvent> Process(BaseEvent triggeringEvent)
@@ -64,7 +65,7 @@ namespace Assets.Scripts.Events
         public override bool Conditions(BaseEvent triggeringEvent)
         {
             // Prevents cards triggering on themselves
-            if (triggeringEvent is EnterFieldEvent enterFieldEvent && enterFieldEvent.Card == Owner)
+            if (triggeringEvent is EnterFieldEvent enterFieldEvent && enterFieldEvent.Card == Source)
                 return false;
 
             return FuncConditions.Invoke(triggeringEvent);

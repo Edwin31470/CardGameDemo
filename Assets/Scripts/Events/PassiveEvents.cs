@@ -7,18 +7,19 @@ namespace Assets.Scripts.Events
 {
     public abstract class BasePassiveEvent : BaseEvent
     {
-        public BaseCard Owner { get; set; }
+        public BaseCard Source { get; set; }
 
-        protected BasePassiveEvent(BaseCard owner)
+        protected BasePassiveEvent(BaseCard source)
         {
-            Owner = owner;
+            Source = source;
         }
 
         public abstract void Process(MainController mainController);
 
+        // Passive events are only valid when their source is on the field
         public bool IsValid()
         {
-            return Owner.Area == Area.Field;
+            return Source.Owner.IsOnField(Source);
         }
     }
 
