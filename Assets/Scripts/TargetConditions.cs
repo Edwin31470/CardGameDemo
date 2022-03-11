@@ -1,12 +1,6 @@
 ﻿using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
-using Assets.Scripts.UI;
 using Assets.Scripts.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Assets.Scripts
 {
@@ -27,7 +21,7 @@ namespace Assets.Scripts
 
         public bool IsMatch(BaseCard card)
         {
-            if (!PlayerType.HasFlag(card.Owner))
+            if (!PlayerType.HasFlag(card.Owner.PlayerType))
                 return false;
 
             if (!Area.HasFlag(card.Area))
