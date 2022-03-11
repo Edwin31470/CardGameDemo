@@ -1,37 +1,39 @@
-﻿using Assets.Scripts.Cards;
-using Assets.Scripts.Enums;
-using System;
+﻿using Assets.Scripts.Enums;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Assets.Scripts.Events;
 using UnityEngine;
 
 namespace Assets.Scripts.UI
 {
     public class SelectionManager : MonoBehaviour
     {
+        // Allowing reference to main controller here due to nature of Update()
+        private MainController MainController { get; set; }
+
         // Card Selection
         private HashSet<CardObject> SelectedCards { get; set; }
         private HashSet<CardObject> ValidCards { get; set; }
         private int MaxTargets { get; set; }
         private Color SelectionColour { get; set; }
 
-        private Action<IEnumerable<BaseCard>> Action { get; set; }
+        private OnFinishSelection OnFinishSelection { get; set; }
 
         public bool IsProcessing { get; set; }
 
         public void Start()
         {
+            MainController = MainController.Get();
             SelectedCards = new HashSet<CardObject>();
+            ValidCards = new HashSet<CardObject>();
         }
 
-        public void Begin(HashSet<CardObject> validCards, int maxTargets, Action<IEnumerable<BaseCard>> action, SelectionType selectionType)
+        public void Begin(HashSet<CardObject> validCards, int maxTargets, OnFinishSelection onFinishSelection, SelectionType selectionType)
         {
             IsProcessing = true;
             ValidCards = validCards;
             MaxTargets = maxTargets;
-            Action = action;
+            OnFinishSelection = onFinishSelection;
 
             switch (selectionType)
             {
@@ -47,9 +49,15 @@ namespace Assets.Scripts.UI
             }
         }
 
+        /// <summary>
+        /// Finish selection and return events of that selection
+        /// </summary>
+        /// <returns>Events resulting from selection</returns>
         public void Finish()
         {
-            Action.Invoke(SelectedCards.Select(x => x.CardReference));
+            var selectedCards = SelectedCards.Select(x => x.CardReference);
+            MainController.EnqueueEvents(OnFinishSelection.Invoke(selectedCards));
+
             DeselectCards();
             IsProcessing = false;
         }
@@ -109,16 +117,26 @@ namespace Assets.Scripts.UI
 
 
             // Finish if all targets selected or no more targets
-            if (SelectedCards.Count() == MaxTargets || SelectedCards.Count() == ValidCards.Count())
+            if (ShouldFinishSelection())
             {
                 Finish();
+            }
+        }
+
+        private bool ShouldFinishSelection()
+        {
+            if (SelectedCards.Count == MaxTargets) {
+                return true;
+            }
+            if (SelectedCards.Count == ValidCards.Count) {
+                return true;
+            }
+            // TODO: Only some events can have less than maximum targets selected
+            if (Input.GetKeyDown(KeyCode.Return)) {
+                return true;
             }
 
-            // Only some events can have less than maximum targets selected
-            if (Input.GetKeyDown(KeyCode.Return))
-            {
-                Finish();
-            }
+            return false;
         }
     }
 }

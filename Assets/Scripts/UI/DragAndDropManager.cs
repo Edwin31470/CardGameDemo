@@ -2,38 +2,42 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Assets.Scripts.Events;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace Assets.Scripts.UI
 {
     class DragAndDropManager : MonoBehaviour
     {
+        // Allowing reference to main controller here due to nature of Update()
+        private MainController MainController { get; set; }
+
         private HashSet<CardObject> AvailableCards { get; set; }
         private HashSet<Slot> AvailableSlots { get; set; }
-        private Func<CardObject, Slot, bool> PlayAction { get; set; }
-        private Action PassAction { get; set; }
+        private Func<CardObject, Slot, IEnumerable<BaseEvent>> OnDrop { get; set; }
+        private Func<IEnumerable<BaseEvent>> OnPass { get; set; }
 
         private CardObject SelectedCard { get; set; }
         private Vector2 OriginalPosition { get; set; }
 
         public bool IsProcessing { get; set; }
 
-        public void Begin(HashSet<CardObject> availableCards, HashSet<Slot> availableSlots, Func<CardObject, Slot, bool> playAction, Action passAction)
+        public void Begin(HashSet<CardObject> availableCards, HashSet<Slot> availableSlots, Func<CardObject, Slot, IEnumerable<BaseEvent>> onDrop, Func<IEnumerable<BaseEvent>> onPass)
         {
+            MainController = MainController.Get();
             AvailableCards = availableCards;
             AvailableSlots = availableSlots;
-            PlayAction = playAction;
-            PassAction = passAction;
+            OnDrop = onDrop;
+            OnPass = onPass;
             IsProcessing = true;
         }
 
         public void Finish(Slot slot)
         {
-            var success = PlayAction.Invoke(SelectedCard, slot);
-            if (!success)
+            var newEvents = OnDrop.Invoke(SelectedCard, slot).ToArray();
+
+            // If no new events, either unable to play cards or discarded drop
+            if (!newEvents.Any())
             {
                 // Not enough mana message
                 DropCard();
@@ -43,11 +47,14 @@ namespace Assets.Scripts.UI
                 DropInSlot(slot);
                 IsProcessing = false;
             }
+
+            MainController.EnqueueEvents(newEvents);
         }
 
         public void Pass()
         {
-            PassAction.Invoke();
+            MainController.EnqueueEvents(OnPass.Invoke());
+
             SelectedCard = null;
             IsProcessing = false;
         }
@@ -117,7 +124,7 @@ namespace Assets.Scripts.UI
                     var touchingSlots = new List<Collider2D>();
 
                     cardCollider.OverlapCollider(contactFilter, touchingSlots);
-                    IEnumerable<Slot> validSlots = touchingSlots.Select(x => x.GetComponent<Slot>());
+                    var validSlots = touchingSlots.Select(x => x.GetComponent<Slot>());
 
                     // If not an action card only allow empty slots
                     if (SelectedCard.CardReference.Type != CardType.Action)
