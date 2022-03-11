@@ -11,13 +11,16 @@ namespace Assets.Scripts.Events
     public abstract class BaseTriggerEvent : BaseEvent
     {
         public BaseCard Owner { get; set; }
+        public bool TriggerOnce { get; set; }
 
-        protected BaseTriggerEvent(BaseCard owner)
+        protected BaseTriggerEvent(BaseCard owner, bool triggerOnce = false)
         {
             Owner = owner;
+            TriggerOnce = triggerOnce;
         }
 
-        public abstract bool Process(BaseEvent triggeringEvent);
+        public abstract bool Conditions(BaseEvent triggeringEvent);
+        public abstract IEnumerable<BaseEvent> Process(BaseEvent triggeringEvent);
 
         public bool IsValid()
         {
@@ -25,68 +28,50 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public abstract class BaseTriggerOnceEvent : BaseTriggerEvent
-    {
-        protected BaseTriggerOnceEvent(BaseCard owner) : base(owner)
-        {
-        }
-    }
 
-    public class OnDestroyedEvent : BaseTriggerOnceEvent
+    public class OnDestroyedEvent : BaseTriggerEvent
     {
-        private Action Action { get; set; }
+        private Func<IEnumerable<BaseEvent>> Func { get; set; }
 
-        public OnDestroyedEvent(BaseCard owner, Action action) : base(owner)
+        public OnDestroyedEvent(BaseCard owner, Func<IEnumerable<BaseEvent>> func) : base(owner, true)
         {
-            Action = action;
+            Func = func;
         }
 
-        public override bool Process(BaseEvent triggeringEvent)
-        {
-            if (triggeringEvent is DestroyCardEvent destroyCardEvent && destroyCardEvent.Card == Owner)
-            {
-                Action.Invoke();
-                return true;
-            }
 
-            return false;
+        public override bool Conditions(BaseEvent triggeringEvent)
+        {
+            return triggeringEvent is DestroyCardEvent destroyCardEvent && destroyCardEvent.Card == Owner;
+        }
+
+        public override IEnumerable<BaseEvent> Process(BaseEvent triggeringEvent)
+        {
+            return Func.Invoke();
         }
     }
 
     public class CustomTriggerEvent : BaseTriggerEvent
     {
-        private Func<BaseEvent, bool> Func { get; set; }
+        private Func<BaseEvent, bool> FuncConditions { get; } 
+        private Func<BaseEvent, IEnumerable<BaseEvent>> Func { get; }
 
-        public CustomTriggerEvent(BaseCard owner, Func<BaseEvent, bool> func) : base(owner)
+        public CustomTriggerEvent(BaseCard owner, Func<BaseEvent, bool> conditions, Func<BaseEvent, IEnumerable<BaseEvent>> func, bool triggerOnce = false) : base(owner, triggerOnce)
         {
+            FuncConditions = conditions;
             Func = func;
         }
 
-        public override bool Process(BaseEvent triggeringEvent)
+        public override bool Conditions(BaseEvent triggeringEvent)
         {
             // Prevents cards triggering on themselves
             if (triggeringEvent is EnterFieldEvent enterFieldEvent && enterFieldEvent.Card == Owner)
                 return false;
 
-            return Func.Invoke(triggeringEvent);
-        }
-    }
-
-    public class CustomTriggerOnceEvent : BaseTriggerOnceEvent
-    {
-        private Func<BaseEvent, bool> Func { get; set; }
-
-        public CustomTriggerOnceEvent(BaseCard owner, Func<BaseEvent, bool> func) : base(owner)
-        {
-            Func = func;
+            return FuncConditions.Invoke(triggeringEvent);
         }
 
-        public override bool Process(BaseEvent triggeringEvent)
+        public override IEnumerable<BaseEvent> Process(BaseEvent triggeringEvent)
         {
-            // Prevents cards triggering on themselves
-            if (triggeringEvent is EnterFieldEvent enterFieldEvent && enterFieldEvent.Card == Owner)
-                return false;
-
             return Func.Invoke(triggeringEvent);
         }
     }

@@ -33,9 +33,9 @@ namespace Assets.Scripts.Events
             OtherPlayerPassed = otherPlayerPassed;
         }
 
-        public override void Process(MainController mainController)
-        {
-            MainController.AddEvent(new PlayCardEvent(PlayingPlayer, OtherPlayerPassed));
+        public override void Process(MainController controller)
+        { 
+            controller.EnqueueEvent(new PlayCardEvent(PlayingPlayer, OtherPlayerPassed));
         }
     }
 
@@ -60,7 +60,7 @@ namespace Assets.Scripts.Events
         public override void Process(MainController controller)
         {
             MainController.ClearPhaseQueue();
-            MainController.AddEvent(new MessageEvent(Message, 10000));
+            controller.EnqueueEvent(new MessageEvent(Message, 10000));
         }
     }
 }

@@ -23,10 +23,11 @@ namespace Assets.Scripts.Events
             Amount = amount;
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             var player = MainController.GetPlayer(PlayerType);
             player.AddTokens(TokenType, Amount);
+            yield break;
         }
     }
 
@@ -43,10 +44,11 @@ namespace Assets.Scripts.Events
             Amount = amount;
         }
 
-        public override void Process()
+        public override IEnumerable<BaseEvent> Process()
         {
             var player = MainController.GetPlayer(PlayerType);
             player.RemoveTokens(TokenType, Amount);
+            yield break;
         }
     }
 }

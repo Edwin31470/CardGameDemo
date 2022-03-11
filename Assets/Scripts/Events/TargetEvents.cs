@@ -17,7 +17,6 @@ namespace Assets.Scripts.Events
 
         public IEnumerable<BaseCard> OverrideTargets { get; set; } // For use with interupt events
 
-
         protected BaseCardSelectionEvent(TargetConditions targetConditions, int count, SelectionType selectionType = SelectionType.Neutral)
         {
             TargetConditions = targetConditions;
@@ -27,10 +26,10 @@ namespace Assets.Scripts.Events
 
         public override void Process(UIManager uIManager)
         {
-            uIManager.BeginCardSelection(TargetConditions, OverrideTargets, Count, FinishedSelection, SelectionType);
+            uIManager.BeginCardSelection(TargetConditions, OverrideTargets, Count, FinishSelection, SelectionType);
         }
 
-        public abstract void FinishedSelection(IEnumerable<BaseCard> selectedCards);
+        public abstract IEnumerable<BaseEvent> FinishSelection(IEnumerable<BaseCard> selectedCards);
     }
 
     public class RedrawCardsEvent : BaseCardSelectionEvent
@@ -45,12 +44,12 @@ namespace Assets.Scripts.Events
             SourcePlayer = sourcePlayer;
         }
 
-        public override void FinishedSelection(IEnumerable<BaseCard> selectedCards)
+        public override IEnumerable<BaseEvent> FinishSelection(IEnumerable<BaseCard> selectedCards)
         {
             foreach (var card in selectedCards)
             {
-                MainController.AddEvent(new ReturnToDeckEvent(card));
-                MainController.AddEvent(new DrawCardEvent(SourcePlayer));
+                yield return new ReturnToDeckEvent(card);
+                yield return new DrawCardEvent(SourcePlayer);
             }
         }
     }
@@ -76,11 +75,11 @@ namespace Assets.Scripts.Events
             targetConditions.CardType = CardType.Creature;
         }
 
-        public override void FinishedSelection(IEnumerable<BaseCard> selectedCards)
+        public override IEnumerable<BaseEvent> FinishSelection(IEnumerable<BaseCard> selectedCards)
         {
             foreach (var card in selectedCards.Cast<CreatureCard>())
             {
-                MainController.AddEvent(new DamageCreatureEvent(card, Value));
+                yield return new DamageCreatureEvent(card, Value);
             }
         }
     }
@@ -95,11 +94,11 @@ namespace Assets.Scripts.Events
             targetConditions.CardType = CardType.Creature;
         }
 
-        public override void FinishedSelection(IEnumerable<BaseCard> selectedCards)
+        public override IEnumerable<BaseEvent> FinishSelection(IEnumerable<BaseCard> selectedCards)
         {
             foreach (var card in selectedCards.Cast<CreatureCard>())
             {
-                MainController.AddEvent(new FortifyCreatureEvent(card, Value));
+                yield return new FortifyCreatureEvent(card, Value);
             }
         }
     }
@@ -114,11 +113,11 @@ namespace Assets.Scripts.Events
             targetConditions.CardType = CardType.Creature;
         }
 
-        public override void FinishedSelection(IEnumerable<BaseCard> selectedCards)
+        public override IEnumerable<BaseEvent> FinishSelection(IEnumerable<BaseCard> selectedCards)
         {
             foreach (var card in selectedCards.Cast<CreatureCard>())
             {
-                MainController.AddEvent(new WeakenCreatureEvent(card, Value));
+                yield return new WeakenCreatureEvent(card, Value);
             }
         }
     }
@@ -133,11 +132,11 @@ namespace Assets.Scripts.Events
             targetConditions.CardType = CardType.Creature;
         }
 
-        public override void FinishedSelection(IEnumerable<BaseCard> selectedCards)
+        public override IEnumerable<BaseEvent> FinishSelection(IEnumerable<BaseCard> selectedCards)
         {
             foreach (var card in selectedCards.Cast<CreatureCard>())
             {
-                MainController.AddEvent(new StrengthenCreatureEvent(card, Value));
+                yield return new StrengthenCreatureEvent(card, Value);
             }
         }
     }
@@ -157,12 +156,12 @@ namespace Assets.Scripts.Events
             Defence = defence;
         }
 
-        public override void FinishedSelection(IEnumerable<BaseCard> selectedCards)
+        public override IEnumerable<BaseEvent> FinishSelection(IEnumerable<BaseCard> selectedCards)
         {
             foreach (var card in selectedCards.Cast<CreatureCard>())
             {
-                MainController.AddEvent(new StrengthenCreatureEvent(card, Attack));
-                MainController.AddEvent(new FortifyCreatureEvent(card, Defence));
+                yield return new StrengthenCreatureEvent(card, Attack);
+                yield return new FortifyCreatureEvent(card, Defence);
             }
         }
     }
@@ -175,11 +174,11 @@ namespace Assets.Scripts.Events
         {
         }
 
-        public override void FinishedSelection(IEnumerable<BaseCard> selectedCards)
+        public override IEnumerable<BaseEvent> FinishSelection(IEnumerable<BaseCard> selectedCards)
         {
             foreach (var card in selectedCards)
             {
-                MainController.AddEvent(new DestroyCardEvent(card));
+                yield return new DestroyCardEvent(card);
             }
         }
     }
@@ -192,11 +191,11 @@ namespace Assets.Scripts.Events
         {
         }
 
-        public override void FinishedSelection(IEnumerable<BaseCard> selectedCards)
+        public override IEnumerable<BaseEvent> FinishSelection(IEnumerable<BaseCard> selectedCards)
         {
             foreach (var card in selectedCards)
             {
-                MainController.AddEvent(new EliminateCardEvent(card));
+                yield return new EliminateCardEvent(card);
             }
         }
     }
@@ -204,42 +203,36 @@ namespace Assets.Scripts.Events
     public class CustomMultiTargetEvent : BaseCardSelectionEvent
     {
         public override string EventTitle => Message;
-        private string Message { get; set; }
-        private Action<IEnumerable<BaseCard>> Action { get; set; }
+        private string Message { get; }
+        private OnFinishSelection CustomFinishSelection { get; }
 
-        public CustomMultiTargetEvent(TargetConditions targetConditions, int count, SelectionType selectionType, string message, Action<IEnumerable<BaseCard>> action)
+        public CustomMultiTargetEvent(TargetConditions targetConditions, int count, SelectionType selectionType, string message, OnFinishSelection onFinishSelection)
             : base(targetConditions, count, selectionType)
         {
             Message = message;
-            Action = action;
+            CustomFinishSelection = onFinishSelection;
         }
 
-        public override void FinishedSelection(IEnumerable<BaseCard> targets) 
-        {
-            Action.Invoke(targets);
-        }
+        public override IEnumerable<BaseEvent> FinishSelection(IEnumerable<BaseCard> selectedCards) => CustomFinishSelection.Invoke(selectedCards);
     }
 
     public class CustomSingleTargetEvent : BaseCardSelectionEvent
     {
         public override string EventTitle => Message;
         private string Message { get; set; }
-        private Action<BaseCard> Action { get; set; }
+        private Func<BaseCard, IEnumerable<BaseEvent>> CustomFinishSelection { get; }
 
-        public CustomSingleTargetEvent(TargetConditions targetConditions, SelectionType selectionType, string message, Action<BaseCard> action)
+        public CustomSingleTargetEvent(TargetConditions targetConditions, SelectionType selectionType, string message, Func<BaseCard, IEnumerable<BaseEvent>> finishSelection)
             : base(targetConditions, 1, selectionType)
         {
             Message = message;
-            Action = action;
+            CustomFinishSelection = finishSelection;
         }
 
-        public override void FinishedSelection(IEnumerable<BaseCard> targets)
+        public override IEnumerable<BaseEvent> FinishSelection(IEnumerable<BaseCard> targets)
         {
-            if (targets.Count() < 1)
-                return;
-
-            var target = targets.Single();
-            Action.Invoke(target);
+            var target = targets.SingleOrDefault();
+            return target != null ? CustomFinishSelection.Invoke(target) : Enumerable.Empty<BaseEvent>();
         }
     };
 }
