@@ -8,7 +8,6 @@ namespace Assets.Scripts.Cards
     public abstract class BaseCard
     {
         public string Id { get; set; }
-        public Player Owner { get; set; }
         public Colour Colour { get; set; }
         public int Cost { get; set; }
         public abstract CardType Type { get; }
@@ -22,9 +21,8 @@ namespace Assets.Scripts.Cards
         public bool IsSummoned { get; set; }
         public bool HasPersistence { get; set; }
 
-        protected BaseCard(Player owner, CardInfo cardInfo)
+        protected BaseCard(CardInfo cardInfo)
         {
-            Owner = owner;
             Colour = cardInfo.Colour;
             Cost = cardInfo.Cost;
             Name = cardInfo.Name;
@@ -60,16 +58,16 @@ namespace Assets.Scripts.Cards
         }
 
         // Factory method to create
-        public static BaseCard Create(Player player, CardInfo cardInfo)
+        public static BaseCard Create(CardInfo cardInfo)
         {
             switch (cardInfo.CardType)
             {
                 case CardType.Creature:
-                    return new CreatureCard(player, cardInfo);
+                    return new CreatureCard(cardInfo);
                 case CardType.Action:
-                    return new ActionCard(player, cardInfo);
+                    return new ActionCard(cardInfo);
                 case CardType.Permanent:
-                    return new PermanentCard(player, cardInfo);
+                    return new PermanentCard(cardInfo);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(cardInfo.CardType), $"Type must be {CardType.Creature}, {CardType.Action} or {CardType.Permanent}");
             }
