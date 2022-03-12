@@ -14,65 +14,63 @@ namespace Assets.Scripts.Events
         public override string EventTitle => $"{PlayingPlayer} Player's Turn";
 
         private PlayerType PlayingPlayer { get; set; }
-        private bool OtherPlayerPassed { get; set; }
+        private bool HasOtherPlayerPassed { get; set; }
+        private BoardState Board { get; set; }
 
-        public PlayCardEvent(PlayerType playingPlayer, bool otherPlayerPassed)
+        public PlayCardEvent(PlayerType playingPlayer, bool hasOtherPlayerPassed)
         {
             PlayingPlayer = playingPlayer;
-            OtherPlayerPassed = otherPlayerPassed;
+            HasOtherPlayerPassed = hasOtherPlayerPassed;
         }
 
-        public override IEnumerable<BaseEvent> Process(UIManager uIManager, Func<PlayerType, Player> getPlayer)
+        public override IEnumerable<BaseEvent> Process(UIManager uIManager, BoardState board)
         {
+            var player = board.GetPlayer(PlayingPlayer);
+
             // If no cards in hand, automatically pass
-            if (!getPlayer(PlayingPlayer).GetHand().Any())
-            {
+            if (!player.Hand.Any()) {
                 return PassTurn();
             }
 
-            var conditions = new TargetConditions
-            {
+            uIManager.SetTurn(PlayingPlayer);
+            Board = board;
+
+            var conditions = new TargetConditions {
                 PlayerType = PlayingPlayer,
                 Area = Area.Hand
             };
 
-            uIManager.SetTurn(PlayingPlayer);
-            uIManager.BeginDragAndDrop(conditions, PlayCard, PassTurn);
+            uIManager.BeginDragAndDrop(player.Hand, player.Field.Where(x => x.Card == null), PlayingPlayer, PlayCard, SacrificeCard, PassTurn);
 
             // resulting events of PlayCard and PassTurn are handled in DragAndDropManager.Finish()
             return Enumerable.Empty<BaseEvent>();
         }
 
-        protected IEnumerable<BaseEvent> PlayCard(CardObject droppedCard, SlotObject slot)
+        protected IEnumerable<BaseEvent> PlayCard(BaseCard droppedCard, FieldSlot fieldSlot)
         {
-            var player = droppedCard.CardReference.Owner;
+            var player = Board.GetCardOwner(droppedCard);
 
-            // Eliminate card if dropping in the mana slot
-            if (slot.SlotType == SlotType.Mana)
-            {
-                yield return new EliminateCardEvent(droppedCard.CardReference, false);
-                droppedCard.Destroy();
-            }
             // Don't play if unable to pay for card
-            else if (player.GetManaAmount(droppedCard.CardReference.Colour) < droppedCard.CardReference.Cost)
-            {
+            if (player.GetManaAmount(droppedCard.Colour) < droppedCard.Cost) {
                 yield break;
             }
-            else
-            {
-                // Pay and play card
-                player.RemoveMana(droppedCard.CardReference.Colour, droppedCard.CardReference.Cost);
-                var fieldIndex = Array.IndexOf(player.GetField(), slot.FieldSlot);
-                yield return new EnterFieldEvent(droppedCard.CardReference, fieldIndex);
-            }
+
+            // Pay and play card
+            player.RemoveMana(droppedCard.Colour, droppedCard.Cost);
+            yield return new EnterFieldEvent(droppedCard, fieldSlot);
 
             yield return new NewTurnEvent(PlayingPlayer.GetOpposite(), false);
+        }
+
+        private IEnumerable<BaseEvent> SacrificeCard(BaseCard card)
+        {
+            yield return new ManaSacrificeEvent(card);
         }
 
         protected IEnumerable<BaseEvent> PassTurn()
         {
             // If both players have now passed, go to the next phase
-            if (OtherPlayerPassed)
+            if (HasOtherPlayerPassed)
             {
                 yield return new NewPhaseEvent(Phase.Damage);
                 yield break;

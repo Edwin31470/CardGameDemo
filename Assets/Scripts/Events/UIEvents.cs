@@ -1,103 +1,131 @@
-﻿using Assets.Scripts.Cards;
+﻿using System.Collections.Generic;
+using Assets.Scripts.Cards;
+using Assets.Scripts.Enums;
 using Assets.Scripts.UI;
+using UnityEngine.XR;
 
 namespace Assets.Scripts.Events
 {
     public class DrawCardUIEvent : BaseUIEvent
     {
-        public BaseCard Card { get; set; }
+        private PlayerType PlayerType { get; }
+        private BaseCard Card { get; }
+        private IEnumerable<BaseCard> HandCards { get; }
 
-        public DrawCardUIEvent(BaseCard card)
+        public DrawCardUIEvent(PlayerType playerType, BaseCard card, IEnumerable<BaseCard> handCards)
         {
+            PlayerType = playerType;
             Card = card;
+            HandCards = handCards;
         }
 
         public override void Process(UIManager uIManager)
         {
-            uIManager.CreateInHand(Card);
+            uIManager.CreateInHand(PlayerType, Card);
+            uIManager.UpdateHand(PlayerType, HandCards);
         }
     }
 
     public class CreateCardInSlotUIEvent : BaseUIEvent
     {
+        private PlayerType PlayerType { get; set; }
         private FieldCard Card { get; set; }
-        private int Index { get; set; }
+        private FieldSlot Slot { get; set; }
 
-        public CreateCardInSlotUIEvent(FieldCard card, int index)
+        public CreateCardInSlotUIEvent(PlayerType playerType, FieldCard card, FieldSlot slot)
         {
+            PlayerType = playerType;
             Card = card;
-            Index = index;
+            Slot = slot;
         }
 
         public override void Process(UIManager uIManager)
         {
-            // TODO: create in index slot instead
-            uIManager.CreateInRandomSlot(Card);
+            uIManager.CreateInSlot(PlayerType, Card, Slot);
         }
     }
 
     public class MoveCardToFieldUIEvent : BaseUIEvent
     {
-        private BaseCard Card { get; set; }
-        private int Index { get; set; }
+        private FieldCard Card { get; set; }
+        private FieldSlot Slot { get; set; }
 
-        public MoveCardToFieldUIEvent(BaseCard card, int index)
+        public MoveCardToFieldUIEvent(FieldCard card, FieldSlot slot)
         {
             Card = card;
-            Index = index;
+            Slot = slot;
         }
 
         public override void Process(UIManager uIManager)
         {
             // TODO: Move to index instead
-            uIManager.MoveToRandomSlot(Card);
+            uIManager.MoveToSlot(Card, Slot);
         }
     }
 
     public class ReturnToDeckUIEvent : BaseUIEvent
     {
+        private PlayerType PlayerType { get; set; }
         private BaseCard Card { get; set; }
 
-        public ReturnToDeckUIEvent(BaseCard card)
+        public ReturnToDeckUIEvent(PlayerType playerType, BaseCard card)
         {
+            PlayerType = playerType;
             Card = card;
         }
 
         public override void Process(UIManager uIManager)
         {
-            var cardObject = uIManager.GetCardObject(Card);
-            uIManager.ReturnToDeck(cardObject);
+            uIManager.ReturnToDeck(PlayerType, Card);
         }
     }
 
-    public class AddToHandUIEvent : BaseUIEvent
+    public class UpdateHandUIEvent : BaseUIEvent
     {
-        private BaseCard Card { get; set; }
+        private PlayerType PlayerType { get; set; }
+        private IEnumerable<BaseCard> HandCards { get; set; }
 
-        public AddToHandUIEvent(BaseCard card)
+        public UpdateHandUIEvent(PlayerType playerType, IEnumerable<BaseCard> handCards)
         {
-            Card = card;
+            PlayerType = playerType;
+            HandCards = handCards;
         }
 
         public override void Process(UIManager uIManager)
         {
-            uIManager.UpdateHand(Card.Owner.PlayerType);
+            uIManager.UpdateHand(PlayerType, HandCards);
         }
     }
 
     public class DestroyCardUIEvent : BaseUIEvent
     {
+        private PlayerType PlayerType { get; set; }
         private BaseCard Card { get; set; }
 
-        public DestroyCardUIEvent(BaseCard card)
+        public DestroyCardUIEvent(PlayerType playerType, BaseCard card)
+        {
+            PlayerType = playerType;
+            Card = card;
+        }
+
+        public override void Process(UIManager uIManager)
+        {
+            uIManager.DestroyCard(PlayerType, Card);
+        }
+    }
+
+    public class SacrificeCardUIEvent : BaseUIEvent
+    {
+        private BaseCard Card { get; set; }
+
+        public SacrificeCardUIEvent(BaseCard card)
         {
             Card = card;
         }
 
         public override void Process(UIManager uIManager)
         {
-            var cardObject = uIManager.GetCardObject(Card);
-            uIManager.Destroy(cardObject);
+            uIManager.SacrificeCard(Card);
         }
     }
 }
