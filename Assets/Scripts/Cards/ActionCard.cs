@@ -6,7 +6,7 @@ namespace Assets.Scripts.Cards
 {
     public class ActionCard : BaseCard
     {
-        public ActionCard(Player owner, CardInfo cardInfo) : base(owner, cardInfo)
+        public ActionCard(CardInfo cardInfo) : base(cardInfo)
         {
             CardEvents = CardEffectsManager.GetCardEvents(this).ToList();
         }

@@ -6,6 +6,7 @@ using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Extensions;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,16 +14,15 @@ namespace Assets.Scripts
 {
     public class MainController : MonoBehaviour
     {
+        // Managers
         private DeckManager DeckManager { get; set; }
         private UIManager UIManager { get; set; }
         private LabelManager LabelManager { get; set; }
         private PileManager PileManager { get; set; }
         private ShowTokensManager ShowTokensManager { get; set; }
 
-
-        private Player FrontPlayer { get; set; }
-        private Player BackPlayer { get; set; }
-
+        // Queues
+        private RepeatingTimer Timer { get; set; }
         private EventQueue<BaseGameplayEvent> EventQueue { get; set; }
         private EventQueue<BasePhaseEvent> PhaseQueue { get; set; }
         private EventQueue<BaseUIEvent> UIQueue { get; set; }
@@ -30,10 +30,10 @@ namespace Assets.Scripts
         private List<BaseInteruptEvent> InteruptEvents { get; set; }
         private List<BaseTriggerEvent> TriggerEvents { get; set; }
 
-        private RepeatingTimer Timer { get; set; }
+        // Board
+        private BoardState Board { get; set; }
 
-        private int RoundNumber { get; set; }
-        private Phase CurrentPhase { get; set; }
+
 
         // Static method to be used by scripts requiring Update()
         public static MainController Get()
@@ -42,43 +42,7 @@ namespace Assets.Scripts
         }
 
         // Helper Methods
-        private Player GetPlayer(PlayerType playerType)
-        {
-            if (playerType == PlayerType.Front)
-                return FrontPlayer;
-            if (playerType == PlayerType.Back)
-                return BackPlayer;
 
-            throw new ArgumentOutOfRangeException(nameof(playerType), $"Must be either {PlayerType.Front} or {PlayerType.Back}");
-        }
-
-        public static Phase GetCurrentPhase()
-        {
-            var controller = GameObject.Find("MainController").GetComponent<MainController>();
-
-            return controller.CurrentPhase;
-        }
-
-        public static int GetRoundNumber()
-        {
-            var controller = GameObject.Find("MainController").GetComponent<MainController>();
-
-            return controller.RoundNumber;
-        }
-
-        public static HashSet<T> GetCardsInPlay<T>(TargetConditions targetConditions) where T : BaseCard
-        {
-            var controller = GameObject.Find("MainController").GetComponent<MainController>();
-
-            var frontHandCards = controller.FrontPlayer.GetHand().Where(x => targetConditions.IsMatch(x));
-            var frontFieldCards = controller.FrontPlayer.GetField().Select(x => x.Card as BaseCard).Where(x => x != null && targetConditions.IsMatch(x));
-            var backHandCards = controller.BackPlayer.GetHand().Where(x => x != null && targetConditions.IsMatch(x));
-            var backFieldCards = controller.BackPlayer.GetField().Select(x => x.Card as BaseCard).Where(x => x != null && targetConditions.IsMatch(x));
-
-            var allCards = frontHandCards.Concat(frontFieldCards).Concat(backHandCards).Concat(backFieldCards);
-
-            return new HashSet<T>(allCards.Cast<T>());
-        }
 
         public static void ClearPhaseQueue()
         {
@@ -131,17 +95,17 @@ namespace Assets.Scripts
             var frontDeck = DeckManager.GetDeck("Blue Deck");
             var backDeck = DeckManager.GetDeck("Purple Deck");
 
-            FrontPlayer = new Player(PlayerType.Front, frontDeck);
-            BackPlayer = new Player(PlayerType.Back, backDeck);
-
+            var frontPlayer = new Player(PlayerType.Front, frontDeck);
+            var backPlayer = new Player(PlayerType.Back, backDeck);
+            Board = new BoardState(frontPlayer, backPlayer);
 
             // Register GameObject Managers
             UIManager = gameObject.AddComponent(typeof(UIManager)) as UIManager;
-            UIManager.RegisterSlots(FrontPlayer);
-            UIManager.RegisterSlots(BackPlayer);
+            UIManager.RegisterSlots(frontPlayer);
+            UIManager.RegisterSlots(backPlayer);
 
             LabelManager = gameObject.AddComponent(typeof(LabelManager)) as LabelManager;
-            LabelManager.Initialize(FrontPlayer, BackPlayer);
+            LabelManager.Initialize(frontPlayer, backPlayer);
 
             PileManager = gameObject.AddComponent(typeof(PileManager)) as PileManager;
             ShowTokensManager = gameObject.AddComponent(typeof(ShowTokensManager)) as ShowTokensManager;
@@ -190,21 +154,21 @@ namespace Assets.Scripts
         // Main Scene methods (buttons etc.)
         public void ShowPile(Area area, PlayerType playerType)
         {
-            var player = GetPlayer(playerType);
+            var player = Board.GetPlayer(playerType);
 
             var cards = new List<BaseCard>();
 
             if (area == Area.Deck)
-                cards = player.GetDeck().OrderBy(x => x.Colour).ThenBy(x => x.Cost).ThenBy(x => x.Type).ThenBy(x => x.Name).ToList();
+                cards = player.Deck.OrderBy(x => x.Colour).ThenBy(x => x.Cost).ThenBy(x => x.Type).ThenBy(x => x.Name).ToList();
             else if (area == Area.Destroyed)
-                cards = player.GetDestroyed();
+                cards = player.Destroyed;
 
             PileManager.ShowPile(cards);
         }
 
         public void ShowTokens(StatType statType, PlayerType playerType)
         {
-            var player = GetPlayer(playerType);
+            var player = Board.GetPlayer(playerType);
 
             var tokens = player.GetTokens(statType);
 
@@ -253,7 +217,7 @@ namespace Assets.Scripts
 
         public void NewPhase(Phase phase)
         {
-            CurrentPhase = phase;
+            Board.CurrentPhase = phase;
 
             switch (phase)
             {
@@ -278,6 +242,8 @@ namespace Assets.Scripts
                 case Phase.GameEnd:
                     EndGame();
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(phase), "Phase not valid, must be a playable phase");
             }
         }
 
@@ -288,7 +254,8 @@ namespace Assets.Scripts
 
         private void DrawPhase()
         {
-            RoundNumber++;
+            Board.RoundNumber++;
+            Timer.SetTickLength(0.1f);
 
             for (int i = 0; i < 7; i++)
             {
@@ -316,11 +283,11 @@ namespace Assets.Scripts
 
         private void DamagePhase()
         {
-            var frontTaken = Math.Max(BackPlayer.TotalAttack - FrontPlayer.TotalDefence, 0);
-            var backTaken = Math.Max(FrontPlayer.TotalAttack - BackPlayer.TotalDefence, 0);
-
-            EnqueueEvent(new DamagePlayerEvent(PlayerType.Front, frontTaken));
-            EnqueueEvent(new DamagePlayerEvent(PlayerType.Back, backTaken));
+            foreach (var player in Board.BothPlayers)
+            {
+                var damageTaken = Math.Max(Board.GetPlayer(player.PlayerType.GetOpposite()).TotalAttack - player.TotalDefence, 0);
+                EnqueueEvent(new DamagePlayerEvent(player.PlayerType, damageTaken));
+            }
 
             EnqueueEvent(new NewPhaseEvent(Phase.Mana));
         }
@@ -330,66 +297,62 @@ namespace Assets.Scripts
             Timer.SetTickLength(0.1f);
 
             // Clear Board
-            foreach (var slot in FrontPlayer.GetField())
+            foreach (var player in Board.BothPlayers)
             {
-                if (slot.Card == null || slot.Card.HasPersistence)
-                    continue;
+                foreach (var card in player.FieldCards)
+                {
+                    if (card.HasPersistence)
+                        continue;
 
-                EnqueueEvent(new DestroyCardEvent(slot.Card));
+                    EnqueueEvent(new DestroyCardEvent(card));
+                }
             }
-
-            foreach (var slot in BackPlayer.GetField())
-            {
-                if (slot.Card == null || slot.Card.HasPersistence)
-                    continue;
-
-                EnqueueEvent(new DestroyCardEvent(slot.Card));
-            }
-
 
             // Return Hand to Deck
-            foreach (var card in FrontPlayer.GetHand())
+            foreach (var player in Board.BothPlayers)
             {
-                EnqueueEvent(new ReturnToDeckEvent(card));
-            }
-
-            foreach (var card in BackPlayer.GetHand())
-            {
-                EnqueueEvent(new ReturnToDeckEvent(card));
+                foreach (var card in player.Hand)
+                {
+                    EnqueueEvent(new ReturnToDeckEvent(card));
+                }
             }
 
 
             // Empty Destroyed
-            EnqueueEvent(new EmptyDestroyPileEvent(FrontPlayer.PlayerType));
-            EnqueueEvent(new EmptyDestroyPileEvent(BackPlayer.PlayerType));
+            foreach (var player in Board.BothPlayers)
+            {
+                EnqueueEvent(new EmptyDestroyPileEvent(player.PlayerType));
 
+            }
 
             EnqueueEvent(new NewPhaseEvent(Phase.Draw));
         }
 
         private void EndGame()
         {
-            var frontPlayerHealth = FrontPlayer.Health.Get();
-            var backPlayerHealth = BackPlayer.Health.Get();
-            var lowestHealthPlayer = frontPlayerHealth <= backPlayerHealth ? FrontPlayer : BackPlayer;
+            var frontPlayer = Board.GetPlayer(PlayerType.Front);
+            var backPlayer = Board.GetPlayer(PlayerType.Back);
+            var lowestHealthPlayer = frontPlayer.Health.Get() <= backPlayer.Health.Get() ? PlayerType.Front : PlayerType.Back;
 
-            var frontPlayerDeckEmpty = FrontPlayer.DeckCount() == 0;
-            var backPlayerDeckEmpty = BackPlayer.DeckCount() == 0;
+            var frontPlayerDeckEmpty = frontPlayer.Deck.Count == 0;
+            var backPlayerDeckEmpty = backPlayer.Deck.Count == 0;
 
-            if (lowestHealthPlayer.Health.Get() <= 0)
+            if (Board.GetPlayer(lowestHealthPlayer).Health.Get() <= 0)
             {
-                EnqueueEvent(new MessageEvent($"{lowestHealthPlayer.PlayerType} Player has run out of life!", 10000));
+                EnqueueEvent(new MessageEvent($"{lowestHealthPlayer} Player has run out of life!", 10000));
+                return;
             }
-            else if (frontPlayerDeckEmpty && lowestHealthPlayer.PlayerType == PlayerType.Front)
+            if (frontPlayerDeckEmpty && lowestHealthPlayer == PlayerType.Front)
             {
                 EnqueueEvent(new MessageEvent($"{PlayerType.Front} Player has run out of cards!", 10000));
+                return;
             }
-            else if (backPlayerDeckEmpty && lowestHealthPlayer.PlayerType == PlayerType.Back)
+            if (backPlayerDeckEmpty && lowestHealthPlayer == PlayerType.Back)
             {
                 EnqueueEvent(new MessageEvent($"{PlayerType.Back} Player has run out of cards!", 10000));
+                return;
             }
         }
-
 
 
         private void NextEvent()
@@ -449,17 +412,17 @@ namespace Assets.Scripts
 
         private void ProcessBoardState()
         {
-            var allCreatureCards = GetCardsInPlay<CreatureCard>(new TargetConditions
+            var allCreatureCards = Board.GetMatchingCards(new TargetConditions
             {
                 CardType = CardType.Creature,
                 Area = Area.PlayArea
-            });
+            }).OfType<CreatureCard>();
 
-            var fieldCreatureCards = GetCardsInPlay<CreatureCard>(new TargetConditions
+            var fieldCreatureCards = Board.GetMatchingCards(new TargetConditions
             {
                 CardType = CardType.Creature,
                 Area = Area.Field
-            });
+            }).OfType<CreatureCard>();
 
             foreach (var creatureCard in allCreatureCards)
             {
@@ -469,13 +432,13 @@ namespace Assets.Scripts
 
             foreach (var passiveEvent in PassiveEvents.ToList())
             {
-                if (!passiveEvent.IsValid())
+                if (!passiveEvent.IsValid(Board))
                 {
                     PassiveEvents.Remove(passiveEvent);
                     continue;
                 }
 
-                passiveEvent.Process(this);
+                passiveEvent.Process(Board);
             }
 
             foreach (var creatureCard in fieldCreatureCards)
@@ -491,7 +454,7 @@ namespace Assets.Scripts
         {
             foreach (var interuptEvent in InteruptEvents.ToList())
             {
-                if (!interuptEvent.IsValid())
+                if (!interuptEvent.IsValid(Board))
                 {
                     InteruptEvents.Remove(interuptEvent);
                     continue;
@@ -509,9 +472,9 @@ namespace Assets.Scripts
             switch (gameplayEvent)
             {
                 case BaseUIInteractionEvent uIInteractionEvent:
-                    return uIInteractionEvent.Process(UIManager, GetPlayer);
+                    return uIInteractionEvent.Process(UIManager, Board);
                 case BaseBoardEvent boardEvent:
-                    return boardEvent.Process(GetPlayer);
+                    return boardEvent.Process(Board);
                 default:
                     return gameplayEvent.Process();
             }
@@ -523,7 +486,7 @@ namespace Assets.Scripts
             {
                 if (triggerEvent.Conditions(triggeringEvent))
                 {
-                    if (triggerEvent.TriggerOnce || !triggerEvent.IsValid()) {
+                    if (triggerEvent.TriggerOnce || !triggerEvent.IsValid(Board)) {
                         TriggerEvents.Remove(triggerEvent);
                     }
 

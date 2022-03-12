@@ -19,18 +19,15 @@ namespace Assets.Scripts
         public Stat RedMana { get; set; }
         public Stat GreenMana { get; set; }
         public Stat BlueMana { get; set; }
-
         public Stat PurpleMana { get; set; }
 
-        private Queue<BaseCard> Deck { get; set; }
-        private HashSet<BaseCard> Hand { get; set; }
-        private FieldSlot[] Field { get; set; }
-        private List<BaseCard> DestroyedPile { get; set; }
-        private List<BaseCard> EliminatedPile { get; set; }
-
-        public IEnumerable<CreatureCard> FieldCreatures => Field
-            .Select(x => x.Card)
-            .OfType<CreatureCard>();
+        public Queue<BaseCard> Deck { get; set; }
+        public HashSet<BaseCard> Hand { get; set; }
+        public FieldSlot[] Field { get; set; }
+        public List<BaseCard> Destroyed { get; set; }
+        public List<BaseCard> Eliminated { get; set; }
+        public IEnumerable<FieldCard> FieldCards => Field.Select(x => x.Card).Where(x => x != null);
+        public IEnumerable<CreatureCard> FieldCreatures => FieldCards.OfType<CreatureCard>();
 
 
         public List<TokenType> Tokens { get; set; }
@@ -61,51 +58,22 @@ namespace Assets.Scripts
             for (var i = 0; i < Field.Length; i++) {
                 Field[i] = new FieldSlot();
             }
-            DestroyedPile = new List<BaseCard>();
-            EliminatedPile = new List<BaseCard>();
+            Destroyed = new List<BaseCard>();
+            Eliminated = new List<BaseCard>();
             Tokens = new List<TokenType>();
 
             foreach (var cardInfo in cardInfos.OrderBy(x => Guid.NewGuid()))
             {
-                Deck.Enqueue(BaseCard.Create(this, cardInfo));
+                Deck.Enqueue(BaseCard.Create(cardInfo));
             }
         }
 
-        // Counts
-        public int DeckCount()
-        {
-            return Deck.Count;
-        }
-
-
         // Getting
-        public Queue<BaseCard> GetDeck()
+        public FieldSlot GetRandomEmptySlot()
         {
-            return Deck;
-        }
-
-        public HashSet<BaseCard> GetHand()
-        {
-            return Hand;
-        }
-
-        public FieldSlot[] GetField()
-        {
-            return Field;
-        }
-
-        public int GetRandomEmptySlot()
-        {
-            var randomSlot = Field.Where(x => x.Card == null)
+            return Field.Where(x => x.Card == null)
                 .OrderBy(x => Guid.NewGuid())
                 .FirstOrDefault();
-
-            return randomSlot != null ? Array.IndexOf(Field, randomSlot) : -1;
-        }
-
-        public List<BaseCard> GetDestroyed()
-        {
-            return DestroyedPile;
         }
 
         public List<TokenType> GetTokens(StatType statType)
@@ -119,6 +87,16 @@ namespace Assets.Scripts
         }
 
         // Exists
+        public bool OwnsCard(BaseCard card)
+        {
+            return Hand
+                .Concat(FieldCards)
+                .Concat(Deck)
+                .Concat(Destroyed)
+                .Concat(Eliminated)
+                .Contains(card);
+        }
+
         public bool IsInDeck(BaseCard card)
         {
             return Deck.Contains(card);
@@ -136,12 +114,12 @@ namespace Assets.Scripts
 
         public bool IsInDestroyed(BaseCard card)
         {
-            return DestroyedPile.Contains(card);
+            return Destroyed.Contains(card);
         }
 
         public bool IsInEliminated(BaseCard card)
         {
-            return EliminatedPile.Contains(card);
+            return Eliminated.Contains(card);
         }
 
 
@@ -164,7 +142,7 @@ namespace Assets.Scripts
 
         public void AddToDestroyed(BaseCard card)
         {
-            DestroyedPile.Add(card);
+            Destroyed.Add(card);
         }
 
         public void AddToEliminated(BaseCard card, bool gainMana = true)
@@ -172,7 +150,7 @@ namespace Assets.Scripts
             if(gainMana)
                 AddMana(card.Colour, 1);
 
-            EliminatedPile.Add(card);
+            Eliminated.Add(card);
         }
 
 
@@ -205,7 +183,7 @@ namespace Assets.Scripts
 
         public void RemoveFromDestroyed(BaseCard card)
         {
-            DestroyedPile.Remove(card);
+            Destroyed.Remove(card);
         }
 
 

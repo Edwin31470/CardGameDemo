@@ -21,9 +21,9 @@ namespace Assets.Scripts.Events
         public abstract bool Process(BaseGameplayEvent baseEvent);
 
         // Interupt events are only valid when their source is on the field
-        public bool IsValid()
+        public bool IsValid(BoardState board)
         {
-            return Source.Owner.IsOnField(Source);
+            return board.GetCardOwner(Source).IsOnField(Source);
         }
     }
 

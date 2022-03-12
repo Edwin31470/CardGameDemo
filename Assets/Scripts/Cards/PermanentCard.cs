@@ -6,7 +6,7 @@ namespace Assets.Scripts.Cards
 {
     public class PermanentCard : FieldCard
     {
-        public PermanentCard(Player owner, CardInfo cardInfo) : base(owner, cardInfo)
+        public PermanentCard(CardInfo cardInfo) : base(cardInfo)
         {
             CardEvents = CardEffectsManager.GetCardEvents(this).ToList();
         }

@@ -85,8 +85,8 @@ namespace Assets.Scripts.Managers
             FrontTotalAttack.text = FrontPlayer.TotalAttack.ToString();
             FrontTotalDefence.text = FrontPlayer.TotalDefence.ToString();
             FrontHealth.text = FrontPlayer.Health.Get().ToString();
-            FrontDeckCount.text = FrontPlayer.DeckCount().ToString();
-            FrontDestroyedCount.text = FrontPlayer.GetDestroyed().Count().ToString();
+            FrontDeckCount.text = FrontPlayer.Deck.Count.ToString();
+            FrontDestroyedCount.text = FrontPlayer.Destroyed.Count.ToString();
             FrontRedMana.text = FrontPlayer.RedMana.Get().ToString();
             FrontGreenMana.text = FrontPlayer.GreenMana.Get().ToString();
             FrontBlueMana.text = FrontPlayer.BlueMana.Get().ToString();
@@ -95,8 +95,8 @@ namespace Assets.Scripts.Managers
             BackTotalAttack.text = BackPlayer.TotalAttack.ToString();
             BackTotalDefence.text = BackPlayer.TotalDefence.ToString();
             BackHealth.text = BackPlayer.Health.Get().ToString();
-            BackDeckCount.text = BackPlayer.DeckCount().ToString();
-            BackDestroyedCount.text = BackPlayer.GetDestroyed().Count().ToString();
+            BackDeckCount.text = BackPlayer.Deck.Count.ToString();
+            BackDestroyedCount.text = BackPlayer.Destroyed.Count.ToString();
             BackRedMana.text = BackPlayer.RedMana.Get().ToString();
             BackGreenMana.text = BackPlayer.GreenMana.Get().ToString();
             BackBlueMana.text = BackPlayer.BlueMana.Get().ToString();

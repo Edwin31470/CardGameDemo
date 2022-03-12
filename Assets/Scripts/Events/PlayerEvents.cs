@@ -26,9 +26,9 @@ namespace Assets.Scripts.Events
             Amount = amount;
         }
 
-        public override IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
+        public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            var player = getPlayer(PlayerType);
+            var player = board.GetPlayer(PlayerType);
             player.Health.Remove(Amount);
 
             if (player.Health.Get() <= 0)
@@ -48,9 +48,9 @@ namespace Assets.Scripts.Events
             Amount = amount;
         }
 
-        public override IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
+        public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            var player = getPlayer(PlayerType);
+            var player = board.GetPlayer(PlayerType);
             player.Health.Add(Amount);
             yield break;
         }
@@ -70,9 +70,9 @@ namespace Assets.Scripts.Events
             Amount = amount;
         }
 
-        public override IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
+        public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            var player = getPlayer(PlayerType);
+            var player = board.GetPlayer(PlayerType);
             player.AddMana(Colour, Amount);
             yield break;
         }

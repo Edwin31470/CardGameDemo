@@ -34,7 +34,7 @@ namespace Assets.Scripts.Events
     // A board event is something that affects the board state (card ownership, player stats)
     public abstract class BaseBoardEvent : BaseGameplayEvent
     {
-        public virtual IEnumerable<BaseEvent> Process(Func<PlayerType, Player> getPlayer)
+        public virtual IEnumerable<BaseEvent> Process(BoardState board)
         {
             throw new MethodAccessException($"{nameof(BaseBoardEvent.Process)} should not be being called. Called by {GetType()}");
         }
@@ -42,7 +42,7 @@ namespace Assets.Scripts.Events
 
     public abstract class BaseUIInteractionEvent : BaseGameplayEvent
     {
-        public virtual IEnumerable<BaseEvent> Process(UIManager uIManager, Func<PlayerType, Player> getPlayer)
+        public virtual IEnumerable<BaseEvent> Process(UIManager uIManager, BoardState board)
         {
             throw new MethodAccessException($"{nameof(BaseUIInteractionEvent.Process)} should not be being called. Called by {GetType()}");
         }
