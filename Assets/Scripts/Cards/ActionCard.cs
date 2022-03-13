@@ -1,6 +1,4 @@
 ﻿using Assets.Scripts.Enums;
-using Assets.Scripts.Managers;
-using System.Linq;
 
 namespace Assets.Scripts.Cards
 {
@@ -8,7 +6,7 @@ namespace Assets.Scripts.Cards
     {
         public ActionCard(CardInfo cardInfo) : base(cardInfo)
         {
-            CardEvents = CardEffectsManager.GetCardEvents(this).ToList();
+
         }
 
         public override CardType Type => CardType.Action;
