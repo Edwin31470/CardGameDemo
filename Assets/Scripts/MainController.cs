@@ -203,7 +203,7 @@ namespace Assets.Scripts
             }
             else
             {
-                throw new ArgumentOutOfRangeException("baseEvent", "Event not queued, something is wrong with the inheritance of events");
+                throw new ArgumentOutOfRangeException(nameof(baseEvent), "Event not queued, something is wrong with the inheritance of events");
             }
         }
 
@@ -250,6 +250,17 @@ namespace Assets.Scripts
         private void StartGame()
         {
             EnqueueEvent(new NewPhaseEvent(Phase.Draw));
+
+            EnqueueEvent(new SetSlotEffectEvent(TemporarySlotEffect, FrontPlayer.GetField()[2], TriggerType.Enter, EffectType.Positive));
+        }
+
+
+        private IEnumerable<BaseEvent> TemporarySlotEffect(FieldCard card)
+        {
+            if (card is CreatureCard creatureCard)
+            {
+                yield return new StrengthenCreatureEvent(creatureCard, 2);
+            }
         }
 
         private void DrawPhase()

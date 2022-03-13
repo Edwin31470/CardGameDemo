@@ -1,5 +1,5 @@
+﻿using Assets.Scripts.Cards;
 ﻿using System.Collections.Generic;
-using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
 using Assets.Scripts.UI;
 using UnityEngine.XR;
@@ -126,6 +126,24 @@ namespace Assets.Scripts.Events
         public override void Process(UIManager uIManager)
         {
             uIManager.SacrificeCard(Card);
+        }
+    }
+
+
+    public class UpdateSlotGlowUIEvent : BaseUIEvent
+    {
+        private FieldSlot Slot { get; }
+        private EffectType Type { get; }
+
+        public UpdateSlotGlowUIEvent(FieldSlot slot, EffectType type)
+        {
+            Slot = slot;
+            Type = type;
+        }
+
+        public override void Process(UIManager uIManager)
+        {
+            uIManager.UpdateSlotGlow(Slot, Type);
         }
     }
 }

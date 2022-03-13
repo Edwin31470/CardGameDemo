@@ -5,6 +5,7 @@ using Assets.Scripts.Items;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Events;
 
 namespace Assets.Scripts
 {
@@ -68,6 +69,7 @@ namespace Assets.Scripts
             }
         }
 
+      
         // Getting
         public FieldSlot GetRandomEmptySlot()
         {
@@ -135,9 +137,9 @@ namespace Assets.Scripts
         }
 
         // Should never try to add to an occupied slot
-        public void AddToField(FieldCard card, int index)
+        public IEnumerable<BaseEvent> AddToField(FieldCard card, int index)
         {
-            Field[index].Add(card);
+            return Field[index].Add(card);
         }
 
         public void AddToDestroyed(BaseCard card)
@@ -166,14 +168,9 @@ namespace Assets.Scripts
             Hand.Remove(card);
         }
 
-        public FieldCard RemoveFromField(int index)
+        public IEnumerable<BaseEvent> RemoveFromField(FieldCard card)
         {
-            return Field[index].Take();
-        }
-
-        public FieldCard RemoveFromField(FieldCard card)
-        {
-            return Field.Single(x => x.Card == card).Take();
+            return Field.Single(x => x.Card == card).Remove();
         }
 
         public void RemoveFromDeck(BaseCard card)

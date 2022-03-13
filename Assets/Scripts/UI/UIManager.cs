@@ -225,5 +225,11 @@ namespace Assets.Scripts.UI
             // Some kind of animation
             cardObject.Destroy();
         }
+
+        public void UpdateSlotGlow(FieldSlot slot, EffectType type)
+        {
+            var slotObject= FindObjectsOfType<SlotObject>().Single(x => x.FieldSlot == slot);
+            slotObject.SetGlow(type);
+        }
     }
 }

@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
+using Assets.Scripts.Events;
 
 namespace Assets.Scripts
 {
@@ -8,36 +11,48 @@ namespace Assets.Scripts
     {
         public FieldCard Card { get; set; }
 
+        public EffectType EffectType { get; set; }
         private TriggerType TriggerType { get; set; }
         private bool TriggerOnce { get; set; }
-        private Action<FieldCard> SlotEffect { get; set; }
+        private Func<FieldCard, IEnumerable<BaseEvent>> SlotEffect { get; set; }
 
-        public FieldCard Take()
+        public IEnumerable<BaseEvent> Remove()
         {
             if (TriggerType.HasFlag(TriggerType.Leave)) {
-                Trigger();
+                return Trigger();
             }
 
-            var card = Card;
-            Card = null;
-            return card;
+            return Enumerable.Empty<BaseEvent>();
         }
 
-        public void Add(FieldCard card)
+        public IEnumerable<BaseEvent> Add(FieldCard card)
         {
-            if (TriggerType.HasFlag(TriggerType.Enter)) {
-                Trigger();
-            }
-
             Card = card;
+
+            if (TriggerType.HasFlag(TriggerType.Enter)) {
+                return Trigger();
+            }
+
+            return Enumerable.Empty<BaseEvent>();
         }
 
-        private void Trigger()
+        private IEnumerable<BaseEvent> Trigger()
         {
-            SlotEffect.Invoke(Card);
+            var newEvents = SlotEffect.Invoke(Card);
 
-            if (TriggerOnce)
+            if (TriggerOnce) {
                 TriggerType = TriggerType.None;
+                SlotEffect = null;
+            }
+
+            return newEvents;
+        }
+
+        public void SetEffect(Func<FieldCard, IEnumerable<BaseEvent>> effect, TriggerType triggerType, EffectType type)
+        {
+            SlotEffect = effect;
+            TriggerType = triggerType;
+            EffectType = type;
         }
     }
 }

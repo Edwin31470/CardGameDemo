@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
 using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.Extensions;
 
 namespace Assets.Scripts.Events
@@ -65,7 +66,10 @@ namespace Assets.Scripts.Events
         {
             var player = board.GetCardOwner(Card);
 
-            player.RemoveFromField(Card);
+            var slotEvents = player.RemoveFromField(Card);
+            foreach (var slotEvent in slotEvents) {
+                yield return slotEvent;
+            }
             player.AddToHand(Card);
 
             yield return new UpdateHandUIEvent(player.PlayerType, player.Hand);
@@ -92,6 +96,11 @@ namespace Assets.Scripts.Events
 
             if (Slot == null)
             {
+                // TODO: this shouldn't be here
+                var slotEvents = player.AddToField(fieldCard, Index);
+                foreach (var slotEvent in slotEvents) {
+                    yield return slotEvent;
+                }
                 yield return new DestroyCardEvent(Card);
             }
             else
@@ -129,7 +138,10 @@ namespace Assets.Scripts.Events
             }
 
             if (Card is FieldCard fieldCard && player.IsOnField(Card)) {
-                player.RemoveFromField(fieldCard);
+                var slotEvents = player.RemoveFromField(fieldCard);
+                foreach (var slotEvent in slotEvents) {
+                    yield return slotEvent;
+                }
                 yield return new DestroyCardUIEvent(player.PlayerType, Card);
             }
 
@@ -181,8 +193,12 @@ namespace Assets.Scripts.Events
             if (player.IsInHand(Card))
                 player.RemoveFromHand(Card);
 
-            if (Card is FieldCard fieldCard && player.IsOnField(Card))
-                player.RemoveFromField(fieldCard);
+            if (Card is FieldCard fieldCard && player.IsOnField(Card)) {
+                var slotEvents = player.RemoveFromField(fieldCard);
+                foreach (var slotEvent in slotEvents) {
+                    yield return slotEvent;
+                }
+            }
 
             if (player.IsInDeck(Card))
                 player.RemoveFromDeck(Card);
@@ -252,7 +268,12 @@ namespace Assets.Scripts.Events
             var originalPlayer = board.GetCardOwner(Card);
             var newPlayer = board.GetPlayer(originalPlayer.PlayerType.GetOpposite());
 
-            originalPlayer.RemoveFromField(Card);
+            var leaveSlotEvents = originalPlayer.RemoveFromField(Card);
+            foreach (var slotEvent in leaveSlotEvents) {
+                yield return slotEvent;
+            }
+            Card.Owner = newPlayer;
+
 
             var slot = newPlayer.GetRandomEmptySlot();
             if (slot == null) {
@@ -260,6 +281,12 @@ namespace Assets.Scripts.Events
             }
             else
             {
+              // TODO: fix
+                var enterSlotEvents = newPlayer.AddToField(Card, index);
+                foreach (var slotEvent in enterSlotEvents) {
+                    yield return slotEvent;
+                }
+
                 slot.Add(Card);
                 yield return new MoveCardToFieldUIEvent(Card, slot);
             }

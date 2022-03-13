@@ -1,7 +1,8 @@
 ﻿namespace Assets.Scripts.Enums
 {
-    public enum SelectionType
+    public enum EffectType
     {
+        None,
         Neutral,
         Positive,
         Negative
