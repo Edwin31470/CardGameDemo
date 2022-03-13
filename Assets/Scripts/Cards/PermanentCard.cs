@@ -8,7 +8,7 @@ namespace Assets.Scripts.Cards
     {
         public PermanentCard(CardInfo cardInfo) : base(cardInfo)
         {
-            CardEvents = CardEffectsManager.GetCardEvents(this).ToList();
+
         }
 
         public override CardType Type => CardType.Permanent;

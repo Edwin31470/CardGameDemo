@@ -78,6 +78,7 @@
     <Compile Include="Assets\Scripts\Cards\BaseCard.cs" />
     <Compile Include="Assets\Scripts\Cards\ActionCard.cs" />
     <Compile Include="Assets\Scripts\Enums\SubType.cs" />
+    <Compile Include="Assets\Scripts\Cards\CardData.cs" />
     <Compile Include="Assets\Scripts\Events\CardEvents.cs" />
     <Compile Include="Assets\Scripts\Enums\CardType.cs" />
     <Compile Include="Assets\Scripts\Enums\PileType.cs" />
@@ -108,6 +109,7 @@
     <Compile Include="Assets\Scripts\Events\UIEvents.cs" />
     <Compile Include="Assets\Scripts\Events\ActiveEvents.cs" />
     <Compile Include="Assets\Scripts\Cards\CardInfo.cs" />
+    <Compile Include="Assets\Scripts\CreateCardController.cs" />
     <Compile Include="Assets\Scripts\Managers\CardGraphicsManager.cs" />
     <Compile Include="Assets\Scripts\Events\TokenEvents.cs" />
     <Compile Include="Assets\Scripts\Events\DragAndDropEvents.cs" />
@@ -116,6 +118,7 @@
     <Compile Include="Assets\Scripts\Events\PhaseEvents.cs" />
     <Compile Include="Assets\Scripts\Events\AreaEvents.cs" />
     <Compile Include="Assets\Scripts\Enums\TokenType.cs" />
+    <Compile Include="Assets\Scripts\CardIO.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
     <Compile Include="Assets\Scripts\Managers\ShowTokensManager.cs" />
   </ItemGroup>

@@ -1,6 +1,4 @@
 ﻿using Assets.Scripts.Enums;
-using Assets.Scripts.Managers;
-using System.Linq;
 
 namespace Assets.Scripts.Cards
 {
@@ -18,13 +16,11 @@ namespace Assets.Scripts.Cards
 
         public CreatureCard(CardInfo cardInfo) : base(cardInfo)
         {
-            BaseAttack = new Stat(-99, 99, cardInfo.Attack);
-            BaseDefence = new Stat(-99, 99, cardInfo.Defence);
+            BaseAttack = new Stat(-99, 99, cardInfo.CardData.Attack);
+            BaseDefence = new Stat(-99, 99, cardInfo.CardData.Defence);
 
             BonusAttack = new Stat(-99, 99, 0);
             BonusDefence = new Stat(-99, 99, 0);
-
-            CardEvents = CardEffectsManager.GetCardEvents(this).ToList();
         }
 
         public override CardType Type => CardType.Creature;

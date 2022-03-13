@@ -107,7 +107,7 @@ namespace Assets.Scripts.Events
                 }
             }
 
-            foreach (var baseEvent in Card.CardEvents)
+            foreach (var baseEvent in Card.EffectEvents.Invoke())
             {
                 yield return baseEvent;
             }
@@ -290,7 +290,7 @@ namespace Assets.Scripts.Events
     public class SummonCardEvent : BaseAreaEvent
     {
         public override float Delay => 1f;
-        public override string EventTitle => $"Summoning {CardInfo.Name}";
+        public override string EventTitle => $"Summoning {CardInfo.CardData.Name}";
 
         private CardInfo CardInfo { get; set; }
         private PlayerType PlayerType { get; set; }

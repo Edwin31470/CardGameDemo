@@ -2,56 +2,67 @@
 using Assets.Scripts.Enums;
 using Assets.Scripts.Events;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Assets.Scripts.Cards
 {
     public abstract class BaseCard
     {
-        public string Id { get; set; }
+        public string Name { get; set; }
         public Colour Colour { get; set; }
         public int Cost { get; set; }
         public abstract CardType Type { get; }
-        public string Name { get; set; }
         public SubType SubTypes { get; set; }
-        public string Flavour { get; set; }
-
-        public List<BaseEvent> CardEvents { get; set; }
+        public string Symbol { get; set; }
         public string EffectText { get; set; }
+        public string FlavourText { get; set; }
 
-        public bool IsSummoned { get; set; }
         public bool HasPersistence { get; set; }
+        public bool IsUnique { get; set; }
+
+        public Func<IEnumerable<BaseEvent>> EffectEvents { get; set; }
+        public bool IsSummoned { get; set; }
+
 
         protected BaseCard(CardInfo cardInfo)
         {
-            Colour = cardInfo.Colour;
-            Cost = cardInfo.Cost;
-            Name = cardInfo.Name;
-            SubTypes = cardInfo.SubTypes;
-            EffectText = cardInfo.EffectText;
-            Flavour = cardInfo.Flavour;
+            Name = cardInfo.CardData.Name;
+            Colour = cardInfo.CardData.Colour;
+            Cost = cardInfo.CardData.Cost;
+            SubTypes = cardInfo.CardData.SubTypes;
+            Symbol = cardInfo.CardData.Symbol;
+            EffectText = cardInfo.CardData.EffectText;
+            FlavourText = cardInfo.CardData.FlavourText;
+            HasPersistence = cardInfo.CardData.HasPersistence;
+            IsUnique = cardInfo.CardData.IsUnique;
+
+            EffectEvents = cardInfo.EffectEvents;
             IsSummoned = cardInfo.IsSummoned;
-            HasPersistence = cardInfo.HasPersistence;
         }
 
         public CardInfo ToCardInfo()
         {
             var cardInfo = new CardInfo
             {
-                Colour = Colour,
-                Cost = Cost,
-                CardType = Type,
-                Name = Name,
-                SubTypes = SubTypes,
-                EffectText = EffectText,
-                Flavour = Flavour,
+                CardData = new CardData
+                {
+                    Name = Name,
+                    Colour = Colour,
+                    Cost = Cost,
+                    CardType = Type,
+                    SubTypes = SubTypes,
+                    EffectText = EffectText,
+                    FlavourText = FlavourText,
+                    HasPersistence = HasPersistence
+                },
+                EffectEvents = EffectEvents,
                 IsSummoned = IsSummoned,
-                HasPersistence = HasPersistence
             };
 
             if (this is CreatureCard creatureCard)
             {
-                cardInfo.Attack = creatureCard.BaseAttack.Get();
-                cardInfo.Defence = creatureCard.BaseDefence.Get();
+                cardInfo.CardData.Attack = creatureCard.BaseAttack.Get();
+                cardInfo.CardData.Defence = creatureCard.BaseDefence.Get();
             }
 
             return cardInfo;
@@ -60,7 +71,7 @@ namespace Assets.Scripts.Cards
         // Factory method to create
         public static BaseCard Create(CardInfo cardInfo)
         {
-            switch (cardInfo.CardType)
+            switch (cardInfo.CardData.CardType)
             {
                 case CardType.Creature:
                     return new CreatureCard(cardInfo);
@@ -69,7 +80,7 @@ namespace Assets.Scripts.Cards
                 case CardType.Permanent:
                     return new PermanentCard(cardInfo);
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(cardInfo.CardType), $"Type must be {CardType.Creature}, {CardType.Action} or {CardType.Permanent}");
+                    throw new ArgumentOutOfRangeException(nameof(cardInfo.CardData.CardType), $"Type must be {CardType.Creature}, {CardType.Action} or {CardType.Permanent}");
             }
         }
     }

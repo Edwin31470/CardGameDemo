@@ -92,8 +92,8 @@ namespace Assets.Scripts
             // Register Players
             DeckManager = new DeckManager();
 
-            var frontDeck = DeckManager.GetDeck("Blue Deck");
-            var backDeck = DeckManager.GetDeck("Purple Deck");
+            var frontDeck = Enumerable.Empty<CardInfo>(); // DeckManager.GetDeck("Blue Deck");
+            var backDeck = Enumerable.Empty<CardInfo>(); //DeckManager.GetDeck("Purple Deck");
 
             var frontPlayer = new Player(PlayerType.Front, frontDeck);
             var backPlayer = new Player(PlayerType.Back, backDeck);
