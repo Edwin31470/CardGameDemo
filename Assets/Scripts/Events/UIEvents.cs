@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Cards;
+using Assets.Scripts.Enums;
 using Assets.Scripts.UI;
 
 namespace Assets.Scripts.Events
@@ -98,6 +99,24 @@ namespace Assets.Scripts.Events
         {
             var cardObject = uIManager.GetCardObject(Card);
             uIManager.Destroy(cardObject);
+        }
+    }
+
+
+    public class UpdateSlotGlowUIEvent : BaseUIEvent
+    {
+        private FieldSlot Slot { get; }
+        private EffectType Type { get; }
+
+        public UpdateSlotGlowUIEvent(FieldSlot slot, EffectType type)
+        {
+            Slot = slot;
+            Type = type;
+        }
+
+        public override void Process(UIManager uIManager)
+        {
+            uIManager.UpdateSlotGlow(Slot, Type);
         }
     }
 }

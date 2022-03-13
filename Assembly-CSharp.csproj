@@ -79,6 +79,8 @@
     <Compile Include="Assets\Scripts\Events\CardEvents.cs" />
     <Compile Include="Assets\Scripts\Enums\CardType.cs" />
     <Compile Include="Assets\Scripts\Enums\PileType.cs" />
+    <Compile Include="Assets\Scripts\FieldSlot.cs" />
+    <Compile Include="Assets\Scripts\Enums\TriggerType.cs" />
     <Compile Include="Assets\Scripts\UI\CardObject.cs" />
     <Compile Include="Assets\Scripts\LegendkeeperIntegration\Extensions.cs" />
     <Compile Include="Assets\Scripts\Delegates.cs" />
@@ -86,6 +88,7 @@
     <Compile Include="Assets\Scripts\Events\TriggerEvents.cs" />
     <Compile Include="Assets\Scripts\UI\SelectionManager.cs" />
     <Compile Include="Assets\Scripts\Events\AllEvents.cs" />
+    <Compile Include="Assets\Scripts\Cards\FieldCard.cs" />
     <Compile Include="Assets\Scripts\Managers\LabelManager.cs" />
     <Compile Include="Assets\Scripts\Enums\Colour.cs" />
     <Compile Include="Assets\Scripts\TargetConditions.cs" />
@@ -113,9 +116,8 @@
     <Compile Include="Assets\Scripts\Enums\TokenType.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
     <Compile Include="Assets\Scripts\Managers\ShowTokensManager.cs" />
-    <Compile Include="Assets\Scripts\Enums\TriggerType.cs" />
-    <Compile Include="Assets\Scripts\Cards\FieldCard.cs" />
-    <Compile Include="Assets\Scripts\FieldSlot.cs" />
+    <Compile Include="Assets\Scripts\Enums\EffectType.cs" />
+    <Compile Include="Assets\Scripts\Events\SlotEffectEvents.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

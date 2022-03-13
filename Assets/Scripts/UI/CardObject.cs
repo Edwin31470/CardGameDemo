@@ -13,7 +13,7 @@ namespace Assets.Scripts.UI
 {
     public class CardObject : MonoBehaviour
     {
-        private readonly int MoveSpeed = 5;
+        private const int MoveSpeed = 5;
         public BaseCard CardReference { get; private set; }
         private Vector2 TargetPosition { get; set; }
 

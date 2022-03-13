@@ -225,5 +225,11 @@ namespace Assets.Scripts.UI
 
             return cardObjects;
         }
+
+        public void UpdateSlotGlow(FieldSlot slot, EffectType type)
+        {
+            var slotObject= FindObjectsOfType<SlotObject>().Single(x => x.FieldSlot == slot);
+            slotObject.SetGlow(type);
+        }
     }
 }
