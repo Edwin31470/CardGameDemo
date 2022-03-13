@@ -78,13 +78,22 @@ namespace Assets.Scripts.UI
             return fieldSlotObjects.Concat(manaSlotObjectSingleton);
         }
 
+        private IEnumerable<SlotObject> GetFieldSlotObjects(IEnumerable<FieldSlot> fieldSlots)
+        {
+            // TODO: UIManager should keep track of slot references
+            var fieldSlotObjects = FindObjectsOfType<SlotObject>()
+                .Where(x => fieldSlots.Contains(x.FieldSlot));
+
+            return fieldSlotObjects;
+        }
+
         private IEnumerable<CardObject> GetCardObjects(IEnumerable<BaseCard> cardReferences)
         {
             // TODO: UIManager should keep track of card objects
             return FindObjectsOfType<CardObject>().Where(x => cardReferences.Contains(x.CardReference));
         }
 
-        private SlotObject GetSlotObject(FieldSlot slot)
+        private SlotObject GetFieldSlotObject(FieldSlot slot)
         {
             return FindObjectsOfType<SlotObject>().Single(x => x.FieldSlot == slot);
         }
@@ -180,14 +189,14 @@ namespace Assets.Scripts.UI
         public void CreateInSlot(PlayerType playerType, BaseCard card, FieldSlot slot)
         {
             var cardObject = CreateCard(playerType, card);
-            var slotObject = GetSlotObject(slot);
+            var slotObject = GetFieldSlotObject(slot);
             cardObject.SetTargetPosition(slotObject.transform.position);
         }
 
         public void MoveToSlot(FieldCard card, FieldSlot slot)
         {
             var cardObject = GetCardObject(card);
-            var slotObject = GetSlotObject(slot);
+            var slotObject = GetFieldSlotObject(slot);
             cardObject.SetTargetPosition(slotObject.transform.position);
         }
 
@@ -228,7 +237,7 @@ namespace Assets.Scripts.UI
 
         public void UpdateSlotGlow(FieldSlot slot, EffectType type)
         {
-            var slotObject= FindObjectsOfType<SlotObject>().Single(x => x.FieldSlot == slot);
+            var slotObject = GetFieldSlotObject(slot);
             slotObject.SetGlow(type);
         }
     }

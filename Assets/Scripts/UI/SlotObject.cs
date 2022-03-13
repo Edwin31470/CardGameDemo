@@ -1,5 +1,4 @@
 ﻿using Assets.Scripts.Enums;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.UI
@@ -21,19 +20,6 @@ namespace Assets.Scripts.UI
                 return;
 
             Glow = transform.Find("Glow").gameObject.GetComponent<SpriteRenderer>();
-        }
-
-        public bool IsOccupied()
-        {
-            // Get any touching cards
-            var contactFilter = new ContactFilter2D();
-            contactFilter.SetLayerMask(LayerMask.GetMask("Card"));
-            var touchingCards = new List<Collider2D>();
-
-            int colliderCount = GetComponent<Collider2D>().OverlapCollider(contactFilter, touchingCards);
-
-            // If any, is occupied
-            return colliderCount > 0;
         }
 
         // TODO: Update colour based on effect type
