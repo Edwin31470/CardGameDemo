@@ -50,54 +50,48 @@ namespace Assets.Scripts.UI
 
         public void RegisterSlots(Player player)
         {
-            var slots = GetAvailableSlots(player.PlayerType).Where(x => x.SlotType == SlotType.Field);
-            foreach (var slot in slots)
+            var fieldSlotObjects = FindObjectsOfType<SlotObject>()
+                .Where(x => x.Owner == player.PlayerType && x.SlotType == SlotType.Field);
+
+            foreach (var slotObject in fieldSlotObjects)
             {
-                slot.FieldSlot = player.GetField()[slot.Index];
+                slotObject.FieldSlot = player.Field[slotObject.Index];
             }
         }
 
-        private CardObject CreateCard(BaseCard card)
+        private CardObject CreateCard(PlayerType playerType, BaseCard card)
         {
-            var newCard = Instantiate(CardObject, card.Owner.PlayerType == PlayerType.Front ? FrontDeckOrigin : BackDeckOrigin, Quaternion.identity);
+            var newCard = Instantiate(CardObject, playerType == PlayerType.Front ? FrontDeckOrigin : BackDeckOrigin, Quaternion.identity);
             newCard.Initialize(card);
             newCard.SetSortingLayer("Card");
             return newCard;
         }
 
-        private HashSet<SlotObject> GetAvailableSlots(PlayerType playerType)
+        private IEnumerable<SlotObject> GetSlotObjects(PlayerType playerType, IEnumerable<FieldSlot> fieldSlots)
         {
             // TODO: UIManager should keep track of slot references
-            var slots = FindObjectsOfType<SlotObject>()
-                .Where(x => x.Owner == playerType && !x.IsOccupied());
+            var fieldSlotObjects = FindObjectsOfType<SlotObject>()
+                .Where(x => fieldSlots.Contains(x.FieldSlot));
+            var manaSlotObjectSingleton = FindObjectsOfType<SlotObject>()
+                .Where(x => x.SlotType == SlotType.Mana && x.Owner == playerType);
 
-            return new HashSet<SlotObject>(slots);
+            return fieldSlotObjects.Concat(manaSlotObjectSingleton);
         }
 
-        private HashSet<CardObject> GetAvailableCards(TargetConditions targetConditions)
+        private IEnumerable<CardObject> GetCardObjects(IEnumerable<BaseCard> cardReferences)
         {
-            // TODO: UIManager should keep track of card references
-            var cardObjects = FindObjectsOfType<CardObject>().Where(x => targetConditions.IsMatch(x.CardReference));
-
-            return new HashSet<CardObject>(cardObjects);
+            // TODO: UIManager should keep track of card objects
+            return FindObjectsOfType<CardObject>().Where(x => cardReferences.Contains(x.CardReference));
         }
 
-        public void UpdateHand(PlayerType player)
+        private SlotObject GetSlotObject(FieldSlot slot)
         {
-            var freeCards = GetAvailableCards(new TargetConditions 
-            {
-                PlayerType = player,
-                Area = Area.Hand
-            });
+            return FindObjectsOfType<SlotObject>().Single(x => x.FieldSlot == slot);
+        }
 
-            var handPoints = GetHandPoints(player, freeCards.Count());
-
-            foreach (var point in handPoints)
-            {
-                var closestCard = freeCards.OrderBy(x => Vector2.Distance(x.transform.position, point)).First();
-                closestCard.SetTargetPosition(new Vector2(point.x, point.y));
-                freeCards.Remove(closestCard);
-            }
+        private CardObject GetCardObject(BaseCard card)
+        {
+            return FindObjectsOfType<CardObject>().Single(x => x.CardReference == card);
         }
 
         private IEnumerable<Vector2> GetHandPoints(PlayerType player, int numberOfPoints)
@@ -113,7 +107,7 @@ namespace Assets.Scripts.UI
                     objectName = "BackPlayer/Hand";
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("player", $"Only {PlayerType.Front} or {PlayerType.Back} are allowed");
+                    throw new ArgumentOutOfRangeException(nameof(player), $"Only {PlayerType.Front} or {PlayerType.Back} are allowed");
             }
 
             BoxCollider2D collider = GameObject.Find(objectName).GetComponent<BoxCollider2D>();
@@ -154,12 +148,12 @@ namespace Assets.Scripts.UI
             BackTurnLight.enabled = playerType == PlayerType.Back;
         }
 
-        public void BeginCardSelection(TargetConditions targetConditions, IEnumerable<BaseCard> overrideTargets, int count, OnFinishSelection onFinishSelection, SelectionType selectionType)
+        public void BeginCardSelection(IEnumerable<BaseCard> allowableTargets, IEnumerable<BaseCard> overrideTargets, int count, OnFinishSelection onFinishSelection, SelectionType selectionType)
         {
             // TODO: null or empty?
             var targets = overrideTargets != null ?
-                new HashSet<CardObject>(GetCardObjects(overrideTargets)) :
-                GetAvailableCards(targetConditions);
+                GetCardObjects(overrideTargets) :
+                GetCardObjects(allowableTargets);
 
             SelectionManager.Begin(
                 targets,
@@ -168,62 +162,68 @@ namespace Assets.Scripts.UI
                 selectionType);
         }
 
-        public void BeginDragAndDrop(TargetConditions targetConditions, Func<CardObject, SlotObject, IEnumerable<BaseEvent>> onDrop, Func<IEnumerable<BaseEvent>> onPass)
+        public void BeginDragAndDrop(IEnumerable<BaseCard> draggableCards, IEnumerable<FieldSlot> availableFieldSlots, PlayerType playingPlayer, Func<BaseCard, FieldSlot, IEnumerable<BaseEvent>> onDrop, Func<BaseCard, IEnumerable<BaseEvent>> onSacrifice, Func<IEnumerable<BaseEvent>> onPass)
         {
             DragAndDropManager.Begin(
-                GetAvailableCards(targetConditions),
-                GetAvailableSlots(targetConditions.PlayerType),
+                GetCardObjects(draggableCards),
+                GetSlotObjects(playingPlayer, availableFieldSlots),
                 onDrop,
+                onSacrifice,
                 onPass);
         }
 
-        public void CreateInHand(BaseCard card)
+        public void CreateInHand(PlayerType playerType, BaseCard card)
         {
-            CreateCard(card);
-            UpdateHand(card.Owner.PlayerType);
+            CreateCard(playerType, card);
         }
 
-        public void CreateInRandomSlot(BaseCard card)
+        public void CreateInSlot(PlayerType playerType, BaseCard card, FieldSlot slot)
         {
-            var cardObject = CreateCard(card);
-            var slot = GetAvailableSlots(card.Owner.PlayerType).Where(x => x.SlotType != SlotType.Mana).OrderBy(x => Guid.NewGuid()).First();
-            cardObject.SetTargetPosition(slot.transform.position);
+            var cardObject = CreateCard(playerType, card);
+            var slotObject = GetSlotObject(slot);
+            cardObject.SetTargetPosition(slotObject.transform.position);
         }
 
-        public void MoveToRandomSlot(BaseCard card)
+        public void MoveToSlot(FieldCard card, FieldSlot slot)
         {
             var cardObject = GetCardObject(card);
-            var slot = GetAvailableSlots(card.Owner.PlayerType).Where(x => x.SlotType != SlotType.Mana).OrderBy(x => Guid.NewGuid()).First();
-            cardObject.SetTargetPosition(slot.transform.position);
+            var slotObject = GetSlotObject(slot);
+            cardObject.SetTargetPosition(slotObject.transform.position);
         }
 
-        public void ReturnToDeck(CardObject cardObject)
+        public void UpdateHand(PlayerType playerType, IEnumerable<BaseCard> handCards)
         {
-            cardObject.SetTargetPosition(cardObject.CardReference.Owner.PlayerType == PlayerType.Front ? FrontDeckOrigin : BackDeckOrigin);
+            var freeCards = GetCardObjects(handCards).ToList();
+
+            var handPoints = GetHandPoints(playerType, freeCards.Count);
+
+            foreach (var point in handPoints)
+            {
+                var closestCard = freeCards.OrderBy(x => Vector2.Distance(x.transform.position, point)).First();
+                closestCard.SetTargetPosition(new Vector2(point.x, point.y));
+                freeCards.Remove(closestCard);
+            }
+        }
+
+        public void ReturnToDeck(PlayerType playerType, BaseCard card)
+        {
+            var cardObject = GetCardObject(card);
+            cardObject.SetTargetPosition(playerType == PlayerType.Front ? FrontDeckOrigin : BackDeckOrigin);
             cardObject.DestroyWhenInPosition = true;
         }
 
-        public void Destroy(CardObject cardObject)
+        public void DestroyCard(PlayerType playerType, BaseCard card)
         {
-            cardObject.SetTargetPosition(cardObject.CardReference.Owner.PlayerType == PlayerType.Front ? FrontDestroyLocation : BackDestroyLocation);
+            var cardObject = GetCardObject(card);
+            cardObject.SetTargetPosition(playerType == PlayerType.Front ? FrontDestroyLocation : BackDestroyLocation);
             cardObject.DestroyWhenInPosition = true;
         }
 
-        public CardObject GetCardObject(BaseCard card)
+        public void SacrificeCard(BaseCard card)
         {
-            var targetConditions = new TargetConditions {PlayerType = card.Owner.PlayerType, Area = Area.Any};
-
-            var cardObject = GetAvailableCards(targetConditions).FirstOrDefault(x => x.CardReference == card);
-
-            return cardObject;
-        }
-
-        public IEnumerable<CardObject> GetCardObjects(IEnumerable<BaseCard> cards)
-        {
-            var cardObjects = GetAvailableCards(new TargetConditions { Area = Area.Any })
-                .Where(x => cards.Contains(x.CardReference));
-
-            return cardObjects;
+            var cardObject = GetCardObject(card);
+            // Some kind of animation
+            cardObject.Destroy();
         }
 
         public void UpdateSlotGlow(FieldSlot slot, EffectType type)

@@ -22,9 +22,10 @@ namespace Assets.Scripts.Events
             SelectionType = selectionType;
         }
 
-        public override IEnumerable<BaseEvent> Process(UIManager uIManager, Func<PlayerType, Player> getPlayer)
+        public override IEnumerable<BaseEvent> Process(UIManager uIManager, BoardState board)
         {
-            uIManager.BeginCardSelection(TargetConditions, OverrideTargets, Count, FinishSelection, SelectionType);
+            var allowableTargets = board.GetMatchingCards(TargetConditions);
+            uIManager.BeginCardSelection(allowableTargets, OverrideTargets, Count, FinishSelection, SelectionType);
             return Enumerable.Empty<BaseEvent>();
         }
 

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Cards;
 using Assets.Scripts.Events;
 using UnityEngine;
 
@@ -14,7 +15,8 @@ namespace Assets.Scripts.UI
 
         private HashSet<CardObject> AvailableCards { get; set; }
         private HashSet<SlotObject> AvailableSlots { get; set; }
-        private Func<CardObject, SlotObject, IEnumerable<BaseEvent>> OnDrop { get; set; }
+        private Func<BaseCard, FieldSlot, IEnumerable<BaseEvent>> OnDrop { get; set; }
+        private Func<BaseCard, IEnumerable<BaseEvent>> OnSacrifice { get; set; }
         private Func<IEnumerable<BaseEvent>> OnPass { get; set; }
 
         private CardObject SelectedCard { get; set; }
@@ -22,33 +24,39 @@ namespace Assets.Scripts.UI
 
         public bool IsProcessing { get; set; }
 
-        public void Begin(HashSet<CardObject> availableCards, HashSet<SlotObject> availableSlots, Func<CardObject, SlotObject, IEnumerable<BaseEvent>> onDrop, Func<IEnumerable<BaseEvent>> onPass)
+        public void Begin(IEnumerable<CardObject> availableCards, IEnumerable<SlotObject> availableSlots, Func<BaseCard, FieldSlot, IEnumerable<BaseEvent>> onDrop, Func<BaseCard, IEnumerable<BaseEvent>> onSacrifice, Func<IEnumerable<BaseEvent>> onPass)
         {
             MainController = MainController.Get();
-            AvailableCards = availableCards;
-            AvailableSlots = availableSlots;
+            AvailableCards = new HashSet<CardObject>(availableCards);
+            AvailableSlots = new HashSet<SlotObject>(availableSlots);
             OnDrop = onDrop;
+            OnSacrifice = onSacrifice;
             OnPass = onPass;
             IsProcessing = true;
         }
 
         public void Finish(SlotObject slot)
         {
-            var newEvents = OnDrop.Invoke(SelectedCard, slot).ToArray();
+            var newEvents = new List<BaseEvent>();
 
-            // If no new events, either unable to play cards or discarded drop
-            if (!newEvents.Any())
-            {
-                // Not enough mana message
-                DropCard();
+            if (slot.SlotType == SlotType.Mana) {
+                newEvents.AddRange(OnSacrifice.Invoke(SelectedCard.CardReference));
+                DropInSlot(slot, true);
             }
             else
             {
+                newEvents.AddRange(OnDrop.Invoke(SelectedCard.CardReference, slot.FieldSlot));
+                // If no new events, unable to pay mana cost
+                if (!newEvents.Any()) {
+                    // Not enough mana message
+                    DropCard();
+                    return;
+                }
                 DropInSlot(slot);
-                IsProcessing = false;
             }
 
             MainController.EnqueueEvents(newEvents);
+            IsProcessing = false;
         }
 
         public void Pass()
@@ -66,10 +74,10 @@ namespace Assets.Scripts.UI
             SelectedCard = null;
         }
 
-        private void DropInSlot(SlotObject slot)
+        private void DropInSlot(SlotObject slot, bool dropActionCards = false)
         {
-            // Drop non-action cards
-            if (SelectedCard.CardReference.Type != CardType.Action)
+            // Only drop non-action cards if dropActionCard is false
+            if (dropActionCards || SelectedCard.CardReference.Type != CardType.Action)
             {
                 SelectedCard.MoveToPosition(slot.transform.position);
                 SelectedCard.SetSortingOrder(0);

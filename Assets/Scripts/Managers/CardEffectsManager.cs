@@ -18,359 +18,360 @@ namespace Assets.Scripts.Managers
 
         public static IEnumerable<BaseEvent> GetCardEvents(CreatureCard card)
         {
-            switch (card.Name)
-            {
-                #region Red Creatures
-                case "Roiling Elemental":
-                    yield return new CustomPassiveAllCreaturesEvent(
-                        card,
-                        new TargetConditions
-                        {
-                            SubType = SubType.Elemental
-                        },
-                        (targets) =>
-                        {
-                            foreach (var target in targets)
-                            {
-                                if (target == card)
-                                    continue;
+            yield break;
+            //switch (card.Name)
+            //{
+            //    #region Red Creatures
+            //    case "Roiling Elemental":
+            //        yield return new CustomPassiveAllCreaturesEvent(
+            //            card,
+            //            new TargetConditions
+            //            {
+            //                SubType = SubType.Elemental
+            //            },
+            //            (targets) =>
+            //            {
+            //                foreach (var target in targets)
+            //                {
+            //                    if (target == card)
+            //                        continue;
 
-                                card.BonusAttack.Add(1);
-                                card.BonusDefence.Add(1);
-                            }
-                        });
-                    yield break;
+            //                    card.BonusAttack.Add(1);
+            //                    card.BonusDefence.Add(1);
+            //                }
+            //            });
+            //        yield break;
 
-                case "Smouldering Draug":
-                    IEnumerable<BaseEvent> SmoulderingDraug()
-                    {
-                        if (MainController.GetCurrentPhase() == Phase.Play)
-                        {
-                            var cardInfo = card.ToCardInfo();
-                            cardInfo.Attack = 2;
-                            cardInfo.Defence = 2;
+            //    case "Smouldering Draug":
+            //        IEnumerable<BaseEvent> SmoulderingDraug()
+            //        {
+            //            if (MainController.GetCurrentPhase() == Phase.Play)
+            //            {
+            //                var cardInfo = card.ToCardInfo();
+            //                cardInfo.Attack = 2;
+            //                cardInfo.Defence = 2;
                             
-                            yield return new SummonCardEvent(cardInfo, card.Owner.PlayerType);
-                        }
-                    }
+            //                yield return new SummonCardEvent(cardInfo, card.Owner.PlayerType);
+            //            }
+            //        }
 
-                    yield return new OnDestroyedEvent(
-                        card,
-                        SmoulderingDraug);
-                    yield break;
+            //        yield return new OnDestroyedEvent(
+            //            card,
+            //            SmoulderingDraug);
+            //        yield break;
 
-                case "Flame-Tongue Kijiti":
-                    yield return new AddTokensEvent(card.Owner.PlayerType, TokenType.Claw, 2);
-                    yield break;
+            //    case "Flame-Tongue Kijiti":
+            //        yield return new AddTokensEvent(card.Owner.PlayerType, TokenType.Claw, 2);
+            //        yield break;
 
-                case "Boiling Elemental":
-                    yield return new DamageTargetsEvent(new TargetConditions(), 1, 4);
-                    yield break;
+            //    case "Boiling Elemental":
+            //        yield return new DamageTargetsEvent(new TargetConditions(), 1, 4);
+            //        yield break;
 
-                case "Soaring Damned":
-                    IEnumerable<BaseEvent> SoaringDamned()
-                    {
-                        yield return new DestroyTargetsEvent(
-                            new TargetConditions
-                            {
-                                CardType = CardType.Creature
-                            },
-                            1);
-                    }
-                    yield return new OnDestroyedEvent(
-                        card,
-                        SoaringDamned);
-                    yield break;
+            //    case "Soaring Damned":
+            //        IEnumerable<BaseEvent> SoaringDamned()
+            //        {
+            //            yield return new DestroyTargetsEvent(
+            //                new TargetConditions
+            //                {
+            //                    CardType = CardType.Creature
+            //                },
+            //                1);
+            //        }
+            //        yield return new OnDestroyedEvent(
+            //            card,
+            //            SoaringDamned);
+            //        yield break;
 
-                case "Eruption Idol":
+            //    case "Eruption Idol":
 
-                    IEnumerable<BaseEvent> EruptionIdol(IEnumerable<CreatureCard> targets)
-                    {
-                        foreach (var target in targets)
-                        {
-                            if (FlipCoin())
-                                yield return new WeakenCreatureEvent(target, 5);
-                            else
-                                yield return new DamageCreatureEvent(target, 5);
-                        }
-                    };
+            //        IEnumerable<BaseEvent> EruptionIdol(IEnumerable<CreatureCard> targets)
+            //        {
+            //            foreach (var target in targets)
+            //            {
+            //                if (FlipCoin())
+            //                    yield return new WeakenCreatureEvent(target, 5);
+            //                else
+            //                    yield return new DamageCreatureEvent(target, 5);
+            //            }
+            //        };
 
-                    yield return new CustomAllCreaturesEvent(
-                        new TargetConditions
-                        {
-                            PlayerType = card.Owner.PlayerType.GetOpposite()
-                        },
-                        EruptionIdol);
-                    yield break;
-                #endregion
+            //        yield return new CustomAllCreaturesEvent(
+            //            new TargetConditions
+            //            {
+            //                PlayerType = card.Owner.PlayerType.GetOpposite()
+            //            },
+            //            EruptionIdol);
+            //        yield break;
+            //    #endregion
 
-                #region Green Creatures
-                case "Bird of Paradise":
-                    yield return new AddManaPlayerEvent(card.Owner.PlayerType, Colour.Green, 1);
-                    yield break;
+            //    #region Green Creatures
+            //    case "Bird of Paradise":
+            //        yield return new AddManaPlayerEvent(card.Owner.PlayerType, Colour.Green, 1);
+            //        yield break;
 
-                case "Chromatic Basilisk":
-                    //yield return new CustomSingleTargetEvent(
-                    //    new TargetConditions
-                    //    {
-                    //        CardType = CardType.Creature,
-                    //    },
-                    //    SelectionType.Neutral,
-                    //    "Choose a creature to have no abilities",
-                    //    (target) =>
-                    //    {
-                    //        // TODO: this probably isn't working
-                    //        var triggerEvent = new CustomTriggerEvent(card, (triggeringEvent) =>
-                    //        {
-                    //            if (triggeringEvent is BasePassiveEvent passiveEvent)
-                    //            {
-                    //                MainController.AddEvent(new CustomInteruptEvent(card, (interuptingEvent) =>
-                    //                {
-                    //                    return true;
-                    //                }));
-                    //            }
-                    //        });
+            //    case "Chromatic Basilisk":
+            //        //yield return new CustomSingleTargetEvent(
+            //        //    new TargetConditions
+            //        //    {
+            //        //        CardType = CardType.Creature,
+            //        //    },
+            //        //    SelectionType.Neutral,
+            //        //    "Choose a creature to have no abilities",
+            //        //    (target) =>
+            //        //    {
+            //        //        // TODO: this probably isn't working
+            //        //        var triggerEvent = new CustomTriggerEvent(card, (triggeringEvent) =>
+            //        //        {
+            //        //            if (triggeringEvent is BasePassiveEvent passiveEvent)
+            //        //            {
+            //        //                MainController.AddEvent(new CustomInteruptEvent(card, (interuptingEvent) =>
+            //        //                {
+            //        //                    return true;
+            //        //                }));
+            //        //            }
+            //        //        });
 
-                    //        foreach (var passiveEvent in MainController.GetPassiveEvents().ToList())
-                    //        {
-                    //            if (passiveEvent.Owner == target)
-                    //                MainController.RemoveEvent(passiveEvent);
-                    //        }
+            //        //        foreach (var passiveEvent in MainController.GetPassiveEvents().ToList())
+            //        //        {
+            //        //            if (passiveEvent.Owner == target)
+            //        //                MainController.RemoveEvent(passiveEvent);
+            //        //        }
 
-                    //        foreach (var interuptEvent in MainController.GetInteruptEvents().ToList())
-                    //        {
-                    //            if (interuptEvent.Owner == target)
-                    //                MainController.RemoveEvent(interuptEvent);
-                    //        }
+            //        //        foreach (var interuptEvent in MainController.GetInteruptEvents().ToList())
+            //        //        {
+            //        //            if (interuptEvent.Owner == target)
+            //        //                MainController.RemoveEvent(interuptEvent);
+            //        //        }
 
-                    //        foreach (var triggerEvent in MainController.GetTriggerEvents().ToList())
-                    //        {
-                    //            if (triggerEvent.Owner == target)
-                    //                MainController.RemoveEvent(triggerEvent);
-                    //        }
-                    //    });
-                    //yield break;
+            //        //        foreach (var triggerEvent in MainController.GetTriggerEvents().ToList())
+            //        //        {
+            //        //            if (triggerEvent.Owner == target)
+            //        //                MainController.RemoveEvent(triggerEvent);
+            //        //        }
+            //        //    });
+            //        //yield break;
 
-                case "Steadfast Behemoth":
-                    yield return new CustomInteruptEvent(
-                        card,
-                        (interuptedEvent) =>
-                        {
-                            if (interuptedEvent is DamageCreatureEvent damageEvent && damageEvent.Card == card)
-                            {
-                                damageEvent.Value = 0;
-                                return true;
-                            }
+            //    case "Steadfast Behemoth":
+            //        yield return new CustomInteruptEvent(
+            //            card,
+            //            (interuptedEvent) =>
+            //            {
+            //                if (interuptedEvent is DamageCreatureEvent damageEvent && damageEvent.Card == card)
+            //                {
+            //                    damageEvent.Value = 0;
+            //                    return true;
+            //                }
 
-                            return false;
-                        });
-                    yield break;
+            //                return false;
+            //            });
+            //        yield break;
 
-                case "Turtleshield Vanguard":
-                    yield return new AddTokensEvent(card.Owner.PlayerType, TokenType.Shell, 2);
-                    yield break;
+            //    case "Turtleshield Vanguard":
+            //        yield return new AddTokensEvent(card.Owner.PlayerType, TokenType.Shell, 2);
+            //        yield break;
 
-                case "Tailwing Moth":
-                    yield return new AddLifePlayerEvent(card.Owner.PlayerType, 5);
-                    yield break;
+            //    case "Tailwing Moth":
+            //        yield return new AddLifePlayerEvent(card.Owner.PlayerType, 5);
+            //        yield break;
 
-                case "Bride of the Forest":
-                    IEnumerable<BaseEvent> BrideOfTheForest(BaseCard target)
-                    {
-                        yield return new GainControlEvent(target as CreatureCard);
-                    }
+            //    case "Bride of the Forest":
+            //        IEnumerable<BaseEvent> BrideOfTheForest(BaseCard target)
+            //        {
+            //            yield return new GainControlEvent(target as CreatureCard);
+            //        }
 
-                    yield return new CustomSingleTargetEvent(new TargetConditions
-                    {
-                        PlayerType = card.Owner.PlayerType.GetOpposite(),
-                        CardType = CardType.Creature,
-                        MaxDefence = 8
-                    },
-                    SelectionType.Neutral,
-                    "Gain control of a creature with 8 or less defence",
-                    BrideOfTheForest);
-                    yield break;
+            //        yield return new CustomSingleTargetEvent(new TargetConditions
+            //        {
+            //            PlayerType = card.Owner.PlayerType.GetOpposite(),
+            //            CardType = CardType.Creature,
+            //            MaxDefence = 8
+            //        },
+            //        SelectionType.Neutral,
+            //        "Gain control of a creature with 8 or less defence",
+            //        BrideOfTheForest);
+            //        yield break;
 
-                case "Arishi, King of Leaves":
-                    IEnumerable<BaseEvent> ArishiKingOfLeaves()
-                    {
-                        var player = card.Owner;
+            //    case "Arishi, King of Leaves":
+            //        IEnumerable<BaseEvent> ArishiKingOfLeaves()
+            //        {
+            //            var player = card.Owner;
 
-                        var greenMana = player.GetManaAmount(Colour.Green);
+            //            var greenMana = player.GetManaAmount(Colour.Green);
 
-                        yield return new StrengthenCreatureEvent(card, greenMana * 2);
-                        yield return new FortifyCreatureEvent(card, greenMana * 2);
-                    }
+            //            yield return new StrengthenCreatureEvent(card, greenMana * 2);
+            //            yield return new FortifyCreatureEvent(card, greenMana * 2);
+            //        }
 
-                    yield return new CustomActiveEvent(
-                        card,
-                        ArishiKingOfLeaves);
-                    yield break;
+            //        yield return new CustomActiveEvent(
+            //            card,
+            //            ArishiKingOfLeaves);
+            //        yield break;
 
-                #endregion
+            //    #endregion
 
-                #region Blue Creatures
-                case "Flickering Spark":
-                    IEnumerable<BaseEvent> FlickeringSpark(BaseEvent triggeringEvent)
-                    {
-                        var eventOwner = (triggeringEvent as EnterFieldEvent).Card as CreatureCard;
-                        yield return new StrengthenCreatureEvent(eventOwner, 1);
-                        yield return new FortifyCreatureEvent(eventOwner, 2);
-                    }
+            //    #region Blue Creatures
+            //    case "Flickering Spark":
+            //        IEnumerable<BaseEvent> FlickeringSpark(BaseEvent triggeringEvent)
+            //        {
+            //            var eventOwner = (triggeringEvent as EnterFieldEvent).Card as CreatureCard;
+            //            yield return new StrengthenCreatureEvent(eventOwner, 1);
+            //            yield return new FortifyCreatureEvent(eventOwner, 2);
+            //        }
 
-                    yield return new CustomTriggerEvent(
-                        card,
-                        triggeringEvent => 
-                            triggeringEvent is EnterFieldEvent enterFieldEvent && 
-                            enterFieldEvent.Card is CreatureCard creatureCard &&
-                            creatureCard.Owner == card.Owner,
-                        FlickeringSpark,
-                        true);
-                    yield break;
+            //        yield return new CustomTriggerEvent(
+            //            card,
+            //            triggeringEvent => 
+            //                triggeringEvent is EnterFieldEvent enterFieldEvent && 
+            //                enterFieldEvent.Card is CreatureCard creatureCard &&
+            //                creatureCard.Owner == card.Owner,
+            //            FlickeringSpark,
+            //            true);
+            //        yield break;
 
-                case "Unexpected Protégé":
-                    IEnumerable<BaseEvent> UnexpectedProtege()
-                    {
-                        var thisPlayer = card.Owner;
-                        var otherPlayer = card.Owner;
+            //    case "Unexpected Protégé":
+            //        IEnumerable<BaseEvent> UnexpectedProtege()
+            //        {
+            //            var thisPlayer = card.Owner;
+            //            var otherPlayer = card.Owner;
 
-                        if (thisPlayer.TotalAttack < otherPlayer.TotalAttack && thisPlayer.TotalDefence < otherPlayer.TotalDefence)
-                        {
-                            yield return new StrengthenCreatureEvent(card, 2);
-                            yield return new FortifyCreatureEvent(card, 2);
-                        }
-                    }
+            //            if (thisPlayer.TotalAttack < otherPlayer.TotalAttack && thisPlayer.TotalDefence < otherPlayer.TotalDefence)
+            //            {
+            //                yield return new StrengthenCreatureEvent(card, 2);
+            //                yield return new FortifyCreatureEvent(card, 2);
+            //            }
+            //        }
 
-                    yield return new CustomActiveEvent(
-                        card,
-                        UnexpectedProtege);
-                    yield break;
+            //        yield return new CustomActiveEvent(
+            //            card,
+            //            UnexpectedProtege);
+            //        yield break;
 
-                case "Water Bearer":
-                    IEnumerable<BaseEvent> WaterBearer(BaseEvent triggeringEvent)
-                    {
-                        yield return new FortifyTargetsEvent(new TargetConditions(), 1, 2);
-                    }
+            //    case "Water Bearer":
+            //        IEnumerable<BaseEvent> WaterBearer(BaseEvent triggeringEvent)
+            //        {
+            //            yield return new FortifyTargetsEvent(new TargetConditions(), 1, 2);
+            //        }
 
-                    yield return new CustomTriggerEvent(
-                        card,
-                        triggeringEvent =>
-                            triggeringEvent is EnterFieldEvent enterFieldEvent &&
-                            enterFieldEvent.Card is ActionCard actionCard &&
-                            actionCard.Owner == card.Owner,
-                        WaterBearer);
-                    yield break;
+            //        yield return new CustomTriggerEvent(
+            //            card,
+            //            triggeringEvent =>
+            //                triggeringEvent is EnterFieldEvent enterFieldEvent &&
+            //                enterFieldEvent.Card is ActionCard actionCard &&
+            //                actionCard.Owner == card.Owner,
+            //            WaterBearer);
+            //        yield break;
 
-                case "Betrayer at Arkus":
-                    IEnumerable<BaseEvent> BetrayerAtArkus(BaseEvent triggeringEvent)
-                    {
-                        var eventOwner = ((EnterFieldEvent) triggeringEvent).Card as CreatureCard;
-                        yield return new DamageCreatureEvent(eventOwner, 2);
-                    }
+            //    case "Betrayer at Arkus":
+            //        IEnumerable<BaseEvent> BetrayerAtArkus(BaseEvent triggeringEvent)
+            //        {
+            //            var eventOwner = ((EnterFieldEvent) triggeringEvent).Card as CreatureCard;
+            //            yield return new DamageCreatureEvent(eventOwner, 2);
+            //        }
 
-                    yield return new CustomTriggerEvent(
-                        card,
-                        triggeringEvent =>
-                            triggeringEvent is EnterFieldEvent enterFieldEvent &&
-                            enterFieldEvent.Card is CreatureCard,
-                        BetrayerAtArkus);
-                    yield break;
+            //        yield return new CustomTriggerEvent(
+            //            card,
+            //            triggeringEvent =>
+            //                triggeringEvent is EnterFieldEvent enterFieldEvent &&
+            //                enterFieldEvent.Card is CreatureCard,
+            //            BetrayerAtArkus);
+            //        yield break;
 
-                case "Technomancer":
-                    yield return new CustomPassiveAllCreaturesEvent(
-                        card,
-                        new TargetConditions
-                        {
-                            PlayerType = card.Owner.PlayerType
-                        },
-                        (targets) =>
-                        {
-                            foreach (var target in targets)
-                            {
-                                target.BonusAttack.Add(2);
-                                target.BonusDefence.Add(2);
-                            }
-                        });
-                    yield break;
-                #endregion
+            //    case "Technomancer":
+            //        yield return new CustomPassiveAllCreaturesEvent(
+            //            card,
+            //            new TargetConditions
+            //            {
+            //                PlayerType = card.Owner.PlayerType
+            //            },
+            //            (targets) =>
+            //            {
+            //                foreach (var target in targets)
+            //                {
+            //                    target.BonusAttack.Add(2);
+            //                    target.BonusDefence.Add(2);
+            //                }
+            //            });
+            //        yield break;
+            //    #endregion
 
-                #region Purple Creatures
-                case "Subdued Conscript":
-                    yield return new CustomInteruptEvent(
-                        card,
-                        (interuptedEvent) =>
-                        {
-                            if (interuptedEvent is BaseStatEvent statEvent && statEvent.Card == card)
-                            {
-                                statEvent.Value = statEvent.Value * 2;
-                                return true;
-                            }
+            //    #region Purple Creatures
+            //    case "Subdued Conscript":
+            //        yield return new CustomInteruptEvent(
+            //            card,
+            //            (interuptedEvent) =>
+            //            {
+            //                if (interuptedEvent is BaseStatEvent statEvent && statEvent.Card == card)
+            //                {
+            //                    statEvent.Value = statEvent.Value * 2;
+            //                    return true;
+            //                }
 
-                            return false;
-                        });
-                    yield break;
+            //                return false;
+            //            });
+            //        yield break;
 
-                case "Feaster of Will":
-                    IEnumerable<BaseEvent> FeasterOfWill(IEnumerable<CreatureCard> targets)
-                    {
-                        foreach (var target in targets)
-                        {
-                            yield return new WeakenCreatureEvent(target, 1);
-                            yield return new DamageCreatureEvent(target, 1);
-                        }
-                    };
+            //    case "Feaster of Will":
+            //        IEnumerable<BaseEvent> FeasterOfWill(IEnumerable<CreatureCard> targets)
+            //        {
+            //            foreach (var target in targets)
+            //            {
+            //                yield return new WeakenCreatureEvent(target, 1);
+            //                yield return new DamageCreatureEvent(target, 1);
+            //            }
+            //        };
 
-                    yield return new CustomAllCreaturesEvent(
-                        new TargetConditions
-                        {
-                            PlayerType = card.Owner.PlayerType.GetOpposite()
-                        },
-                        FeasterOfWill);
-                    yield break;
+            //        yield return new CustomAllCreaturesEvent(
+            //            new TargetConditions
+            //            {
+            //                PlayerType = card.Owner.PlayerType.GetOpposite()
+            //            },
+            //            FeasterOfWill);
+            //        yield break;
 
-                case "It That Speaks in Whispers":
-                    IEnumerable<BaseEvent> ItThatSpeaksInWhispers(IEnumerable<CreatureCard> targets)
-                    {
-                        if (targets.Count() < 2)
-                            yield break;
+            //    case "It That Speaks in Whispers":
+            //        IEnumerable<BaseEvent> ItThatSpeaksInWhispers(IEnumerable<CreatureCard> targets)
+            //        {
+            //            if (targets.Count() < 2)
+            //                yield break;
 
-                        var damageDealer = targets.Shuffle().First();
-                        var target = targets.First(x => x != damageDealer);
+            //            var damageDealer = targets.Shuffle().First();
+            //            var target = targets.First(x => x != damageDealer);
 
-                        yield return new DamageCreatureEvent(target, damageDealer.Attack);
-                    };
+            //            yield return new DamageCreatureEvent(target, damageDealer.Attack);
+            //        };
 
-                    yield return new CustomAllCreaturesEvent(
-                        new TargetConditions
-                        {
-                            PlayerType = card.Owner.PlayerType.GetOpposite()
-                        },
-                        ItThatSpeaksInWhispers);
-                    yield break;
+            //        yield return new CustomAllCreaturesEvent(
+            //            new TargetConditions
+            //            {
+            //                PlayerType = card.Owner.PlayerType.GetOpposite()
+            //            },
+            //            ItThatSpeaksInWhispers);
+            //        yield break;
 
-                case "Bloodmouth Vicious":
-                    yield return new DestroyTargetsEvent(
-                        new TargetConditions
-                        {
-                            CardType = CardType.Creature,
-                            MaxDefence = 4
-                        },
-                        1);
-                    yield break;
+            //    case "Bloodmouth Vicious":
+            //        yield return new DestroyTargetsEvent(
+            //            new TargetConditions
+            //            {
+            //                CardType = CardType.Creature,
+            //                MaxDefence = 4
+            //            },
+            //            1);
+            //        yield break;
 
-                case "It That Becomes the Sea":
-                    IEnumerable<BaseEvent> ItThatBecomesTheSea(BaseEvent triggeringEvent)
-                    {
-                        yield return new DamageCreatureEvent(card, 2);
-                    }
+            //    case "It That Becomes the Sea":
+            //        IEnumerable<BaseEvent> ItThatBecomesTheSea(BaseEvent triggeringEvent)
+            //        {
+            //            yield return new DamageCreatureEvent(card, 2);
+            //        }
 
-                    yield return new CustomTriggerEvent(
-                        card,
-                        triggeringEvent => triggeringEvent is EnterFieldEvent enterFieldEvent && enterFieldEvent.Card.Type == CardType.Action,
-                        ItThatBecomesTheSea);
-                    yield break;
-                    #endregion
-            }
+            //        yield return new CustomTriggerEvent(
+            //            card,
+            //            triggeringEvent => triggeringEvent is EnterFieldEvent enterFieldEvent && enterFieldEvent.Card.Type == CardType.Action,
+            //            ItThatBecomesTheSea);
+            //        yield break;
+            //        #endregion
+            //}
         }
 
         public static IEnumerable<BaseEvent> GetCardEvents(ActionCard card)

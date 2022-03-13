@@ -12,6 +12,7 @@ namespace Assets.Scripts.Enums
         None = 0,
         Front = 1,
         Back = 2,
+        Both = 4,
         Either = Front | Back
     }
 }

@@ -1,9 +1,5 @@
 using Assets.Scripts.Cards;
-using Assets.Scripts.Enums;
 using Assets.Scripts.Extensions;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using Assets.Scripts.Managers;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -73,7 +69,7 @@ namespace Assets.Scripts.UI
 
             // Set Large Card Position
             LargeCard.SetActive(false);
-            if (cardReference.Owner.PlayerType == PlayerType.Back)
+            if (true) //cardReference.Owner.PlayerType == PlayerType.Back) // TODO: show based on current card position
                 LargeCard.transform.localPosition = new Vector3(LargeCard.transform.localPosition.x, -LargeCard.transform.localPosition.y, LargeCard.transform.localPosition.z);
 
             NameLabel = LargeCard.transform.Find("Canvas/Name").GetComponent<Text>();

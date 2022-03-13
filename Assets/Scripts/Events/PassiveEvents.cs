@@ -2,6 +2,7 @@
 using Assets.Scripts.Enums;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Assets.Scripts.Events
 {
@@ -14,12 +15,12 @@ namespace Assets.Scripts.Events
             Source = source;
         }
 
-        public abstract void Process(MainController mainController);
+        public abstract void Process(BoardState board);
 
         // Passive events are only valid when their source is on the field
-        public bool IsValid()
+        public bool IsValid(BoardState board)
         {
-            return Source.Owner.IsOnField(Source);
+            return board.GetCardOwner(Source).IsOnField(Source);
         }
     }
 
@@ -33,7 +34,7 @@ namespace Assets.Scripts.Events
             Action = action;
         }
 
-        public override void Process(MainController mainController)
+        public override void Process(BoardState board)
         {
             Action.Invoke();
         }
@@ -43,9 +44,9 @@ namespace Assets.Scripts.Events
     public class CustomPassiveAllCreaturesEvent : BasePassiveEvent
     {
         private TargetConditions TargetConditions { get; set; } // Filter out targets not matching these conditions
-        private Action<HashSet<CreatureCard>> Action { get; set; } // Targets
+        private Action<IEnumerable<CreatureCard>> Action { get; set; } // Targets
 
-        public CustomPassiveAllCreaturesEvent(BaseCard owner, TargetConditions targetConditions, Action<HashSet<CreatureCard>> action)
+        public CustomPassiveAllCreaturesEvent(BaseCard owner, TargetConditions targetConditions, Action<IEnumerable<CreatureCard>> action)
             : base(owner)
         {
             targetConditions.CardType = CardType.Creature;
@@ -53,9 +54,9 @@ namespace Assets.Scripts.Events
             Action = action;
         }
 
-        public override void Process(MainController mainController)
+        public override void Process(BoardState board)
         {
-            var cards = MainController.GetCardsInPlay<CreatureCard>(TargetConditions);
+            var cards = board.GetMatchingCards(TargetConditions).OfType<CreatureCard>();
             Action.Invoke(cards);
         }
     }

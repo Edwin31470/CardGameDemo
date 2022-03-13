@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.Events
 {
-    public abstract class BaseAllEvent : BaseGameplayEvent
+    //TODO: should be able to use a target event with all cards already targeted
+    public abstract class BaseAllEvent : BaseAreaEvent
     {
         protected TargetConditions TargetConditions { get; set; }
 
@@ -29,10 +30,9 @@ namespace Assets.Scripts.Events
             Func = func;
         }
 
-        public override IEnumerable<BaseEvent> Process()
+        public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            //TODO: should be able to use a target event with all cards already targeted
-            var cards = MainController.GetCardsInPlay<CreatureCard>(TargetConditions);
+            var cards = board.GetMatchingCards(TargetConditions).OfType<CreatureCard>();
             return Func.Invoke(cards);
         }
     }

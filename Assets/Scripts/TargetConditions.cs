@@ -21,14 +21,6 @@ namespace Assets.Scripts
 
         public bool IsMatch(BaseCard card)
         {
-            var owner = card.Owner;
-
-            if (!PlayerType.HasFlag(card.Owner.PlayerType))
-                return false;
-
-            if (!IsAreaMatch(card, Area))
-                return false;
-
             if (!CardType.HasFlag(card.Type))
                 return false;
 
@@ -49,26 +41,6 @@ namespace Assets.Scripts
                 if (!creatureCard.Defence.IsBetween(MinDefence, MaxDefence))
                     return false;
             }
-
-            return true;
-        }
-
-        private bool IsAreaMatch(BaseCard card, Area area)
-        {
-            if (card.Owner.IsInDeck(card) && !area.HasFlag(Area.Deck))
-                return false;
-
-            if (card.Owner.IsInHand(card) && !area.HasFlag(Area.Hand))
-                return false;
-
-            if (card.Owner.IsOnField(card) && !area.HasFlag(Area.Field))
-                return false;
-
-            if (card.Owner.IsInDestroyed(card) && !area.HasFlag(Area.Destroyed))
-                return false;
-
-            if (card.Owner.IsInEliminated(card) && !area.HasFlag(Area.Eliminated))
-                return false;
 
             return true;
         }

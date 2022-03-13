@@ -27,10 +27,10 @@ namespace Assets.Scripts.UI
             ValidCards = new HashSet<CardObject>();
         }
 
-        public void Begin(HashSet<CardObject> validCards, int maxTargets, OnFinishSelection onFinishSelection, SelectionType selectionType)
+        public void Begin(IEnumerable<CardObject> validCards, int maxTargets, OnFinishSelection onFinishSelection, SelectionType selectionType)
         {
             IsProcessing = true;
-            ValidCards = validCards;
+            ValidCards = new HashSet<CardObject>(validCards);
             MaxTargets = maxTargets;
             OnFinishSelection = onFinishSelection;
 
