@@ -96,16 +96,15 @@ namespace Assets.Scripts.Events
 
             if (Slot == null)
             {
-                // TODO: this shouldn't be here
-                var slotEvents = player.AddToField(fieldCard, Index);
-                foreach (var slotEvent in slotEvents) {
-                    yield return slotEvent;
-                }
                 yield return new DestroyCardEvent(Card);
             }
             else
             {
-                Slot.Add((FieldCard)Card);
+                var slotEvents = Slot.Add((FieldCard)Card);
+                foreach (var slotEvent in slotEvents)
+                {
+                    yield return slotEvent;
+                }
             }
 
             foreach (var baseEvent in Card.CardEvents)
@@ -272,8 +271,6 @@ namespace Assets.Scripts.Events
             foreach (var slotEvent in leaveSlotEvents) {
                 yield return slotEvent;
             }
-            Card.Owner = newPlayer;
-
 
             var slot = newPlayer.GetRandomEmptySlot();
             if (slot == null) {
@@ -281,13 +278,10 @@ namespace Assets.Scripts.Events
             }
             else
             {
-              // TODO: fix
-                var enterSlotEvents = newPlayer.AddToField(Card, index);
+                var enterSlotEvents = slot.Add(Card);
                 foreach (var slotEvent in enterSlotEvents) {
                     yield return slotEvent;
                 }
-
-                slot.Add(Card);
                 yield return new MoveCardToFieldUIEvent(Card, slot);
             }
         }

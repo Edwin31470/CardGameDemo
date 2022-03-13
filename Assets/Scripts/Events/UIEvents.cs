@@ -58,7 +58,6 @@ namespace Assets.Scripts.Events
 
         public override void Process(UIManager uIManager)
         {
-            // TODO: Move to index instead
             uIManager.MoveToSlot(Card, Slot);
         }
     }

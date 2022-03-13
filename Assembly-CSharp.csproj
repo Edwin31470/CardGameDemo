@@ -64,6 +64,7 @@
     <Compile Include="Assets\Scripts\Events\PlayerEvents.cs" />
     <Compile Include="Assets\Scripts\UI\UIManager.cs" />
     <Compile Include="Assets\Scripts\Enums\SelectionType.cs" />
+    <Compile Include="Assets\Scripts\Events\SlotEffectEvents.cs" />
     <Compile Include="Assets\Scripts\Enums\Area.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumerableExtensions.cs" />
     <Compile Include="Assets\Scripts\Events\PassiveEvents.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="Assets\Scripts\Events\TargetEvents.cs" />
     <Compile Include="Assets\Scripts\Events\BaseEvents.cs" />
     <Compile Include="Assets\Scripts\Managers\PileManager.cs" />
+    <Compile Include="Assets\Scripts\Enums\EffectType.cs" />
     <Compile Include="Assets\Scripts\LegendkeeperIntegration\Project.cs" />
     <Compile Include="Assets\Scripts\Enums\Phase.cs" />
     <Compile Include="Assets\Scripts\Cards\BaseCard.cs" />
@@ -116,8 +118,6 @@
     <Compile Include="Assets\Scripts\Enums\TokenType.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
     <Compile Include="Assets\Scripts\Managers\ShowTokensManager.cs" />
-    <Compile Include="Assets\Scripts\Enums\EffectType.cs" />
-    <Compile Include="Assets\Scripts\Events\SlotEffectEvents.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
