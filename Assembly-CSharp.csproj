@@ -8,7 +8,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <ProjectGuid>{ED35986B-2BF8-BEF8-5703-6D2B46598CDE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -121,6 +122,8 @@
     <Compile Include="Assets\Scripts\CardIO.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
     <Compile Include="Assets\Scripts\Managers\ShowTokensManager.cs" />
+    <Compile Include="Assets\Scripts\EditDeckController.cs" />
+    <Compile Include="Assets\Scripts\DeckIO.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
