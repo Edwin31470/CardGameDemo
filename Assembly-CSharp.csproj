@@ -113,6 +113,8 @@
     <Compile Include="Assets\Scripts\CreateCardController.cs" />
     <Compile Include="Assets\Scripts\Managers\CardGraphicsManager.cs" />
     <Compile Include="Assets\Scripts\Events\TokenEvents.cs" />
+    <Compile Include="Assets\Scripts\EditDeckController.cs" />
+    <Compile Include="Assets\Scripts\DeckIO.cs" />
     <Compile Include="Assets\Scripts\Events\DragAndDropEvents.cs" />
     <Compile Include="Assets\Scripts\Enums\StatType.cs" />
     <Compile Include="Assets\Scripts\Cards\PermanentCard.cs" />
@@ -122,8 +124,6 @@
     <Compile Include="Assets\Scripts\CardIO.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
     <Compile Include="Assets\Scripts\Managers\ShowTokensManager.cs" />
-    <Compile Include="Assets\Scripts\EditDeckController.cs" />
-    <Compile Include="Assets\Scripts\DeckIO.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
@@ -794,6 +794,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Assets\Scripts\Effects\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

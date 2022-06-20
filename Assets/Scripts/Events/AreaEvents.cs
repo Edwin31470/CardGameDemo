@@ -107,7 +107,7 @@ namespace Assets.Scripts.Events
                 }
             }
 
-            foreach (var baseEvent in Card.EffectEvents.Invoke())
+            foreach (var baseEvent in Card.GetEvents())
             {
                 yield return baseEvent;
             }

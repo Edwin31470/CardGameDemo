@@ -15,7 +15,6 @@ namespace Assets.Scripts
     public class MainController : MonoBehaviour
     {
         // Managers
-        private DeckManager DeckManager { get; set; }
         private UIManager UIManager { get; set; }
         private LabelManager LabelManager { get; set; }
         private PileManager PileManager { get; set; }
@@ -90,10 +89,9 @@ namespace Assets.Scripts
         void Start()
         {
             // Register Players
-            DeckManager = new DeckManager();
 
-            var frontDeck = Enumerable.Empty<CardInfo>(); // DeckManager.GetDeck("Blue Deck");
-            var backDeck = Enumerable.Empty<CardInfo>(); //DeckManager.GetDeck("Purple Deck");
+            var frontDeck = DeckManager.GetDeck("RedDeck");
+            var backDeck = DeckManager.GetDeck("RedDeck");
 
             var frontPlayer = new Player(PlayerType.Front, frontDeck);
             var backPlayer = new Player(PlayerType.Back, backDeck);
@@ -101,8 +99,7 @@ namespace Assets.Scripts
 
             // Register GameObject Managers
             UIManager = gameObject.AddComponent(typeof(UIManager)) as UIManager;
-            UIManager.RegisterSlots(frontPlayer);
-            UIManager.RegisterSlots(backPlayer);
+            UIManager.Initialize(Board);
 
             LabelManager = gameObject.AddComponent(typeof(LabelManager)) as LabelManager;
             LabelManager.Initialize(frontPlayer, backPlayer);
@@ -501,7 +498,7 @@ namespace Assets.Scripts
                         TriggerEvents.Remove(triggerEvent);
                     }
 
-                    var newEvents = triggerEvent.Process(triggeringEvent);
+                    var newEvents = triggerEvent.Process(Board, triggeringEvent);
                     EnqueueEvents(newEvents);
                 }
             }

@@ -363,5 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Unity ignores
-Temp
-Library
+/[Ll]ibrary/
+/[Tt]emp/

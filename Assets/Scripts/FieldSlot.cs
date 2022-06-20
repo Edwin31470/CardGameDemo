@@ -18,8 +18,11 @@ namespace Assets.Scripts
 
         public IEnumerable<BaseEvent> Remove()
         {
+            var card = Card;
+            Card = null;
+
             if (TriggerType.HasFlag(TriggerType.Leave)) {
-                return Trigger();
+                return Trigger(card);
             }
 
             return Enumerable.Empty<BaseEvent>();
@@ -30,13 +33,13 @@ namespace Assets.Scripts
             Card = card;
 
             if (TriggerType.HasFlag(TriggerType.Enter)) {
-                return Trigger();
+                return Trigger(card);
             }
 
             return Enumerable.Empty<BaseEvent>();
         }
 
-        private IEnumerable<BaseEvent> Trigger()
+        private IEnumerable<BaseEvent> Trigger(FieldCard card)
         {
             var newEvents = SlotEffect.Invoke(Card);
 

@@ -20,7 +20,7 @@ namespace Assets.Scripts.Events
         }
 
         public abstract bool Conditions(BaseEvent triggeringEvent);
-        public abstract IEnumerable<BaseEvent> Process(BaseEvent triggeringEvent);
+        public abstract IEnumerable<BaseEvent> Process(BoardState boardState, BaseEvent triggeringEvent);
 
         // Trigger events are only valid when their source is on the field
         public bool IsValid(BoardState board)
@@ -45,7 +45,7 @@ namespace Assets.Scripts.Events
             return triggeringEvent is DestroyCardEvent destroyCardEvent && destroyCardEvent.Card == Source;
         }
 
-        public override IEnumerable<BaseEvent> Process(BaseEvent triggeringEvent)
+        public override IEnumerable<BaseEvent> Process(BoardState boardState, BaseEvent triggeringEvent)
         {
             return Func.Invoke();
         }
@@ -54,9 +54,9 @@ namespace Assets.Scripts.Events
     public class CustomTriggerEvent : BaseTriggerEvent
     {
         private Func<BaseEvent, bool> FuncConditions { get; } 
-        private Func<BaseEvent, IEnumerable<BaseEvent>> Func { get; }
+        private Func<BoardState, BaseEvent, IEnumerable<BaseEvent>> Func { get; }
 
-        public CustomTriggerEvent(BaseCard owner, Func<BaseEvent, bool> conditions, Func<BaseEvent, IEnumerable<BaseEvent>> func, bool triggerOnce = false) : base(owner, triggerOnce)
+        public CustomTriggerEvent(BaseCard owner, Func<BaseEvent, bool> conditions, Func<BoardState, BaseEvent, IEnumerable<BaseEvent>> func, bool triggerOnce = false) : base(owner, triggerOnce)
         {
             FuncConditions = conditions;
             Func = func;
@@ -71,9 +71,9 @@ namespace Assets.Scripts.Events
             return FuncConditions.Invoke(triggeringEvent);
         }
 
-        public override IEnumerable<BaseEvent> Process(BaseEvent triggeringEvent)
+        public override IEnumerable<BaseEvent> Process(BoardState boardState, BaseEvent triggeringEvent)
         {
-            return Func.Invoke(triggeringEvent);
+            return Func.Invoke(boardState, triggeringEvent);
         }
     }
 }
