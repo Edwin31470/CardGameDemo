@@ -41,13 +41,13 @@ namespace Assets.Scripts.Events
     }
 
     // For events with creature targets
-    public class CustomPassiveAllCreaturesEvent : BasePassiveEvent
+    public class CustomPassiveCreatureSourceAllCreaturesEvent : BasePassiveEvent
     {
         private TargetConditions TargetConditions { get; set; } // Filter out targets not matching these conditions
-        private Action<IEnumerable<CreatureCard>> Action { get; set; } // Targets
+        private Action<BoardState, CreatureCard, IEnumerable<CreatureCard>> Action { get; set; } // Targets
 
-        public CustomPassiveAllCreaturesEvent(BaseCard owner, TargetConditions targetConditions, Action<IEnumerable<CreatureCard>> action)
-            : base(owner)
+        public CustomPassiveCreatureSourceAllCreaturesEvent(BaseCard source, TargetConditions targetConditions, Action<BoardState, CreatureCard, IEnumerable<CreatureCard>> action)
+            : base(source)
         {
             targetConditions.CardType = CardType.Creature;
             TargetConditions = targetConditions;
@@ -56,8 +56,8 @@ namespace Assets.Scripts.Events
 
         public override void Process(BoardState board)
         {
-            var cards = board.GetMatchingCards(TargetConditions).OfType<CreatureCard>();
-            Action.Invoke(cards);
+            var cards = board.GetMatchingCards(TargetConditions).Cast<CreatureCard>();
+            Action.Invoke(board, (CreatureCard)Source, cards);
         }
     }
 }

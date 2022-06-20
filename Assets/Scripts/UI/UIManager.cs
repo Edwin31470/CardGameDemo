@@ -12,6 +12,8 @@ namespace Assets.Scripts.UI
 {
     public class UIManager : MonoBehaviour
     {
+        public bool IsProcessing => SelectionManager.IsProcessing || DragAndDropManager.IsProcessing;
+
         private static CardObject CardObject { get; set; }
         private SelectionManager SelectionManager { get; set; }
         private DragAndDropManager DragAndDropManager { get; set; }
@@ -26,7 +28,11 @@ namespace Assets.Scripts.UI
         private SpriteRenderer FrontTurnLight { get; set; }
         private SpriteRenderer BackTurnLight { get; set; }
 
-        public bool IsProcessing => SelectionManager.IsProcessing || DragAndDropManager.IsProcessing;
+        // Keep track of cards and slots
+        private HashSet<CardObject> CardObjects { get; set; }
+        private List<SlotObject> FieldSlotObjects { get; set; }
+        private HashSet<SlotObject> ManaSlotObjects { get; set; }
+        private IEnumerable<SlotObject> SlotObjects => FieldSlotObjects.Concat(ManaSlotObjects);
 
         public void Start()
         {
@@ -48,14 +54,25 @@ namespace Assets.Scripts.UI
             BackTurnLight = GameObject.Find("BackPlayer/ActiveTurnLight").GetComponent<SpriteRenderer>();
         }
 
-        public void RegisterSlots(Player player)
+        public void Initialize(BoardState board)
         {
-            var fieldSlotObjects = FindObjectsOfType<SlotObject>()
-                .Where(x => x.Owner == player.PlayerType && x.SlotType == SlotType.Field);
+            // Initialize collections
+            CardObjects = new HashSet<CardObject>();
+            FieldSlotObjects = new List<SlotObject>();
+            ManaSlotObjects = new HashSet<SlotObject>();
 
-            foreach (var slotObject in fieldSlotObjects)
+            foreach (var player in board.BothPlayers)
             {
-                slotObject.FieldSlot = player.Field[slotObject.Index];
+                var fieldSlotObjects = FindObjectsOfType<SlotObject>()
+                    .Where(x => x.Owner == player.PlayerType && x.SlotType == SlotType.Field)
+                    .ToArray();
+
+                foreach (var slotObject in fieldSlotObjects)
+                {
+                    slotObject.FieldSlot = player.Field[slotObject.Index];
+                }
+
+                FieldSlotObjects.AddRange(fieldSlotObjects);
             }
         }
 
@@ -64,43 +81,34 @@ namespace Assets.Scripts.UI
             var newCard = Instantiate(CardObject, playerType == PlayerType.Front ? FrontDeckOrigin : BackDeckOrigin, Quaternion.identity);
             newCard.Initialize(card);
             newCard.SetSortingLayer("Card");
+
+            CardObjects.Add(newCard);
             return newCard;
         }
 
         private IEnumerable<SlotObject> GetSlotObjects(PlayerType playerType, IEnumerable<FieldSlot> fieldSlots)
         {
-            // TODO: UIManager should keep track of slot references
-            var fieldSlotObjects = FindObjectsOfType<SlotObject>()
-                .Where(x => fieldSlots.Contains(x.FieldSlot));
-            var manaSlotObjectSingleton = FindObjectsOfType<SlotObject>()
-                .Where(x => x.SlotType == SlotType.Mana && x.Owner == playerType);
-
-            return fieldSlotObjects.Concat(manaSlotObjectSingleton);
+            return SlotObjects.Where(x => fieldSlots.Contains(x.FieldSlot)).Concat(ManaSlotObjects.Where(x => x.Owner == playerType));
         }
 
         private IEnumerable<SlotObject> GetFieldSlotObjects(IEnumerable<FieldSlot> fieldSlots)
         {
-            // TODO: UIManager should keep track of slot references
-            var fieldSlotObjects = FindObjectsOfType<SlotObject>()
-                .Where(x => fieldSlots.Contains(x.FieldSlot));
-
-            return fieldSlotObjects;
-        }
-
-        private IEnumerable<CardObject> GetCardObjects(IEnumerable<BaseCard> cardReferences)
-        {
-            // TODO: UIManager should keep track of card objects
-            return FindObjectsOfType<CardObject>().Where(x => cardReferences.Contains(x.CardReference));
+            return FieldSlotObjects.Where(x => fieldSlots.Contains(x.FieldSlot));
         }
 
         private SlotObject GetFieldSlotObject(FieldSlot slot)
         {
-            return FindObjectsOfType<SlotObject>().Single(x => x.FieldSlot == slot);
+            return FieldSlotObjects.Single(x => x.FieldSlot == slot);
+        }
+
+        private IEnumerable<CardObject> GetCardObjects(IEnumerable<BaseCard> cardReferences)
+        {
+            return CardObjects.Where(x => cardReferences.Contains(x.CardReference));
         }
 
         private CardObject GetCardObject(BaseCard card)
         {
-            return FindObjectsOfType<CardObject>().Single(x => x.CardReference == card);
+            return CardObjects.Single(x => x.CardReference == card);
         }
 
         private IEnumerable<Vector2> GetHandPoints(PlayerType player, int numberOfPoints)
@@ -157,7 +165,12 @@ namespace Assets.Scripts.UI
             BackTurnLight.enabled = playerType == PlayerType.Back;
         }
 
-        public void BeginCardSelection(IEnumerable<BaseCard> allowableTargets, IEnumerable<BaseCard> overrideTargets, int count, OnFinishSelection onFinishSelection, SelectionType selectionType)
+        public void BeginCardSelection(
+            IEnumerable<BaseCard> allowableTargets,
+            IEnumerable<BaseCard> overrideTargets,
+            int count,
+            Func<IEnumerable<BaseCard>, IEnumerable<BaseEvent>> onFinishSelection,
+            SelectionType selectionType)
         {
             // TODO: null or empty?
             var targets = overrideTargets != null ?
@@ -226,13 +239,18 @@ namespace Assets.Scripts.UI
             var cardObject = GetCardObject(card);
             cardObject.SetTargetPosition(playerType == PlayerType.Front ? FrontDestroyLocation : BackDestroyLocation);
             cardObject.DestroyWhenInPosition = true;
+
+            CardObjects.Remove(cardObject);
         }
 
         public void SacrificeCard(BaseCard card)
         {
             var cardObject = GetCardObject(card);
-            // Some kind of animation
-            cardObject.Destroy();
+            cardObject.SetTargetPosition(cardObject.transform.position);
+            cardObject.DestroyWhenInPosition = true;
+
+            CardObjects.Remove(cardObject);
+
         }
 
         public void UpdateSlotGlow(FieldSlot slot, EffectType type)

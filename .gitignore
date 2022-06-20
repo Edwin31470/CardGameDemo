@@ -363,16 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Unity ignores
-Temp
-Library
-Library/LastSceneManagerSetup.txt
-Library/ArtifactDB
-Library/SceneVisibilityState.asset
-Library/ScriptAssemblies/Assembly-CSharp.dll
-Library/ScriptMapper
-Library/ShaderCache/EditorEncounteredVariants
-Library/SourceAssetDB
-Library/StateCache/MainStageHierarchy/4d/4d2a36d9faf65734f0bbefb3ee623532.json
-Library/StateCache/SceneView/8c/8cd7c613bf844de3b80696e27a479d5e.json
-UserSettings/EditorUserSettings.asset
-UserSettings/Layouts/default-2021.dwlt
+/[Ll]ibrary/
+/[Tt]emp/

@@ -1,6 +1,9 @@
-﻿using Assets.Scripts.Enums;
+﻿using System;
+using Assets.Scripts.Enums;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Cards;
+using Assets.Scripts.Events;
 using UnityEngine;
 
 namespace Assets.Scripts.UI
@@ -16,7 +19,7 @@ namespace Assets.Scripts.UI
         private int MaxTargets { get; set; }
         private Color SelectionColour { get; set; }
 
-        private OnFinishSelection OnFinishSelection { get; set; }
+        private Func<IEnumerable<BaseCard>, IEnumerable<BaseEvent>> OnFinishSelection { get; set; }
 
         public bool IsProcessing { get; set; }
 
@@ -27,7 +30,7 @@ namespace Assets.Scripts.UI
             ValidCards = new HashSet<CardObject>();
         }
 
-        public void Begin(IEnumerable<CardObject> validCards, int maxTargets, OnFinishSelection onFinishSelection, SelectionType selectionType)
+        public void Begin(IEnumerable<CardObject> validCards, int maxTargets, Func<IEnumerable<BaseCard>, IEnumerable<BaseEvent>> onFinishSelection, SelectionType selectionType)
         {
             IsProcessing = true;
             ValidCards = new HashSet<CardObject>(validCards);
@@ -83,6 +86,8 @@ namespace Assets.Scripts.UI
             // Null when not hovering
             var hoveredCard = hit.collider?.GetComponentInParent<CardObject>();
 
+            HandHoveredHighlighting(hoveredCard);
+
             // Clicking on a card
             if (Input.GetMouseButtonDown(0))
             {
@@ -101,24 +106,25 @@ namespace Assets.Scripts.UI
                 }
             }
 
-
-            // Dehighlight When Not Selected
-            foreach (var card in ValidCards.Where(x => !SelectedCards.Contains(x) && x != hoveredCard))
+            // Finish if all targets selected or no more targets
+            if (ShouldFinishSelection())
             {
-                card.Dehighlight();
+                Finish();
             }
+        }
 
+        private void HandHoveredHighlighting(CardObject hoveredCard)
+        {
             // Highlight When Hovering
             if (ValidCards.Contains(hoveredCard))
             {
                 hoveredCard.Highlight(SelectionColour);
             }
 
-
-            // Finish if all targets selected or no more targets
-            if (ShouldFinishSelection())
+            // Dehighlight When Not Hovered
+            foreach (var card in ValidCards.Where(x => !SelectedCards.Contains(x) && x != hoveredCard))
             {
-                Finish();
+                card.Dehighlight();
             }
         }
 

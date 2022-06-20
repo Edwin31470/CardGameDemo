@@ -4,6 +4,7 @@ using Assets.Scripts.Events;
 
 namespace Assets.Scripts
 {
-    // Shorthand for Func<IEnumerable<BaseCard>,IEnumerable<BaseEvent>>
-    public delegate IEnumerable<BaseEvent> OnFinishSelection(IEnumerable<BaseCard> cards);
+    public delegate IEnumerable<BaseEvent> SelectSingleTarget(BoardState boardState, BaseCard source, BaseCard target);
+
+    public delegate IEnumerable<BaseEvent> SelectMultipleTargets(BoardState boardState, BaseCard source, IEnumerable<BaseCard> targets);
 }

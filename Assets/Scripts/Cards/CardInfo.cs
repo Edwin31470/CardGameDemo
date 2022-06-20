@@ -9,7 +9,7 @@ namespace Assets.Scripts.Cards
     public class CardInfo
     {
         public CardData CardData { get; set; }
-        public Func<IEnumerable<BaseEvent>> EffectEvents { get; set; }
+        public Func<BaseCard, IEnumerable<BaseEvent>> GenerateEvents { get; set; }
         public bool IsSummoned { get; set; }
     }
 }

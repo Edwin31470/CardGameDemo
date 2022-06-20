@@ -20,7 +20,7 @@ namespace Assets.Scripts.Cards
         public bool HasPersistence { get; set; }
         public bool IsUnique { get; set; }
 
-        public Func<IEnumerable<BaseEvent>> EffectEvents { get; set; }
+        public Func<BaseCard /* this */, IEnumerable<BaseEvent>> GenerateEvents { get; set; }
         public bool IsSummoned { get; set; }
 
 
@@ -36,8 +36,13 @@ namespace Assets.Scripts.Cards
             HasPersistence = cardInfo.CardData.HasPersistence;
             IsUnique = cardInfo.CardData.IsUnique;
 
-            EffectEvents = cardInfo.EffectEvents;
+            GenerateEvents = cardInfo.GenerateEvents;
             IsSummoned = cardInfo.IsSummoned;
+        }
+
+        public IEnumerable<BaseEvent> GetEvents()
+        {
+            return GenerateEvents.Invoke(this);
         }
 
         public CardInfo ToCardInfo()
@@ -55,7 +60,7 @@ namespace Assets.Scripts.Cards
                     FlavourText = FlavourText,
                     HasPersistence = HasPersistence
                 },
-                EffectEvents = EffectEvents,
+                GenerateEvents = GenerateEvents,
                 IsSummoned = IsSummoned,
             };
 
