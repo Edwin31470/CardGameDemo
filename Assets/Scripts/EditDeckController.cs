@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Cards;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -38,6 +39,9 @@ namespace Assets.Scripts
 
             GameObject.Find("Canvas/SaveButton").GetComponent<Button>()
                 .onClick.AddListener(SaveDeck);
+
+            GameObject.Find("Canvas/AddDeckButton").GetComponent<Button>()
+                .onClick.AddListener(CreateEmptyDeck);
         }
 
         private void DeckDropdownChanged(int index)
@@ -81,6 +85,15 @@ namespace Assets.Scripts
             }
 
             DeckIO.WriteDeck(DeckDropdown.captionText.text, newDeck.OrderBy(x => x));
+        }
+
+        private void CreateEmptyDeck()
+        {
+            var deckName = GameObject.Find("Canvas/NewDeckName").GetComponent<TMP_InputField>().text;
+
+            DeckDropdown.AddOptions(new List<string>() { deckName });
+
+            DeckIO.WriteDeck(deckName, Enumerable.Empty<int>());
         }
     }
 }
