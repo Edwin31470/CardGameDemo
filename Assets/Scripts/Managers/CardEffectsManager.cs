@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.Managers
 {
+    // DEPRECIATED
+    // Will remove when all effects have been copied to the new system
+
     public static class CardEffectsManager
     {
         private static Random _random = new Random((int)DateTime.Now.Ticks);
@@ -19,53 +22,9 @@ namespace Assets.Scripts.Managers
         public static IEnumerable<BaseEvent> GetCardEvents(CreatureCard card)
         {
             yield break;
-            //switch (card.Name)
-            //{
-            //    #region Red Creatures
-            //    case "Roiling Elemental":
-            //        yield return new CustomPassiveAllCreaturesEvent(
-            //            card,
-            //            new TargetConditions
-            //            {
-            //                SubType = SubType.Elemental
-            //            },
-            //            (targets) =>
-            //            {
-            //                foreach (var target in targets)
-            //                {
-            //                    if (target == card)
-            //                        continue;
-
-            //                    card.BonusAttack.Add(1);
-            //                    card.BonusDefence.Add(1);
-            //                }
-            //            });
-            //        yield break;
-
-            //    case "Smouldering Draug":
-            //        IEnumerable<BaseEvent> SmoulderingDraug()
-            //        {
-            //            if (MainController.GetCurrentPhase() == Phase.Play)
-            //            {
-            //                var cardInfo = card.ToCardInfo();
-            //                cardInfo.Attack = 2;
-            //                cardInfo.Defence = 2;
-                            
-            //                yield return new SummonCardEvent(cardInfo, card.Owner.PlayerType);
-            //            }
-            //        }
-
-            //        yield return new OnDestroyedEvent(
-            //            card,
-            //            SmoulderingDraug);
-            //        yield break;
 
             //    case "Flame-Tongue Kijiti":
             //        yield return new AddTokensEvent(card.Owner.PlayerType, TokenType.Claw, 2);
-            //        yield break;
-
-            //    case "Boiling Elemental":
-            //        yield return new DamageTargetsEvent(new TargetConditions(), 1, 4);
             //        yield break;
 
             //    case "Soaring Damned":

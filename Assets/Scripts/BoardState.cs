@@ -103,7 +103,18 @@ namespace Assets.Scripts
                     return player;
             }
 
-            return null;
+            throw new ArgumentOutOfRangeException(nameof(card), "Card must be owned by either player");
+        }
+
+        public Player GetSlotOwner(FieldSlot slot)
+        {
+            foreach (var player in BothPlayers)
+            {
+                if (player.Field.Contains(slot))
+                    return player;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(slot), "Slot must be owned by either player");
         }
     }
 }

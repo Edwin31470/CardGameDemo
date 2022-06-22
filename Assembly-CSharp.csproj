@@ -126,6 +126,10 @@
     <Compile Include="Assets\Scripts\Enums\Colour.cs" />
     <Compile Include="Assets\Scripts\MainController.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
+    <Compile Include="Assets\Scripts\Effects\BaseEffects.cs" />
+    <Compile Include="Assets\Scripts\Effects\SimpleEffects.cs" />
+    <Compile Include="Assets\Scripts\Effects\CustomEffects.cs" />
+    <Compile Include="Assets\Scripts\Effects\RedCreatureEffects.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

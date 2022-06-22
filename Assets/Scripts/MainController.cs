@@ -248,7 +248,7 @@ namespace Assets.Scripts
         {
             EnqueueEvent(new NewPhaseEvent(Phase.Draw));
 
-            EnqueueEvent(new SetSlotEffectEvent(TemporarySlotEffect, Board.GetPlayer(PlayerType.Front).Field[2], TriggerType.Enter, EffectType.Positive));
+            //EnqueueEvent(new SetSlotEffectEvent(TemporarySlotEffect, Board.GetPlayer(PlayerType.Front).Field[2], TriggerType.Enter, EffectType.Positive));
         }
 
 

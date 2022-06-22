@@ -32,13 +32,13 @@ namespace Assets.Scripts.Events
 
     public class OnDestroyedEvent : BaseTriggerEvent
     {
-        private Func<IEnumerable<BaseEvent>> Func { get; set; }
+        // Function to trigger when the card is destroyed
+        private Func<BoardState, BaseCard, IEnumerable<BaseEvent>> Func { get; set; }
 
-        public OnDestroyedEvent(BaseCard owner, Func<IEnumerable<BaseEvent>> func) : base(owner, true)
+        public OnDestroyedEvent(BaseCard owner, Func<BoardState, BaseCard, IEnumerable<BaseEvent>> func) : base(owner, true)
         {
             Func = func;
         }
-
 
         public override bool Conditions(BaseEvent triggeringEvent)
         {
@@ -47,7 +47,7 @@ namespace Assets.Scripts.Events
 
         public override IEnumerable<BaseEvent> Process(BoardState boardState, BaseEvent triggeringEvent)
         {
-            return Func.Invoke();
+            return Func.Invoke(boardState, Source);
         }
     }
 

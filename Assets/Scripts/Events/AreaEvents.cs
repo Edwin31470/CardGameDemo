@@ -89,16 +89,18 @@ namespace Assets.Scripts.Events
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            var player = board.GetCardOwner(Card);
+            // Work out who owns the card
+            Player player;
+            if (Slot != null)
+                player = board.GetSlotOwner(Slot); // Field cards are always owned by the player whose side they are played on
+            else
+                player = board.GetCardOwner(Card); // Action cards are always owned by the player who uses them
 
             if (player.IsInHand(Card))
                 player.RemoveFromHand(Card);
 
-            if (Slot == null)
-            {
-                yield return new DestroyCardEvent(Card);
-            }
-            else
+            // Add the field card to the slot or destroy the action card
+            if (Slot != null)
             {
                 var slotEvents = Slot.Add((FieldCard)Card);
                 foreach (var slotEvent in slotEvents)
@@ -106,7 +108,12 @@ namespace Assets.Scripts.Events
                     yield return slotEvent;
                 }
             }
+            else
+            {
+                yield return new DestroyCardEvent(Card);
+            }
 
+            // Get the card's events
             foreach (var baseEvent in Card.GetEvents())
             {
                 yield return baseEvent;
@@ -151,6 +158,10 @@ namespace Assets.Scripts.Events
 
             if (!Card.IsSummoned) {
                 player.AddToDestroyed(Card);
+            }
+            else
+            {
+                player.AddToEliminated(Card);
             }
         }
     }

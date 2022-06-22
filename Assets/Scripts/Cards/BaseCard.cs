@@ -20,7 +20,7 @@ namespace Assets.Scripts.Cards
         public bool HasPersistence { get; set; }
         public bool IsUnique { get; set; }
 
-        public Func<BaseCard /* this */, IEnumerable<BaseEvent>> GenerateEvents { get; set; }
+        private Func<BaseCard /* this */, IEnumerable<BaseEvent>> GenerateEvents { get; set; }
         public bool IsSummoned { get; set; }
 
 
