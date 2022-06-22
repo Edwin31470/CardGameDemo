@@ -75,7 +75,7 @@ namespace Assets.Scripts.Events
 
         public override void Process(UIManager uIManager)
         {
-            uIManager.ReturnToDeck(PlayerType, Card);
+            uIManager.MoveThenRemoveCard(Area.Deck, PlayerType, Card);
         }
     }
 
@@ -109,7 +109,7 @@ namespace Assets.Scripts.Events
 
         public override void Process(UIManager uIManager)
         {
-            uIManager.DestroyCard(PlayerType, Card);
+            uIManager.MoveThenRemoveCard(Area.Destroyed, PlayerType, Card);
         }
     }
 
@@ -124,7 +124,7 @@ namespace Assets.Scripts.Events
 
         public override void Process(UIManager uIManager)
         {
-            uIManager.SacrificeCard(Card);
+            uIManager.MoveThenRemoveCard(Area.None, PlayerType.Either, Card);
         }
     }
 

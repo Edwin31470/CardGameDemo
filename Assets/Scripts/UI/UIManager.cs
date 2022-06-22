@@ -227,30 +227,28 @@ namespace Assets.Scripts.UI
             }
         }
 
-        public void ReturnToDeck(PlayerType playerType, BaseCard card)
+        public void MoveThenRemoveCard(Area area, PlayerType playerType, BaseCard card)
         {
             var cardObject = GetCardObject(card);
-            cardObject.SetTargetPosition(playerType == PlayerType.Front ? FrontDeckOrigin : BackDeckOrigin);
-            cardObject.DestroyWhenInPosition = true;
-        }
 
-        public void DestroyCard(PlayerType playerType, BaseCard card)
-        {
-            var cardObject = GetCardObject(card);
-            cardObject.SetTargetPosition(playerType == PlayerType.Front ? FrontDestroyLocation : BackDestroyLocation);
+            Vector2 location;
+            switch (area)
+            {
+                case Area.Deck:
+                    location = playerType == PlayerType.Front ? FrontDeckOrigin : BackDeckOrigin;
+                    break;
+                case Area.Destroyed:
+                    location = playerType == PlayerType.Front ? FrontDestroyLocation : BackDestroyLocation;
+                    break;
+                default:
+                    location = cardObject.transform.position;
+                    break;
+            }
+
+            cardObject.SetTargetPosition(location);
             cardObject.DestroyWhenInPosition = true;
 
             CardObjects.Remove(cardObject);
-        }
-
-        public void SacrificeCard(BaseCard card)
-        {
-            var cardObject = GetCardObject(card);
-            cardObject.SetTargetPosition(cardObject.transform.position);
-            cardObject.DestroyWhenInPosition = true;
-
-            CardObjects.Remove(cardObject);
-
         }
 
         public void UpdateSlotGlow(FieldSlot slot, EffectType type)
