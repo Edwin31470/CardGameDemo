@@ -19,7 +19,7 @@ namespace Assets.Scripts
             IsLocked = false;
         }
 
-        public T DequeueEvent()
+        public T Dequeue()
         {
             if (IsLocked || IsEmpty)
                 return null;
@@ -27,24 +27,17 @@ namespace Assets.Scripts
             return Queue.Dequeue();
         }
 
-        public void EnqueueEvent(T baseEvent)
+        public void Enqueue(T baseEvent)
         {
             Queue.Enqueue(baseEvent);
         }
 
-        public T Peek()
+        public void Empty()
         {
-            return Queue.Peek();
-        }
-
-        public IEnumerable<T> PeekAll()
-        {
-            return Queue.ToList();
-        }
-
-        public void RemoveEvent(T baseEvent)
-        {
-            Queue = new Queue<T>(Queue.Where(x => x != baseEvent));
+            while (Queue.Count > 0)
+            {
+                Queue.Dequeue();
+            }
         }
     }
 }

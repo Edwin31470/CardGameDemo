@@ -13,11 +13,11 @@ namespace Assets.Scripts.Managers
     {
         private static readonly Dictionary<int, CardData> CardLibrary = CardIO.ReadAll().ToDictionary(x => x.Id, x => x);
 
-        private static readonly Dictionary<int, BaseCardEffect> EffectLibrary = Assembly.GetAssembly(typeof(BaseCardEffect))
+        private static readonly Dictionary<int, BaseEffect> EffectLibrary = Assembly.GetAssembly(typeof(BaseEffect))
             .GetTypes()
-            .Where(x => x.IsClass && !x.IsAbstract && x.IsSubclassOf(typeof(BaseCardEffect)))
-            .Select(x => (BaseCardEffect)Activator.CreateInstance(x))
-            .ToDictionary(x => x.CardId, x => x);
+            .Where(x => x.IsClass && !x.IsAbstract && x.IsSubclassOf(typeof(BaseEffect)))
+            .Select(x => (BaseEffect)Activator.CreateInstance(x))
+            .ToDictionary(x => x.Id, x => x);
 
         public static List<CardInfo> GetDeck(string deckName)
         {
@@ -26,7 +26,7 @@ namespace Assets.Scripts.Managers
             return cardIds.Select(x => new CardInfo
             {
                 CardData = CardLibrary[x],
-                GenerateEvents = EffectLibrary[x].GetEffect
+                GenerateEvents = EffectLibrary.TryGetValue(x, out var effect) ? effect.GenerateEffects : (x, y) => Enumerable.Empty<BaseEvent>()
             }).ToList();
         }
     }

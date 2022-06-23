@@ -15,55 +15,9 @@ namespace Assets.Scripts.Managers
 
     public static class CardEffectsManager
     {
-        private static Random _random = new Random((int)DateTime.Now.Ticks);
-
-        private static bool FlipCoin() => _random.Next(0, 2) == 0;
-
         public static IEnumerable<BaseEvent> GetCardEvents(CreatureCard card)
         {
             yield break;
-
-            //    case "Flame-Tongue Kijiti":
-            //        yield return new AddTokensEvent(card.Owner.PlayerType, TokenType.Claw, 2);
-            //        yield break;
-
-            //    case "Soaring Damned":
-            //        IEnumerable<BaseEvent> SoaringDamned()
-            //        {
-            //            yield return new DestroyTargetsEvent(
-            //                new TargetConditions
-            //                {
-            //                    CardType = CardType.Creature
-            //                },
-            //                1);
-            //        }
-            //        yield return new OnDestroyedEvent(
-            //            card,
-            //            SoaringDamned);
-            //        yield break;
-
-            //    case "Eruption Idol":
-
-            //        IEnumerable<BaseEvent> EruptionIdol(IEnumerable<CreatureCard> targets)
-            //        {
-            //            foreach (var target in targets)
-            //            {
-            //                if (FlipCoin())
-            //                    yield return new WeakenCreatureEvent(target, 5);
-            //                else
-            //                    yield return new DamageCreatureEvent(target, 5);
-            //            }
-            //        };
-
-            //        yield return new CustomAllCreaturesEvent(
-            //            new TargetConditions
-            //            {
-            //                PlayerType = card.Owner.PlayerType.GetOpposite()
-            //            },
-            //            EruptionIdol);
-            //        yield break;
-            //    #endregion
-
             //    #region Green Creatures
             //    case "Bird of Paradise":
             //        yield return new AddManaPlayerEvent(card.Owner.PlayerType, Colour.Green, 1);
@@ -336,61 +290,6 @@ namespace Assets.Scripts.Managers
         public static IEnumerable<BaseEvent> GetCardEvents(ActionCard card)
         {
             yield break;
-
-            //switch (card.Name)
-            //{
-            //    #region Red Actions
-            //    case "Shard of Arah":
-            //        yield return new DamageTargetsEvent(new TargetConditions(), 1, 3);
-            //        yield return new StrengthenTargetsEvent(new TargetConditions(), 1, 3);
-            //        yield break;
-
-            //    case "Tempest Cup":
-            //        yield return new AddTokensEvent(card.Owner, TokenType.Claw, 3);
-            //        yield return new AddTokensEvent(card.Owner, TokenType.Cracked, 2);
-            //        yield return new AddLifePlayerEvent(card.Owner, 5);
-            //        yield break;
-
-            //    case "Willing Sacrifice":
-            //        yield return new DestroyTargetsEvent(
-            //            new TargetConditions
-            //            {
-            //                PlayerType = card.Owner,
-            //                CardType = CardType.Creature
-            //            },
-            //            1);
-            //        yield return new CustomAllCreaturesEvent(
-            //            new TargetConditions
-            //            {
-            //                PlayerType = card.Owner
-            //            },
-            //            (targets) =>
-            //            {
-            //                foreach (var target in targets)
-            //                {
-            //                    MainController.AddEvent(new StrengthenCreatureEvent(target, 3));
-            //                    MainController.AddEvent(new FortifyCreatureEvent(target, 3));
-            //                }
-            //            });
-            //        break;
-
-            //    case "Rolling Thunder":
-            //        yield return new CustomAllCreaturesEvent(
-            //            new TargetConditions
-            //            {
-
-            //            },
-            //            (targets) =>
-            //            {
-            //                foreach (var target in targets)
-            //                {
-            //                    MainController.AddEvent(new DamageCreatureEvent(target, target.Owner == card.Owner ? 1 : 3));
-            //                }
-            //            });
-            //        yield break;
-
-            //    #endregion
-
             //    #region Green Actions
             //    case "Apple of the Orchard":
             //        yield return new CustomAllCreaturesEvent(

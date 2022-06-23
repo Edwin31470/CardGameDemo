@@ -20,7 +20,7 @@ namespace Assets.Scripts.Cards
         public bool HasPersistence { get; set; }
         public bool IsUnique { get; set; }
 
-        private Func<BaseCard /* this */, IEnumerable<BaseEvent>> GenerateEvents { get; set; }
+        private Func<BaseCard /* this */, BoardState, IEnumerable<BaseEvent>> GenerateEvents { get; set; }
         public bool IsSummoned { get; set; }
 
 
@@ -40,9 +40,9 @@ namespace Assets.Scripts.Cards
             IsSummoned = cardInfo.IsSummoned;
         }
 
-        public IEnumerable<BaseEvent> GetEvents()
+        public IEnumerable<BaseEvent> GetEvents(BoardState board)
         {
-            return GenerateEvents.Invoke(this);
+            return GenerateEvents.Invoke(this, board);
         }
 
         public CardInfo ToCardInfo()

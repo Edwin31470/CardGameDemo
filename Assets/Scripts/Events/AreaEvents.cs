@@ -26,6 +26,12 @@ namespace Assets.Scripts.Events
         {
             var player = board.GetPlayer(PlayerType);
 
+            if (player.Deck.Count == 0)
+            {
+                yield return new GameEndEvent($"{player.PlayerType} Player has run out of cards!");
+                yield break;
+            };
+
             var card = player.TakeFromDeck();
             player.AddToHand(card);
 
@@ -89,34 +95,40 @@ namespace Assets.Scripts.Events
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
+            var isActionCard = Card is ActionCard;
+
             // Work out who owns the card
             Player player;
-            if (Slot != null)
-                player = board.GetSlotOwner(Slot); // Field cards are always owned by the player whose side they are played on
-            else
+            if (isActionCard)
                 player = board.GetCardOwner(Card); // Action cards are always owned by the player who uses them
+            else
+                player = board.GetSlotOwner(Slot); // Field cards are always owned by the player whose side they are played on
 
-            if (player.IsInHand(Card))
-                player.RemoveFromHand(Card);
+            var effectEvents = Card.GetEvents(board).ToList(); // Generate effect events before removing from hand
 
-            // Add the field card to the slot or destroy the action card
-            if (Slot != null)
+            // Add card to slot
+            if (!isActionCard)
             {
-                var slotEvents = Slot.Add((FieldCard)Card);
+                if (player.IsInHand(Card))
+                    player.RemoveFromHand(Card);
+
+                var slotEvents = Slot.Add(Card);
                 foreach (var slotEvent in slotEvents)
                 {
                     yield return slotEvent;
                 }
             }
-            else
-            {
-                yield return new DestroyCardEvent(Card);
-            }
 
             // Get the card's events
-            foreach (var baseEvent in Card.GetEvents())
+            foreach (var baseEvent in effectEvents)
             {
                 yield return baseEvent;
+            }
+
+            // Destroy if an action card
+            if (isActionCard)
+            {
+                yield return new DestroyCardEvent(Card);
             }
         }
     }
@@ -276,7 +288,7 @@ namespace Assets.Scripts.Events
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
             var originalPlayer = board.GetCardOwner(Card);
-            var newPlayer = board.GetPlayer(originalPlayer.PlayerType.GetOpposite());
+            var newPlayer = board.GetPlayer(originalPlayer.PlayerType.Opposite());
 
             var leaveSlotEvents = originalPlayer.RemoveFromField(Card);
             foreach (var slotEvent in leaveSlotEvents) {
@@ -315,25 +327,26 @@ namespace Assets.Scripts.Events
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
+            var isActionCard = CardInfo.CardData.CardType == CardType.Action;
+
             var player = board.GetPlayer(PlayerType);
             var summonedCard = BaseCard.Create(CardInfo);
 
-            if (summonedCard is FieldCard fieldCard)
+            if (isActionCard)
+            {
+                yield return new EnterFieldEvent(summonedCard, null);
+            }
+            else
             {
                 var slot = player.GetRandomEmptySlot();
                 if (slot == null)
                 {
                     yield return new MessageEvent("Unable to summon card: no free slots", 1);
                     yield break;
-
                 }
 
-                yield return new CreateCardInSlotUIEvent(PlayerType, fieldCard, slot);
-                yield return new EnterFieldEvent(fieldCard, slot);
-            }
-            else
-            {
-                yield return new EnterFieldEvent(summonedCard, null);
+                yield return new CreateCardInSlotUIEvent(PlayerType, summonedCard, slot);
+                yield return new EnterFieldEvent(summonedCard, slot);
             }
         }
     }

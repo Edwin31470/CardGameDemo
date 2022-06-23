@@ -5,23 +5,36 @@ using Assets.Scripts.Events;
 
 namespace Assets.Scripts.Effects
 {
+    public static class FlipCoin
+    {
+        private static readonly Random _random = new((int)DateTime.Now.Ticks);
+
+        public static bool Flip => _random.Next(0, 2) == 0;
+    }
+
     // Effects are singleton classes that generate a list of events
     // Used for cards, abilities, items and slots
 
     public abstract class BaseEffect
     {
-
+        public abstract int Id { get; }
+        public abstract IEnumerable<BaseEvent> GenerateEffects(BaseCard source, BoardState board);
     }
 
-    public abstract class BaseCardEffect
+    // An effect with a card source
+    public abstract class BaseCardEffect<T> : BaseEffect where T : BaseCard
     {
-        public abstract int CardId { get; }
-        public abstract IEnumerable<BaseEvent> GetEffect(BaseCard source);
+        public abstract IEnumerable<BaseEvent> GetEffect(T source, BoardState board);
 
-        // Conditional methods
-        protected static Func<BaseEvent, bool> IsDestroyed(BaseCard target)
+        public override IEnumerable<BaseEvent> GenerateEffects(BaseCard source, BoardState board)
         {
-            return triggeringEvent => triggeringEvent is DestroyCardEvent destroyCardEvent && destroyCardEvent.Card == target;
+            return GetEffect((T)source, board);
         }
+    }
+
+    // An effect with targeting
+    public abstract class BaseTargetingEffect<T> : BaseCardEffect<T> where T : BaseCard
+    {
+        protected abstract TargetConditions GetTargetConditions(T source, BoardState board);
     }
 }

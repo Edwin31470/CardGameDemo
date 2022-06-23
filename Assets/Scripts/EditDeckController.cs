@@ -56,7 +56,7 @@ namespace Assets.Scripts
 
             // Add new deck
             foreach (var card in deckCards) {
-                AddCardRow(Cards[card]);
+                AddCardRow(Cards.Single(x => x.Id == card));
             }
         }
 

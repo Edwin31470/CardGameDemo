@@ -14,7 +14,6 @@ namespace Assets.Scripts.Enums
         Redraw,
         Play,
         Damage,
-        Mana,
-        GameEnd
+        Mana
     }
 }

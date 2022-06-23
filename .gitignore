@@ -365,12 +365,3 @@ FodyWeavers.xsd
 # Unity ignores
 /[Ll]ibrary/
 /[Tt]emp/
-Library/ArtifactDB
-Library/LastSceneManagerSetup.txt
-Library/SceneVisibilityState.asset
-Library/ScriptAssemblies/Assembly-CSharp.dll
-Library/ScriptMapper
-Library/SourceAssetDB
-Library/StateCache/MainStageHierarchy/4d/4d2a36d9faf65734f0bbefb3ee623532.json
-Library/StateCache/SceneView/8c/8cd7c613bf844de3b80696e27a479d5e.json
-UserSettings/Layouts/default-2021.dwlt

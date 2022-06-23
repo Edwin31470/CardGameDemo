@@ -8,39 +8,51 @@ namespace Assets.Scripts.Effects
     // Effects that generate complex/non-preexisting effects
     // Usually inherits from BaseCardEffect or a SimpleEffect
 
-    public abstract class CustomPassiveCreatureSourceAllCreaturesEffect : BaseCardEffect
+    // A passive effect with a source and many valid targets
+    public abstract class CustomPassiveAllCreaturesEffect<T> : BaseTargetingEffect<T> where T : BaseCard
     {
-        protected abstract TargetConditions TargetConditions { get; }
-
-        public override IEnumerable<BaseEvent> GetEffect(BaseCard source)
+        public override IEnumerable<BaseEvent> GetEffect(T source, BoardState board)
         {
-            yield return new CustomPassiveCreatureSourceAllCreaturesEvent(source, TargetConditions, Effect);
+            yield return new CustomPassiveAllCreaturesEvent<T>(source, GetTargetConditions(source, board), Effect);
         }
 
-        protected abstract void Effect(BoardState boardState, CreatureCard source, IEnumerable<CreatureCard> targets);
+        protected abstract void Effect(T source, BoardState boardState, IEnumerable<CreatureCard> targets);
     }
 
-    public abstract class CustomSingleTargetEffect : SimpleTargetEffect
+    // Apply an effect to a single target
+    public abstract class CustomSingleTargetEffect<T> : BaseTargetingEffect<T> where T : BaseCard
     {
         protected abstract SelectionType SelectionType { get; }
         protected abstract string Message { get; }
 
 
-        public override IEnumerable<BaseEvent> GetEffect(BaseCard source)
+        public override IEnumerable<BaseEvent> GetEffect(T source, BoardState board)
         {
-            yield return new CustomSingleTargetEvent(source, TargetConditions, Effect, SelectionType, Message);
+            yield return new CustomSingleTargetEvent<T>(source, GetTargetConditions(source, board), Effect, SelectionType, Message);
         }
 
-        protected abstract IEnumerable<BaseEvent> Effect(BoardState boardState, BaseCard source, BaseCard target);
+        protected abstract IEnumerable<BaseEvent> Effect(T source, BoardState boardState, BaseCard target);
     }
 
-    public abstract class CustomOnDestroyedEffect : BaseCardEffect
+    // Apply an effect when the source is destroyed
+    public abstract class CustomOnDestroyedEffect<T> : BaseCardEffect<T> where T : BaseCard
     {
-        public override IEnumerable<BaseEvent> GetEffect(BaseCard source)
+        public override IEnumerable<BaseEvent> GetEffect(T source, BoardState board)
         {
-            yield return new OnDestroyedEvent(source, Effect);
+            yield return new OnDestroyedEvent<T>(source, Effect);
         }
 
-        protected abstract IEnumerable<BaseEvent> Effect(BoardState boardState, BaseCard source);
+        protected abstract IEnumerable<BaseEvent> Effect(T source, BoardState boardState);
+    }
+
+    // Apply the same effect to each valid target
+    public abstract class CustomAllCreaturesEffect<T> : BaseTargetingEffect<T> where T : BaseCard
+    {
+        public override IEnumerable<BaseEvent> GetEffect(T source, BoardState board)
+        {
+            yield return new CustomAllCreaturesEvent<T>(source, GetTargetConditions(source, board), Effect);
+        }
+
+        protected abstract IEnumerable<BaseEvent> Effect(T source, CreatureCard target);
     }
 }

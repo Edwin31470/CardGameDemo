@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
@@ -145,11 +146,14 @@ namespace Assets.Scripts
 
         private List<string> GetSymbolNames()
         {
-            return new List<string>
-            {
-                "Elemental",
-                "Skull"
-            };
+            const string SymbolsFolder = "Assets/Resources/Sprites/Symbols";
+
+            return Directory
+                .GetFiles(SymbolsFolder, "*.png")
+                .Select(Path.GetFileName)
+                .Where(x => x.Contains("Symbol"))
+                .Select(x => x.Substring(0, x.Length - 10))
+                .ToList();
         }
     }
 }

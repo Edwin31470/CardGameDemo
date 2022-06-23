@@ -29,10 +29,10 @@ namespace Assets.Scripts.Events
     public class CreateCardInSlotUIEvent : BaseUIEvent
     {
         private PlayerType PlayerType { get; set; }
-        private FieldCard Card { get; set; }
+        private BaseCard Card { get; set; }
         private FieldSlot Slot { get; set; }
 
-        public CreateCardInSlotUIEvent(PlayerType playerType, FieldCard card, FieldSlot slot)
+        public CreateCardInSlotUIEvent(PlayerType playerType, BaseCard card, FieldSlot slot)
         {
             PlayerType = playerType;
             Card = card;

@@ -38,29 +38,4 @@ namespace Assets.Scripts.Events
             controller.EnqueueEvent(new PlayCardEvent(PlayingPlayer, OtherPlayerPassed));
         }
     }
-
-    public class GameEndEvent : BasePhaseEvent
-    {
-        public override void Process(MainController controller)
-        {
-            MainController.ClearPhaseQueue();
-            controller.NewPhase(Phase.GameEnd);
-        }
-    }
-
-    public class CustomGameEndEvent : BasePhaseEvent
-    {
-        private string Message { get; set; }
-
-        public CustomGameEndEvent(string message)
-        {
-            Message = message;
-        }
-
-        public override void Process(MainController controller)
-        {
-            MainController.ClearPhaseQueue();
-            controller.EnqueueEvent(new MessageEvent(Message, 10000));
-        }
-    }
 }

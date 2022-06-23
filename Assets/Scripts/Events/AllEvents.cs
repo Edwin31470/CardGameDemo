@@ -8,23 +8,24 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.Events
 {
-    //TODO: should be able to use a target event with all cards already targeted
-    public abstract class BaseAllEvent : BaseAreaEvent
+    // Active events that apply the same effect to all valid targets
+
+    public abstract class BaseAllEvent<T> : BaseActiveEvent<T> where T : BaseCard
     {
         protected TargetConditions TargetConditions { get; set; }
 
-        protected BaseAllEvent(TargetConditions targetConditions)
+        protected BaseAllEvent(T source, TargetConditions targetConditions) : base(source)
         {
             TargetConditions = targetConditions;
         }
     }
 
     // Targets all field creatures
-    public class CustomAllCreaturesEvent : BaseAllEvent
+    public class CustomAllCreaturesEvent<T> : BaseAllEvent<T> where T : BaseCard
     {
-        Func<IEnumerable<CreatureCard>,IEnumerable<BaseEvent>> Func { get; set; }
+        private Func<T, CreatureCard, IEnumerable<BaseEvent>> Func { get; set; }
 
-        public CustomAllCreaturesEvent(TargetConditions targetConditions, Func<IEnumerable<CreatureCard>,IEnumerable<BaseEvent>> func) : base(targetConditions)
+        public CustomAllCreaturesEvent(T source, TargetConditions targetConditions, Func<T, CreatureCard, IEnumerable<BaseEvent>> func) : base(source, targetConditions)
         {
             targetConditions.CardType = CardType.Creature;
             Func = func;
@@ -33,7 +34,14 @@ namespace Assets.Scripts.Events
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
             var cards = board.GetMatchingCards(TargetConditions).OfType<CreatureCard>();
-            return Func.Invoke(cards);
+
+            var events = new List<BaseEvent>();
+            foreach (var card in cards)
+            {
+                events.AddRange(Func.Invoke(Source, card));
+            }
+
+            return events;
         }
     }
 }

@@ -1,15 +1,11 @@
 ﻿using Assets.Scripts.Enums;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Assets.Scripts.Extensions
 {
     public static class EnumExtensions
     {
-        public static PlayerType GetOpposite(this PlayerType player)
+        public static PlayerType Opposite(this PlayerType player)
         {
             return ~player & PlayerType.Either;
         }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Assets.Scripts.Enums;
+using Assets.Scripts.Cards;
 
 namespace Assets.Scripts.Events
 {
@@ -9,15 +10,6 @@ namespace Assets.Scripts.Events
     {
         public virtual string EventTitle => null;
         public virtual float Delay => 0;
-
-        /// <summary>
-        /// Actions a delegate
-        /// </summary>
-        /// <returns>Enumerable of events to queue</returns>
-        public virtual IEnumerable<BaseEvent> Process()
-        {
-            throw new MethodAccessException($"{nameof(BaseEvent.Process)} should not be being called. Called by {GetType()}");
-        }
     }
 
     public abstract class BaseUIEvent : BaseEvent
@@ -28,10 +20,13 @@ namespace Assets.Scripts.Events
     // Gameplay events are events that go in to the normal queue
     public abstract class BaseGameplayEvent : BaseEvent
     {
-
+        public virtual IEnumerable<BaseEvent> Process()
+        {
+            throw new MethodAccessException($"{nameof(BaseGameplayEvent.Process)} should not be being called. Called by {GetType()}");
+        }
     }
 
-    // A board event is something that affects the board state (card ownership, player stats)
+    // A board event is something that affects the board state (card stats, card ownership, player stats) - most things
     public abstract class BaseBoardEvent : BaseGameplayEvent
     {
         public virtual IEnumerable<BaseEvent> Process(BoardState board)
@@ -40,6 +35,7 @@ namespace Assets.Scripts.Events
         }
     }
 
+    // Like a board event but requires UI interaction
     public abstract class BaseUIInteractionEvent : BaseGameplayEvent
     {
         public virtual IEnumerable<BaseEvent> Process(UIManager uIManager, BoardState board)
@@ -53,7 +49,6 @@ namespace Assets.Scripts.Events
         public override float Delay => 1f;
         public abstract void Process(MainController controller);
     }
-
 
     public class MessageEvent : BaseGameplayEvent
     {

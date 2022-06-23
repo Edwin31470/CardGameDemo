@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 namespace Assets.Scripts.Events
 {
+    // Events that affect the player's stats
+
     public class BasePlayerEvent : BaseBoardEvent
     {
         protected PlayerType PlayerType { get; set; }
@@ -32,7 +34,7 @@ namespace Assets.Scripts.Events
             player.Health.Remove(Amount);
 
             if (player.Health.Get() <= 0)
-                yield return new GameEndEvent();
+                yield return new GameEndEvent($"{player.PlayerType} Player has run out of life!");
         }
     }
 

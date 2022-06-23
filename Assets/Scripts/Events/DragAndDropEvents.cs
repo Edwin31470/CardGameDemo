@@ -59,7 +59,7 @@ namespace Assets.Scripts.Events
             player.RemoveMana(droppedCard.Colour, droppedCard.Cost);
             yield return new EnterFieldEvent(droppedCard, fieldSlot);
 
-            yield return new NewTurnEvent(PlayingPlayer.GetOpposite(), false);
+            yield return new NewTurnEvent(PlayingPlayer.Opposite(), false);
         }
 
         private IEnumerable<BaseEvent> SacrificeCard(BaseCard card)
@@ -76,7 +76,7 @@ namespace Assets.Scripts.Events
                 yield break;
             }
 
-            yield return new NewTurnEvent(PlayingPlayer.GetOpposite(), true);
+            yield return new NewTurnEvent(PlayingPlayer.Opposite(), true);
         }
     }
 }

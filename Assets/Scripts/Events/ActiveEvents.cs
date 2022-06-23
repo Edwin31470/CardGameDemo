@@ -6,90 +6,76 @@ using System.Collections.Generic;
 
 namespace Assets.Scripts.Events
 {
-    public abstract class BaseActiveEvent : BaseGameplayEvent
+    // Events that trigger once
+
+    public abstract class BaseActiveEvent<T> : BaseBoardEvent
     {
+        protected T Source { get; set; }
+
+        public BaseActiveEvent(T source)
+        {
+            Source = source;
+        }
     }
 
-    public abstract class BaseStatEvent : BaseActiveEvent
+    public abstract class BaseStatEvent : BaseActiveEvent<CreatureCard>
     {
-        public CreatureCard Card { get; set; }
         public int Value { get; set; }
+        public Stat Stat { get; set; }
 
-        protected BaseStatEvent(CreatureCard card, int value)
+        protected BaseStatEvent(CreatureCard source, int value, Stat stat) : base(source)
         {
-            Card = card;
             Value = value;
+            Stat = stat;
+        }
+
+        public override IEnumerable<BaseEvent> Process(BoardState board)
+        {
+            Stat.Add(Value);
+            yield break;
         }
     }
 
     public class DamageCreatureEvent : BaseStatEvent
     {
 
-        public DamageCreatureEvent(CreatureCard card, int value) : base(card, value)
+        public DamageCreatureEvent(CreatureCard card, int value) : base(card, -value, card.BaseDefence)
         {
-        }
-
-        public override IEnumerable<BaseEvent> Process()
-        {
-            Card.BaseDefence.Remove(Value);
-            yield break;
         }
     }
 
     public class FortifyCreatureEvent : BaseStatEvent
     {
-        public FortifyCreatureEvent(CreatureCard card, int value) : base(card, value)
+        public FortifyCreatureEvent(CreatureCard card, int value) : base(card, value, card.BaseDefence)
         {
-        }
-
-
-        public override IEnumerable<BaseEvent> Process()
-        {
-            Card.BaseDefence.Add(Value);
-            yield break;
         }
     }
 
     public class WeakenCreatureEvent : BaseStatEvent
     {
-        public WeakenCreatureEvent(CreatureCard card, int value) : base(card, value)
+        public WeakenCreatureEvent(CreatureCard card, int value) : base(card, -value, card.BaseAttack)
         {
-        }
-
-
-        public override IEnumerable<BaseEvent> Process()
-        {
-            Card.BaseAttack.Remove(Value);
-            yield break;
         }
     }
 
     public class StrengthenCreatureEvent : BaseStatEvent
     {
-        public StrengthenCreatureEvent(CreatureCard card, int value) : base(card, value)
+        public StrengthenCreatureEvent(CreatureCard card, int value) : base(card, value, card.BaseAttack)
         {
-        }
-
-
-        public override IEnumerable<BaseEvent> Process()
-        {
-            Card.BaseAttack.Add(Value);
-            yield break;
         }
     }
 
-    public class CustomActiveEvent : BaseActiveEvent
+    // TODO: not working (is it needed)
+    public class CustomActiveEvent<T> : BaseActiveEvent<T> where T : BaseCard
     {
-        public BaseCard Card { get; set; }
         public Func<IEnumerable<BaseEvent>> Func { get; set; }
 
-        public CustomActiveEvent(BaseCard baseCard, Func<IEnumerable<BaseEvent>> func)
+        public CustomActiveEvent(T source, Func<IEnumerable<BaseEvent>> func) : base(source)
         {
-            Card = baseCard;
             Func = func;
         }
 
-        public override IEnumerable<BaseEvent> Process()
+        public override IEnumerable<BaseEvent> Process(BoardState board)
         {
             return Func.Invoke();
         }

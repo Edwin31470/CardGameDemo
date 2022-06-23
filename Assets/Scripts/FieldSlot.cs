@@ -28,12 +28,12 @@ namespace Assets.Scripts
             return Enumerable.Empty<BaseEvent>();
         }
 
-        public IEnumerable<BaseEvent> Add(FieldCard card)
+        public IEnumerable<BaseEvent> Add(BaseCard card)
         {
-            Card = card;
+            Card = (FieldCard)card;
 
             if (TriggerType.HasFlag(TriggerType.Enter)) {
-                return Trigger(card);
+                return Trigger(Card);
             }
 
             return Enumerable.Empty<BaseEvent>();

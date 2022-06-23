@@ -212,24 +212,24 @@ namespace Assets.Scripts.Events
     }
 
     // Keep track of source card
-    public abstract class BaseCustomTargetEvent : BaseCardSelectionEvent
+    public abstract class BaseCustomTargetEvent<T> : BaseCardSelectionEvent where T : BaseCard
     {
-        protected BaseCard Source { get; set; }
+        protected T Source { get; set; }
         public override string EventTitle => Message;
         private string Message { get; }
 
-        protected BaseCustomTargetEvent(BaseCard source, TargetConditions targetConditions, int count, SelectionType selectionType, string message) : base(targetConditions, count, selectionType)
+        protected BaseCustomTargetEvent(T source, TargetConditions targetConditions, int count, SelectionType selectionType, string message) : base(targetConditions, count, selectionType)
         {
             Source = source;
             Message = message;
         }
     }
 
-    public class CustomMultiTargetEvent : BaseCustomTargetEvent
+    public class CustomMultiTargetEvent<T> : BaseCustomTargetEvent<T> where T : BaseCard
     {
-        private SelectMultipleTargets CustomFinishSelection { get; }
+        private SelectMultipleTargets<T> CustomFinishSelection { get; }
 
-        public CustomMultiTargetEvent(BaseCard source, TargetConditions targetConditions, int count, SelectMultipleTargets onFinishSelection, SelectionType selectionType, string message)
+        public CustomMultiTargetEvent(T source, TargetConditions targetConditions, int count, SelectMultipleTargets<T> onFinishSelection, SelectionType selectionType, string message)
             : base(source, targetConditions, count, selectionType, message)
         {
             CustomFinishSelection = onFinishSelection;
@@ -237,15 +237,15 @@ namespace Assets.Scripts.Events
 
         public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<BaseCard> selectedCards)
         {
-            return CustomFinishSelection.Invoke(BoardState, Source, selectedCards);
+            return CustomFinishSelection.Invoke(Source, BoardState, selectedCards);
         }
     }
 
-    public class CustomSingleTargetEvent : BaseCustomTargetEvent
+    public class CustomSingleTargetEvent<T> : BaseCustomTargetEvent<T> where T : BaseCard
     {
-        private SelectSingleTarget CustomFinishSelection { get; }
+        private SelectSingleTarget<T> CustomFinishSelection { get; }
 
-        public CustomSingleTargetEvent(BaseCard source, TargetConditions targetConditions, SelectSingleTarget onFinishSelection, SelectionType selectionType, string message)
+        public CustomSingleTargetEvent(T source, TargetConditions targetConditions, SelectSingleTarget<T> onFinishSelection, SelectionType selectionType, string message)
             : base(source, targetConditions, 1, selectionType, message)
         {
             CustomFinishSelection = onFinishSelection;
@@ -254,7 +254,7 @@ namespace Assets.Scripts.Events
         public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<BaseCard> targets)
         {
             var target = targets.SingleOrDefault();
-            return target != null ? CustomFinishSelection.Invoke(BoardState, Source, target) : Enumerable.Empty<BaseEvent>();
+            return target != null ? CustomFinishSelection.Invoke(Source, BoardState, target) : Enumerable.Empty<BaseEvent>();
         }
     };
 }

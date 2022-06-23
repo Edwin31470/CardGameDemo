@@ -20,19 +20,18 @@ namespace Assets.Scripts
         private PileManager PileManager { get; set; }
         private ShowTokensManager ShowTokensManager { get; set; }
 
-        // Queues
+        // Queues and collections
         private RepeatingTimer Timer { get; set; }
-        private EventQueue<BaseGameplayEvent> EventQueue { get; set; }
-        private EventQueue<BasePhaseEvent> PhaseQueue { get; set; }
-        private EventQueue<BaseUIEvent> UIQueue { get; set; }
-        private List<BasePassiveEvent> PassiveEvents { get; set; }
-        private List<BaseInteruptEvent> InteruptEvents { get; set; }
-        private List<BaseTriggerEvent> TriggerEvents { get; set; }
+        private EventQueue<BaseUIEvent> UIQueue { get; set; } = new();
+        private EventQueue<BaseGameEndEvent> GameEndQueue { get; set; } = new();
+        private EventQueue<BaseGameplayEvent> EventQueue { get; set; } = new();
+        private EventQueue<BasePhaseEvent> PhaseQueue { get; set; } = new();
+        private List<BasePassiveEvent> PassiveEvents { get; set; } = new();
+        private List<BaseInteruptEvent> InteruptEvents { get; set; } = new();
+        private List<BaseTriggerEvent> TriggerEvents { get; set; } = new();
 
         // Board
         private BoardState Board { get; set; }
-
-
 
         // Static method to be used by scripts requiring Update()
         public static MainController Get()
@@ -40,58 +39,14 @@ namespace Assets.Scripts
             return GameObject.Find("MainController").GetComponent<MainController>();
         }
 
-        // Helper Methods
-
-
-        public static void ClearPhaseQueue()
-        {
-            var controller = GameObject.Find("MainController").GetComponent<MainController>();
-
-            while (!controller.PhaseQueue.IsEmpty)
-            {
-                controller.PhaseQueue.DequeueEvent();
-            }
-        }
-
-        public static void ClearGameplayQueue()
-        {
-            var controller = GameObject.Find("MainController").GetComponent<MainController>();
-
-            while (!controller.EventQueue.IsEmpty)
-            {
-                controller.EventQueue.DequeueEvent();
-            }
-        }
-
-        public static void RemoveEvent(BaseEvent baseEvent)
-        {
-            var controller = GameObject.Find("MainController").GetComponent<MainController>();
-
-            if (baseEvent is BasePassiveEvent passiveEvent)
-            {
-                controller.PassiveEvents.Remove(passiveEvent);
-            }
-            else if (baseEvent is BaseInteruptEvent interuptEvent)
-            {
-                controller.InteruptEvents.Remove(interuptEvent);
-            }
-            else if (baseEvent is BaseTriggerEvent triggerEvent)
-            {
-                controller.TriggerEvents.Remove(triggerEvent);
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException("baseEvent", $"{baseEvent.GetType()} is not a valid event to be removed");
-            }
-        }
 
         // Start is called before the first frame update
         void Start()
         {
             // Register Players
 
-            var frontDeck = DeckManager.GetDeck("RedDeck");
-            var backDeck = DeckManager.GetDeck("RedDeck");
+            var frontDeck = DeckManager.GetDeck("SmallRedDeck");
+            var backDeck = DeckManager.GetDeck("SmallRedDeck");
 
             var frontPlayer = new Player(PlayerType.Front, frontDeck);
             var backPlayer = new Player(PlayerType.Back, backDeck);
@@ -129,20 +84,9 @@ namespace Assets.Scripts
             GameObject.Find("Canvas/BackPlayer/TotalDefence").GetComponent<Button>()
                 .onClick.AddListener(() => ShowTokens(StatType.Defence, PlayerType.Back));
 
-
-            // Register Event Queues
-            EventQueue = new EventQueue<BaseGameplayEvent>();
-            PhaseQueue = new EventQueue<BasePhaseEvent>();
-            UIQueue = new EventQueue<BaseUIEvent>();
-            PassiveEvents = new List<BasePassiveEvent>();
-            InteruptEvents = new List<BaseInteruptEvent>();
-            TriggerEvents = new List<BaseTriggerEvent>();
-
-
             // Register Timer
             Timer = gameObject.AddComponent(typeof(RepeatingTimer)) as RepeatingTimer;
             Timer.Initialize(0.1f, NextEvent);
-
 
             EnqueueEvent(new NewPhaseEvent(Phase.GameStart));
             Timer.StartTimer();
@@ -176,15 +120,19 @@ namespace Assets.Scripts
         {
             if (baseEvent is BaseUIEvent uiEvent)
             {
-                UIQueue.EnqueueEvent(uiEvent);
+                UIQueue.Enqueue(uiEvent);
+            }
+            else if (baseEvent is BaseGameEndEvent gameEndEvent)
+            {
+                GameEndQueue.Enqueue(gameEndEvent);
             }
             else if (baseEvent is BasePhaseEvent phaseEvent)
             {
-                PhaseQueue.EnqueueEvent(phaseEvent);
+                PhaseQueue.Enqueue(phaseEvent);
             }
             else if (baseEvent is BaseGameplayEvent gameplayEvent)
             {
-                EventQueue.EnqueueEvent(gameplayEvent);
+                EventQueue.Enqueue(gameplayEvent);
             }
             else if (baseEvent is BasePassiveEvent passiveEvent)
             {
@@ -236,9 +184,6 @@ namespace Assets.Scripts
                 case Phase.Mana:
                     ManaPhase();
                     break;
-                case Phase.GameEnd:
-                    EndGame();
-                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(phase), "Phase not valid, must be a playable phase");
             }
@@ -247,8 +192,6 @@ namespace Assets.Scripts
         private void StartGame()
         {
             EnqueueEvent(new NewPhaseEvent(Phase.Draw));
-
-            //EnqueueEvent(new SetSlotEffectEvent(TemporarySlotEffect, Board.GetPlayer(PlayerType.Front).Field[2], TriggerType.Enter, EffectType.Positive));
         }
 
 
@@ -293,7 +236,7 @@ namespace Assets.Scripts
         {
             foreach (var player in Board.BothPlayers)
             {
-                var damageTaken = Math.Max(Board.GetPlayer(player.PlayerType.GetOpposite()).TotalAttack - player.TotalDefence, 0);
+                var damageTaken = Math.Max(Board.GetPlayer(player.PlayerType.Opposite()).TotalAttack - player.TotalDefence, 0);
                 EnqueueEvent(new DamagePlayerEvent(player.PlayerType, damageTaken));
             }
 
@@ -325,41 +268,24 @@ namespace Assets.Scripts
                 }
             }
 
-
             // Empty Destroyed
             foreach (var player in Board.BothPlayers)
             {
                 EnqueueEvent(new EmptyDestroyPileEvent(player.PlayerType));
-
             }
 
             EnqueueEvent(new NewPhaseEvent(Phase.Draw));
         }
 
-        private void EndGame()
+        private void EndGame(string message)
         {
-            var frontPlayer = Board.GetPlayer(PlayerType.Front);
-            var backPlayer = Board.GetPlayer(PlayerType.Back);
-            var lowestHealthPlayer = frontPlayer.Health.Get() <= backPlayer.Health.Get() ? PlayerType.Front : PlayerType.Back;
+            // Empty all queues
+            GameEndQueue.Empty();
+            UIQueue.Empty();
+            EventQueue.Empty();
+            PhaseQueue.Empty();
 
-            var frontPlayerDeckEmpty = frontPlayer.Deck.Count == 0;
-            var backPlayerDeckEmpty = backPlayer.Deck.Count == 0;
-
-            if (Board.GetPlayer(lowestHealthPlayer).Health.Get() <= 0)
-            {
-                EnqueueEvent(new MessageEvent($"{lowestHealthPlayer} Player has run out of life!", 10000));
-                return;
-            }
-            if (frontPlayerDeckEmpty && lowestHealthPlayer == PlayerType.Front)
-            {
-                EnqueueEvent(new MessageEvent($"{PlayerType.Front} Player has run out of cards!", 10000));
-                return;
-            }
-            if (backPlayerDeckEmpty && lowestHealthPlayer == PlayerType.Back)
-            {
-                EnqueueEvent(new MessageEvent($"{PlayerType.Back} Player has run out of cards!", 10000));
-                return;
-            }
+            EnqueueEvent(new MessageEvent(message, int.MaxValue));
         }
 
 
@@ -388,15 +314,24 @@ namespace Assets.Scripts
         private BaseEvent ProcessNextEvent()
         {
             // Process the UI queue until empty
-            var uIEvent = UIQueue.DequeueEvent();
+            var uIEvent = UIQueue.Dequeue();
             if (uIEvent != null)
             {
                 uIEvent.Process(UIManager);
                 return uIEvent;
             }
 
+            // Check if the game has ended - might need to go before the UI queue
+            var gameEndEvent = GameEndQueue.Dequeue();
+            if (gameEndEvent != null)
+            {
+                var message = gameEndEvent.Process();
+                EndGame(message);
+                return gameEndEvent;
+            }
+
             // Process the gameplay queue until empty
-            var gameplayEvent = EventQueue.DequeueEvent();
+            var gameplayEvent = EventQueue.Dequeue();
             if (gameplayEvent != null)
             {
                 ProcessInteruptEvents(gameplayEvent);
@@ -408,7 +343,7 @@ namespace Assets.Scripts
             }
 
             // Process end of phase events
-            var phaseEvent = PhaseQueue.DequeueEvent();
+            var phaseEvent = PhaseQueue.Dequeue();
             if (phaseEvent != null)
             {
                 phaseEvent.Process(this);

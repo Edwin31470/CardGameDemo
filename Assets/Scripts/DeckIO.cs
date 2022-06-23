@@ -21,10 +21,9 @@ namespace Assets.Scripts
 
         public static List<int> ReadDeck(string deckName)
         {
-            using (var jsonReader = new JsonTextReader(new StreamReader($"{DeckFolder}/{deckName}.json")))
-            {
-                return JsonSerializer.Deserialize<List<int>>(jsonReader);
-            }
+            using var jsonReader = new JsonTextReader(new StreamReader($"{DeckFolder}/{deckName}.json"));
+
+            return JsonSerializer.Deserialize<List<int>>(jsonReader);
         }
 
         public static void WriteDeck(string deckName, IEnumerable<int> cardIds)
