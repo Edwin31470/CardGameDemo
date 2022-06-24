@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Cards;
+﻿using Assets.Scripts.Bases;
+using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Extensions;
 using System;
@@ -8,7 +9,7 @@ namespace Assets.Scripts.Events
 {
     // Events that trigger once
 
-    public abstract class BaseActiveEvent<T> : BaseBoardEvent
+    public abstract class BaseActiveEvent<T> : BaseBoardEvent where T : BaseSource
     {
         protected T Source { get; set; }
 

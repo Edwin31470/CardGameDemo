@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using Assets.Scripts.Bases;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Events;
+using Assets.Scripts.Items;
 
 namespace Assets.Scripts.Effects
 {
@@ -18,11 +20,33 @@ namespace Assets.Scripts.Effects
     public abstract class BaseEffect
     {
         public abstract int Id { get; }
-        public abstract IEnumerable<BaseEvent> GenerateEffects(BaseCard source, BoardState board);
+        public abstract IEnumerable<BaseEvent> GenerateEffects(BaseSource source, BoardState board);
+    }
+
+    // An effect with an item source
+    public abstract class BaseItemEffect : BaseEffect
+    {
+        public override IEnumerable<BaseEvent> GenerateEffects(BaseSource source, BoardState board)
+        {
+            return GenerateEffects(source, board);
+        }
+
+        public abstract IEnumerable<BaseEvent> GenerateEffects(BaseItem source, BoardState board);
     }
 
     // An effect with a card source
-    public abstract class BaseCardEffect<T> : BaseEffect where T : BaseCard
+    public abstract class BaseCardEffect : BaseEffect
+    {
+        public override IEnumerable<BaseEvent> GenerateEffects(BaseSource source, BoardState board)
+        {
+            return GenerateEffects(source, board);
+        }
+
+        public abstract IEnumerable<BaseEvent> GenerateEffects(BaseCard source, BoardState board);
+    }
+
+    // An effect with a card source type
+    public abstract class BaseCardEffect<T> : BaseCardEffect where T : BaseCard
     {
         public abstract IEnumerable<BaseEvent> GetEffect(T source, BoardState board);
 

@@ -62,6 +62,7 @@
     <Compile Include="Assets\Scripts\Events\PhaseEvents.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\GreenCreatureEffects.cs" />
     <Compile Include="Assets\Scripts\Managers\CardGraphicsManager.cs" />
+    <Compile Include="Assets\Scripts\Effects\ItemEffects\WeaponEffects.cs" />
     <Compile Include="Assets\Scripts\Events\TriggerEvents.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\PurpleActionEffects.cs" />
     <Compile Include="Assets\Scripts\UI\DragAndDropManager.cs" />
@@ -125,7 +126,7 @@
     <Compile Include="Assets\Scripts\Managers\CardEffectsManager.cs" />
     <Compile Include="Assets\Scripts\Enums\PlayerType.cs" />
     <Compile Include="Assets\Scripts\Events\GameEndEvents.cs" />
-    <Compile Include="Assets\Scripts\CardIO.cs" />
+    <Compile Include="Assets\Scripts\IO\CardIO.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\BlueActionEffects.cs" />
     <Compile Include="Assets\Scripts\Effects\BaseEffects.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumerableExtensions.cs" />
@@ -135,13 +136,21 @@
     <Compile Include="Assets\Scripts\Effects\CardEffects\RedCreatureEffects.cs" />
     <Compile Include="Assets\Scripts\EditDeckController.cs" />
     <Compile Include="Assets\Scripts\ManageCardsController.cs" />
-    <Compile Include="Assets\Scripts\DeckIO.cs" />
+    <Compile Include="Assets\Scripts\Bases\BaseSource.cs" />
     <Compile Include="Assets\Scripts\Effects\SimpleEffects.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\GreenPermanentEffects.cs" />
     <Compile Include="Assets\Scripts\Enums\Colour.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\PurpleCreatureEffects.cs" />
     <Compile Include="Assets\Scripts\MainController.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
+    <Compile Include="Assets\Scripts\IO\DeckIO.cs" />
+    <Compile Include="Assets\Scripts\IO\ItemIO.cs" />
+    <Compile Include="Assets\Scripts\Enums\ItemType.cs" />
+    <Compile Include="Assets\Scripts\Items\ItemData.cs" />
+    <Compile Include="Assets\Scripts\Managers\ItemManager.cs" />
+    <Compile Include="Assets\Scripts\Items\ItemInfo.cs" />
+    <Compile Include="Assets\Scripts\Effects\ItemEffects\AccessoryEffects.cs" />
+    <Compile Include="Assets\Scripts\Effects\ItemEffects\ArmourEffects.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

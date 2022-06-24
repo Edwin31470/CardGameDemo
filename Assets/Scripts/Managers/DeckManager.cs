@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Assets.Scripts.Effects;
+using Assets.Scripts.IO;
 
 namespace Assets.Scripts.Managers
 {
@@ -13,10 +14,10 @@ namespace Assets.Scripts.Managers
     {
         private static readonly Dictionary<int, CardData> CardLibrary = CardIO.ReadAll().ToDictionary(x => x.Id, x => x);
 
-        private static readonly Dictionary<int, BaseEffect> EffectLibrary = Assembly.GetAssembly(typeof(BaseEffect))
+        private static readonly Dictionary<int, BaseCardEffect> EffectLibrary = Assembly.GetAssembly(typeof(BaseCardEffect))
             .GetTypes()
-            .Where(x => x.IsClass && !x.IsAbstract && x.IsSubclassOf(typeof(BaseEffect)))
-            .Select(x => (BaseEffect)Activator.CreateInstance(x))
+            .Where(x => x.IsClass && !x.IsAbstract && x.IsSubclassOf(typeof(BaseCardEffect)))
+            .Select(x => (BaseCardEffect)Activator.CreateInstance(x))
             .ToDictionary(x => x.Id, x => x);
 
         public static List<CardInfo> GetDeck(string deckName)

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Assets.Scripts
+namespace Assets.Scripts.IO
 {
     public static class DeckIO
     {

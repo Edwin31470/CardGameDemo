@@ -4,6 +4,7 @@ using System.Linq;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Extensions;
+using Assets.Scripts.Items;
 
 namespace Assets.Scripts
 {
@@ -103,7 +104,7 @@ namespace Assets.Scripts
                     return player;
             }
 
-            throw new ArgumentOutOfRangeException(nameof(card), "Card must be owned by either player");
+            throw new ArgumentOutOfRangeException(nameof(card), "Card must be owned by a player");
         }
 
         public Player GetSlotOwner(FieldSlot slot)
@@ -114,7 +115,18 @@ namespace Assets.Scripts
                     return player;
             }
 
-            throw new ArgumentOutOfRangeException(nameof(slot), "Slot must be owned by either player");
+            throw new ArgumentOutOfRangeException(nameof(slot), "Slot must be owned by a player");
+        }
+
+        public Player GetItemOwner(BaseItem item)
+        {
+            foreach (var player in BothPlayers)
+            {
+                if (player.Items.Contains(item))
+                    return player;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(item), "Item must be owned by a player");
         }
     }
 }

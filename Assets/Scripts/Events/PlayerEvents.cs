@@ -58,7 +58,7 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public class AddManaPlayerEvent : BasePlayerEvent
+    public class AddManaEvent : BasePlayerEvent
     {
         public override float Delay => 1f;
         public override string EventTitle => $"{PlayerType} Player gains {Amount} {Colour} mana";
@@ -66,7 +66,7 @@ namespace Assets.Scripts.Events
         private Colour Colour { get; set; }
         private int Amount { get; set; }
 
-        public AddManaPlayerEvent(PlayerType playerType, Colour colour, int amount) : base(playerType)
+        public AddManaEvent(PlayerType playerType, Colour colour, int amount) : base(playerType)
         {
             Colour = colour;
             Amount = amount;

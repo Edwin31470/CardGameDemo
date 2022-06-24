@@ -48,8 +48,12 @@ namespace Assets.Scripts
             var frontDeck = DeckManager.GetDeck("SmallRedDeck");
             var backDeck = DeckManager.GetDeck("SmallRedDeck");
 
-            var frontPlayer = new Player(PlayerType.Front, frontDeck);
-            var backPlayer = new Player(PlayerType.Back, backDeck);
+            var frontItems = ItemManager.GetItems(new[] { 0 });
+            var backItems = ItemManager.GetItems(new[] { 0 });
+
+            var frontPlayer = new Player(PlayerType.Front, frontDeck, frontItems);
+            var backPlayer = new Player(PlayerType.Back, backDeck, backItems);
+
             Board = new BoardState(frontPlayer, backPlayer);
 
             // Register GameObject Managers
@@ -191,16 +195,17 @@ namespace Assets.Scripts
 
         private void StartGame()
         {
-            EnqueueEvent(new NewPhaseEvent(Phase.Draw));
-        }
-
-
-        private IEnumerable<BaseEvent> TemporarySlotEffect(FieldCard card)
-        {
-            if (card is CreatureCard creatureCard)
+            // Get item effects
+            foreach(var player in Board.BothPlayers)
             {
-                yield return new StrengthenCreatureEvent(creatureCard, 2);
+                foreach(var item in player.Items)
+                {
+                    var events = item.GetEvents(Board);
+                    EnqueueEvents(events);
+                }
             }
+
+            EnqueueEvent(new NewPhaseEvent(Phase.Draw));
         }
 
         private void DrawPhase()

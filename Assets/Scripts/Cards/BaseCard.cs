@@ -2,11 +2,11 @@
 using Assets.Scripts.Enums;
 using Assets.Scripts.Events;
 using System.Collections.Generic;
-using System.Linq;
+using Assets.Scripts.Bases;
 
 namespace Assets.Scripts.Cards
 {
-    public abstract class BaseCard
+    public abstract class BaseCard : BaseSource
     {
         public string Name { get; set; }
         public Colour Colour { get; set; }

@@ -13,63 +13,44 @@ namespace Assets.Scripts
     {
         public PlayerType PlayerType { get; set; }
 
-        public Stat Health { get; set; }
+        public Stat Health { get; set; } = new Stat(-99, 99, 50);
         public int TotalAttack => (FieldCreatures.Aggregate(0, (i, x) => i += x.Attack) + TokenAttack).Clamp(0, 99);
         public int TotalDefence => (FieldCreatures.Aggregate(0, (i, x) => i += x.Defence) + TokenDefence).Clamp(0, 99);
 
-        public Stat RedMana { get; set; }
-        public Stat GreenMana { get; set; }
-        public Stat BlueMana { get; set; }
-        public Stat PurpleMana { get; set; }
+        public Stat RedMana { get; set; } = new Stat(0, 99, 10);
+        public Stat GreenMana { get; set; } = new Stat(0, 99, 10);
+        public Stat BlueMana { get; set; } = new Stat(0, 99, 10);
+        public Stat PurpleMana { get; set; } = new Stat(0, 99, 10);
 
-        public Queue<BaseCard> Deck { get; set; }
-        public HashSet<BaseCard> Hand { get; set; }
-        public FieldSlot[] Field { get; set; }
-        public List<BaseCard> Destroyed { get; set; }
-        public List<BaseCard> Eliminated { get; set; }
+        public Queue<BaseCard> Deck { get; set; } = new();
+        public HashSet<BaseCard> Hand { get; set; } = new();
+        public FieldSlot[] Field { get; set; } = Enumerable.Range(1, 5).Select(x => new FieldSlot()).ToArray();
+        public List<BaseCard> Destroyed { get; set; } = new();
+        public List<BaseCard> Eliminated { get; set; } = new();
         public IEnumerable<FieldCard> FieldCards => Field.Select(x => x.Card).Where(x => x != null);
         public IEnumerable<CreatureCard> FieldCreatures => FieldCards.OfType<CreatureCard>();
 
-
-        public List<TokenType> Tokens { get; set; }
+        public List<TokenType> Tokens { get; set; } = new();
         private int TokenAttack => Tokens.Count(x => x == TokenType.Claw) - Tokens.Count(x => x == TokenType.Blunt);
         private int TokenDefence => Tokens.Count(x => x == TokenType.Shell) - Tokens.Count(x => x == TokenType.Cracked);
 
+        public List<BaseItem> Items { get; set; } = new();
 
-        public List<BaseItem> Items { get; set; }
-
-
-        public Player(PlayerType playerType, IEnumerable<CardInfo> cardInfos)
+        public Player(PlayerType playerType, IEnumerable<CardInfo> cardInfos, IEnumerable<ItemInfo> itemInfos)
         {
             PlayerType = playerType;
-
-            Health = new Stat(-99, 99, 50);
-            //RedMana = new Stat(0, 99, 0);
-            //BlueMana = new Stat(0, 99, 0);
-            //GreenMana = new Stat(0, 99, 0);
-            //PurpleMana = new Stat(0, 99, 0);
-            RedMana = new Stat(0, 99, 10);
-            BlueMana = new Stat(0, 99, 10);
-            GreenMana = new Stat(0, 99, 10);
-            PurpleMana = new Stat(0, 99, 10);
-
-            Deck = new Queue<BaseCard>();
-            Hand = new HashSet<BaseCard>();
-            Field = new FieldSlot[5];
-            for (var i = 0; i < Field.Length; i++) {
-                Field[i] = new FieldSlot();
-            }
-            Destroyed = new List<BaseCard>();
-            Eliminated = new List<BaseCard>();
-            Tokens = new List<TokenType>();
 
             foreach (var cardInfo in cardInfos.OrderBy(x => Guid.NewGuid()))
             {
                 Deck.Enqueue(BaseCard.Create(cardInfo));
             }
+
+            foreach (var itemInfo in itemInfos)
+            {
+                Items.Add(BaseItem.Create(itemInfo));
+            }
         }
 
-      
         // Getting
         public FieldSlot GetRandomEmptySlot()
         {
@@ -122,6 +103,11 @@ namespace Assets.Scripts
         public bool IsInEliminated(BaseCard card)
         {
             return Eliminated.Contains(card);
+        }
+
+        public bool OwnsItem(BaseItem item)
+        {
+            return Items.Contains(item);
         }
 
 
