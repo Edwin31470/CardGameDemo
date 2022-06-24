@@ -56,11 +56,14 @@
     <Analyzer Include="C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\Effects\CardEffects\BluePermanentEffects.cs" />
     <Compile Include="Assets\Scripts\Events\AreaEvents.cs" />
     <Compile Include="Assets\Scripts\Events\InteruptEvents.cs" />
     <Compile Include="Assets\Scripts\Events\PhaseEvents.cs" />
+    <Compile Include="Assets\Scripts\Effects\CardEffects\GreenCreatureEffects.cs" />
     <Compile Include="Assets\Scripts\Managers\CardGraphicsManager.cs" />
     <Compile Include="Assets\Scripts\Events\TriggerEvents.cs" />
+    <Compile Include="Assets\Scripts\Effects\CardEffects\PurpleActionEffects.cs" />
     <Compile Include="Assets\Scripts\UI\DragAndDropManager.cs" />
     <Compile Include="Assets\Scripts\Enums\StatType.cs" />
     <Compile Include="Assets\Scripts\FieldSlot.cs" />
@@ -68,6 +71,7 @@
     <Compile Include="Assets\Scripts\Cards\CardInfo.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
     <Compile Include="Assets\Scripts\Items\BaseItem.cs" />
+    <Compile Include="Assets\Scripts\Effects\CardEffects\GreenActionEffects.cs" />
     <Compile Include="Assets\Scripts\Enums\TokenType.cs" />
     <Compile Include="Assets\Scripts\Enums\TriggerType.cs" />
     <Compile Include="Assets\Scripts\Cards\FieldCard.cs" />
@@ -92,10 +96,12 @@
     <Compile Include="Assets\Scripts\Enums\SelectionType.cs" />
     <Compile Include="Assets\Scripts\Events\ActiveEvents.cs" />
     <Compile Include="Assets\Scripts\Managers\DeckManager.cs" />
+    <Compile Include="Assets\Scripts\Effects\CardEffects\PurplePermanentEffects.cs" />
     <Compile Include="Assets\Scripts\Events\TokenEvents.cs" />
     <Compile Include="Assets\Scripts\Events\PlayerEvents.cs" />
     <Compile Include="Assets\Scripts\Enums\Phase.cs" />
     <Compile Include="Assets\Scripts\Cards\ActionCard.cs" />
+    <Compile Include="Assets\Scripts\Effects\CardEffects\RedActionEffects.cs" />
     <Compile Include="Assets\Scripts\LegendkeeperIntegration\Extensions.cs" />
     <Compile Include="Assets\Scripts\Cards\CardData.cs" />
     <Compile Include="Assets\Scripts\Delegates.cs" />
@@ -110,38 +116,32 @@
     <Compile Include="Assets\Scripts\Cards\PermanentCard.cs" />
     <Compile Include="Assets\Scripts\UI\SelectionManager.cs" />
     <Compile Include="Assets\Scripts\Managers\LabelManager.cs" />
+    <Compile Include="Assets\Scripts\Effects\CardEffects\BlueCreatureEffects.cs" />
+    <Compile Include="Assets\Scripts\Effects\CardEffects\RedPermanentEffects.cs" />
     <Compile Include="Assets\Scripts\LegendkeeperIntegration\Document.cs" />
     <Compile Include="Assets\Scripts\Extensions\MathExtensions.cs" />
     <Compile Include="Assets\Scripts\Events\SlotEffectEvents.cs" />
     <Compile Include="Assets\Scripts\Stat.cs" />
     <Compile Include="Assets\Scripts\Managers\CardEffectsManager.cs" />
     <Compile Include="Assets\Scripts\Enums\PlayerType.cs" />
+    <Compile Include="Assets\Scripts\Events\GameEndEvents.cs" />
     <Compile Include="Assets\Scripts\CardIO.cs" />
+    <Compile Include="Assets\Scripts\Effects\CardEffects\BlueActionEffects.cs" />
     <Compile Include="Assets\Scripts\Effects\BaseEffects.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumerableExtensions.cs" />
     <Compile Include="Assets\Scripts\Enums\UIMode.cs" />
     <Compile Include="Assets\Scripts\Events\UIEvents.cs" />
     <Compile Include="Assets\Scripts\LegendkeeperIntegration\Project.cs" />
+    <Compile Include="Assets\Scripts\Effects\CardEffects\RedCreatureEffects.cs" />
     <Compile Include="Assets\Scripts\EditDeckController.cs" />
-    <Compile Include="Assets\Scripts\CreateCardController.cs" />
+    <Compile Include="Assets\Scripts\ManageCardsController.cs" />
     <Compile Include="Assets\Scripts\DeckIO.cs" />
     <Compile Include="Assets\Scripts\Effects\SimpleEffects.cs" />
+    <Compile Include="Assets\Scripts\Effects\CardEffects\GreenPermanentEffects.cs" />
     <Compile Include="Assets\Scripts\Enums\Colour.cs" />
+    <Compile Include="Assets\Scripts\Effects\CardEffects\PurpleCreatureEffects.cs" />
     <Compile Include="Assets\Scripts\MainController.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
-    <Compile Include="Assets\Scripts\Effects\CardEffects\PurpleCreatureEffects.cs" />
-    <Compile Include="Assets\Scripts\Effects\CardEffects\GreenActionEffects.cs" />
-    <Compile Include="Assets\Scripts\Effects\CardEffects\BlueCreatureEffects.cs" />
-    <Compile Include="Assets\Scripts\Effects\CardEffects\RedCreatureEffects.cs" />
-    <Compile Include="Assets\Scripts\Effects\CardEffects\PurplePermanentEffects.cs" />
-    <Compile Include="Assets\Scripts\Effects\CardEffects\GreenPermanentEffects.cs" />
-    <Compile Include="Assets\Scripts\Effects\CardEffects\GreenCreatureEffects.cs" />
-    <Compile Include="Assets\Scripts\Effects\CardEffects\RedPermanentEffects.cs" />
-    <Compile Include="Assets\Scripts\Effects\CardEffects\BlueActionEffects.cs" />
-    <Compile Include="Assets\Scripts\Effects\CardEffects\RedActionEffects.cs" />
-    <Compile Include="Assets\Scripts\Effects\CardEffects\BluePermanentEffects.cs" />
-    <Compile Include="Assets\Scripts\Effects\CardEffects\PurpleActionEffects.cs" />
-    <Compile Include="Assets\Scripts\Events\GameEndEvents.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

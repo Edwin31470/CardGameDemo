@@ -21,6 +21,14 @@ namespace Assets.Scripts
             }
         }
 
+        public static CardData ReadCard(int id)
+        {
+            using (var jsonReader = new JsonTextReader(new StreamReader(CardFolder + $"/{id}.json")))
+            {
+                return JsonSerializer.Deserialize<CardData>(jsonReader);
+            }
+        }
+
         public static void WriteCard(CardData data)
         {
             using (var jsonWriter = new JsonTextWriter(new StreamWriter(CardFolder + $"/{data.Id}.json")))

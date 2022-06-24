@@ -365,3 +365,4 @@ FodyWeavers.xsd
 # Unity ignores
 /[Ll]ibrary/
 /[Tt]emp/
+/[Uu]serSettings/

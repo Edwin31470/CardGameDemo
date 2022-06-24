@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace Assets.Scripts
 {
-    public class CreateCardController : MonoBehaviour
+    public class ManageCardsController : MonoBehaviour
     {
         private InputField NameField { get; set; }
         private Dropdown ColourDropdown { get; set; }
@@ -21,9 +21,11 @@ namespace Assets.Scripts
         private Dropdown DefenceDropdown { get; set; }
         private InputField EffectTextField { get; set; }
         private InputField FlavourTextField { get; set; }
-        private Toggle HasPersistence { get; set; }
-        private Toggle IsUnique { get; set; }
+        private Toggle HasPersistenceToggle { get; set; }
+        private Toggle IsUniqueToggle { get; set; }
 
+
+        private Dropdown EditCardDropdown { get; set; }
 
         void Start()
         {
@@ -60,17 +62,34 @@ namespace Assets.Scripts
             defenceDropdown.AddOptions(GetRangeText(0, 20));
             DefenceDropdown = defenceDropdown;
 
-            HasPersistence = GameObject.Find("Canvas/HasPersistenceToggle").GetComponent<Toggle>();
-            IsUnique = GameObject.Find("Canvas/IsUniqueToggle").GetComponent<Toggle>();
+            HasPersistenceToggle = GameObject.Find("Canvas/HasPersistenceToggle").GetComponent<Toggle>();
+            IsUniqueToggle = GameObject.Find("Canvas/IsUniqueToggle").GetComponent<Toggle>();
+
+            var editCardDropdown = GameObject.Find("Canvas/EditCardDropdown").GetComponent<Dropdown>();
+            editCardDropdown.AddOptions(GetExistingCardNames());
+            EditCardDropdown = editCardDropdown;
+            EditCardDropdown.onValueChanged.AddListener(x => PopulateCardToEdit(x - 1));
+
 
             // Register button
-            GameObject.Find("Canvas/CreateButton").GetComponent<Button>()
-                .onClick.AddListener(CreateCard);
+            GameObject.Find("Canvas/SubmitButton").GetComponent<Button>()
+                .onClick.AddListener(SubmitCard);
         }
 
-        private void CreateCard()
+        private void SubmitCard()
         {
-            var id = CardIO.ReadAll().Max(x => x.Id) + 1;
+            var selectedExistingCard = EditCardDropdown.captionText.text;
+
+            int id;
+            if (selectedExistingCard == string.Empty)
+            {
+                var existingCards = CardIO.ReadAll();
+                id = existingCards.Max(x => x.Id) + 1;
+            }
+            else
+            {
+                id = int.Parse(selectedExistingCard[^2..]);
+            }
 
             var name = NameField.text;
             var colour = (Colour)Enum.Parse(typeof(Colour), ColourDropdown.captionText.text);
@@ -87,8 +106,8 @@ namespace Assets.Scripts
             var attack = int.Parse(AttackDropdown.captionText.text);
             var defence = int.Parse(DefenceDropdown.captionText.text);
 
-            var hasPersistence = HasPersistence.isOn;
-            var isUnique = IsUnique.isOn;
+            var hasPersistence = HasPersistenceToggle.isOn;
+            var isUnique = IsUniqueToggle.isOn;
 
             var cardData = new CardData
             {
@@ -108,6 +127,10 @@ namespace Assets.Scripts
             };
 
             CardIO.WriteCard(cardData);
+
+            EditCardDropdown.ClearOptions();
+            EditCardDropdown.AddOptions(GetExistingCardNames());
+            PopulateComponents(new CardData());
         }
 
         private List<string> GetEnumNames(Type enumType)
@@ -154,6 +177,46 @@ namespace Assets.Scripts
                 .Where(x => x.Contains("Symbol"))
                 .Select(x => x.Substring(0, x.Length - 10))
                 .ToList();
+        }
+
+        private List<string> GetExistingCardNames()
+        {
+            var existingCards = CardIO.ReadAll()
+                .OrderBy(x => x.Id)
+                .Select(x => $"{x.Name} - {x.Id}")
+                .ToList();
+
+            existingCards.Insert(0, string.Empty);
+
+            return existingCards;
+        }
+
+        private void PopulateCardToEdit(int id)
+        {
+            if (id == -1)
+            {
+                PopulateComponents(new CardData());
+                return;
+            }
+
+            var existingCard = CardIO.ReadCard(id);
+            PopulateComponents(existingCard);
+        }
+
+        private void PopulateComponents(CardData card)
+        {
+            NameField.text = card.Name;
+            ColourDropdown.value = ColourDropdown.options.FindIndex(x => x.text == card.Colour.ToString());
+            CostDropdown.value = CostDropdown.options.FindIndex(x => x.text == card.Cost.ToString());
+            CardTypeDropdown.value = CardTypeDropdown.options.FindIndex(x => x.text == card.CardType.ToString());
+            SubTypeDropdown.value = SubTypeDropdown.options.FindIndex(x => x.text == card.SubTypes.ToString());
+            SymbolDropdown.value = SymbolDropdown.options.FindIndex(x => x.text == card.Symbol?.ToString());
+            EffectTextField.text = card.EffectText;
+            FlavourTextField.text = card.FlavourText;
+            AttackDropdown.value = AttackDropdown.options.FindIndex(x => x.text == card.Attack.ToString());
+            DefenceDropdown.value = DefenceDropdown.options.FindIndex(x => x.text == card.Defence.ToString());
+            HasPersistenceToggle.isOn = card.HasPersistence;
+            IsUniqueToggle.isOn = card.IsUnique;
         }
     }
 }

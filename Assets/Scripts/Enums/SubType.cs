@@ -20,10 +20,8 @@ namespace Assets.Scripts.Enums
         Horror = 1 << 7,
         Immortal = 1 << 8,
         Construct = 1 << 9,
-
-        Event = 1 << 20,
         // Max is 31
 
-        Any = None | Elemental | Undead | Reptile | Bird | Insect | Human | Behemoth | Horror | Immortal | Construct |Event
+        Any = None | Elemental | Undead | Reptile | Bird | Insect | Human | Behemoth | Horror | Immortal | Construct
     }
 }
