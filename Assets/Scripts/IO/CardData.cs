@@ -1,14 +1,10 @@
 ﻿using Assets.Scripts.Enums;
 using Newtonsoft.Json;
 
-namespace Assets.Scripts.Cards
+namespace Assets.Scripts.IO
 {
-    public class CardData
+    public class CardData : BaseData
     {
-        [JsonProperty("id")]
-        public int Id { get; set; }
-        [JsonProperty("name")]
-        public string Name { get; set; }
         [JsonProperty("colour")]
         public Colour Colour { get; set; }
         [JsonProperty("cost")]
@@ -23,10 +19,6 @@ namespace Assets.Scripts.Cards
         public int Attack { get; set; }
         [JsonProperty("defence")]
         public int Defence { get; set; }
-        [JsonProperty("effectText")]
-        public string EffectText { get; set; }
-        [JsonProperty("flavourText")]
-        public string FlavourText { get; set; }
         [JsonProperty("hasPersistence")]
         public bool HasPersistence { get; set; }
         [JsonProperty("isUnique")]

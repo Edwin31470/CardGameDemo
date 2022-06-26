@@ -56,6 +56,7 @@
     <Analyzer Include="C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\Effects\ItemEffects\AccessoryEffects.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\BluePermanentEffects.cs" />
     <Compile Include="Assets\Scripts\Events\AreaEvents.cs" />
     <Compile Include="Assets\Scripts\Events\InteruptEvents.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Assets\Scripts\FieldSlot.cs" />
     <Compile Include="Assets\Scripts\UI\UIManager.cs" />
     <Compile Include="Assets\Scripts\Cards\CardInfo.cs" />
+    <Compile Include="Assets\Scripts\Items\ItemInfo.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
     <Compile Include="Assets\Scripts\Items\BaseItem.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\GreenActionEffects.cs" />
@@ -104,10 +106,12 @@
     <Compile Include="Assets\Scripts\Cards\ActionCard.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\RedActionEffects.cs" />
     <Compile Include="Assets\Scripts\LegendkeeperIntegration\Extensions.cs" />
-    <Compile Include="Assets\Scripts\Cards\CardData.cs" />
+    <Compile Include="Assets\Scripts\IO\CardData.cs" />
     <Compile Include="Assets\Scripts\Delegates.cs" />
+    <Compile Include="Assets\Scripts\IO\ItemData.cs" />
     <Compile Include="Assets\Scripts\Cards\BaseCard.cs" />
     <Compile Include="Assets\Scripts\Effects\CustomEffects.cs" />
+    <Compile Include="Assets\Scripts\Enums\ItemType.cs" />
     <Compile Include="Assets\Scripts\Events\CardEvents.cs" />
     <Compile Include="Assets\Scripts\Enums\EffectType.cs" />
     <Compile Include="Assets\Scripts\UI\SlotObject.cs" />
@@ -115,18 +119,19 @@
     <Compile Include="Assets\Scripts\UI\CardObject.cs" />
     <Compile Include="Assets\Scripts\Events\BaseEvents.cs" />
     <Compile Include="Assets\Scripts\Cards\PermanentCard.cs" />
+    <Compile Include="Assets\Scripts\IO\DeckIO.cs" />
     <Compile Include="Assets\Scripts\UI\SelectionManager.cs" />
     <Compile Include="Assets\Scripts\Managers\LabelManager.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\BlueCreatureEffects.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\RedPermanentEffects.cs" />
     <Compile Include="Assets\Scripts\LegendkeeperIntegration\Document.cs" />
     <Compile Include="Assets\Scripts\Extensions\MathExtensions.cs" />
+    <Compile Include="Assets\Scripts\Effects\ItemEffects\ArmourEffects.cs" />
     <Compile Include="Assets\Scripts\Events\SlotEffectEvents.cs" />
     <Compile Include="Assets\Scripts\Stat.cs" />
     <Compile Include="Assets\Scripts\Managers\CardEffectsManager.cs" />
     <Compile Include="Assets\Scripts\Enums\PlayerType.cs" />
     <Compile Include="Assets\Scripts\Events\GameEndEvents.cs" />
-    <Compile Include="Assets\Scripts\IO\CardIO.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\BlueActionEffects.cs" />
     <Compile Include="Assets\Scripts\Effects\BaseEffects.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumerableExtensions.cs" />
@@ -143,14 +148,11 @@
     <Compile Include="Assets\Scripts\Effects\CardEffects\PurpleCreatureEffects.cs" />
     <Compile Include="Assets\Scripts\MainController.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
-    <Compile Include="Assets\Scripts\IO\DeckIO.cs" />
-    <Compile Include="Assets\Scripts\IO\ItemIO.cs" />
-    <Compile Include="Assets\Scripts\Enums\ItemType.cs" />
-    <Compile Include="Assets\Scripts\Items\ItemData.cs" />
     <Compile Include="Assets\Scripts\Managers\ItemManager.cs" />
-    <Compile Include="Assets\Scripts\Items\ItemInfo.cs" />
-    <Compile Include="Assets\Scripts\Effects\ItemEffects\AccessoryEffects.cs" />
-    <Compile Include="Assets\Scripts\Effects\ItemEffects\ArmourEffects.cs" />
+    <Compile Include="Assets\Scripts\ManageItemsController.cs" />
+    <Compile Include="Assets\Scripts\BaseManagerController.cs" />
+    <Compile Include="Assets\Scripts\IO\DataIO.cs" />
+    <Compile Include="Assets\Scripts\IO\BaseData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

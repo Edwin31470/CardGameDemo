@@ -12,7 +12,7 @@ namespace Assets.Scripts.Managers
 {
     public static class DeckManager
     {
-        private static readonly Dictionary<int, CardData> CardLibrary = CardIO.ReadAll().ToDictionary(x => x.Id, x => x);
+        private static readonly Dictionary<int, CardData> CardLibrary = DataIO.ReadAll<CardData>().ToDictionary(x => x.Id, x => x);
 
         private static readonly Dictionary<int, BaseCardEffect> EffectLibrary = Assembly.GetAssembly(typeof(BaseCardEffect))
             .GetTypes()

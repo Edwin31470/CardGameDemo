@@ -32,7 +32,7 @@ namespace Assets.Scripts
             DeckDropdown.AddOptions(Enumerable.Repeat("Select Deck", 1).Concat(DeckIO.ReadDeckNames()).ToList());
             DeckDropdown.onValueChanged.AddListener(DeckDropdownChanged);
 
-            Cards = CardIO.ReadAll().ToList();
+            Cards = DataIO.ReadAll<CardData>().ToList();
             CardDropown = GameObject.Find("Canvas/CardDropdown").GetComponent<Dropdown>();
             CardDropown.AddOptions(Cards.Select(x => x.Name).ToList());
             GameObject.Find("Canvas/AddCardButton").GetComponent<Button>()

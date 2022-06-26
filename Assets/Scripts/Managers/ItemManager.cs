@@ -11,7 +11,7 @@ namespace Assets.Scripts.Managers
 {
     public static class ItemManager
     {
-        private static readonly Dictionary<int, ItemData> ItemLibrary = ItemIO.ReadAll().ToDictionary(x => x.Id, x => x);
+        private static readonly Dictionary<int, ItemData> ItemLibrary = DataIO.ReadAll<ItemData>().ToDictionary(x => x.Id, x => x);
 
         private static readonly Dictionary<int, BaseItemEffect> EffectLibrary = Assembly.GetAssembly(typeof(BaseItemEffect))
             .GetTypes()
