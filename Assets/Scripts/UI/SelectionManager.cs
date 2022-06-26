@@ -19,7 +19,7 @@ namespace Assets.Scripts.UI
         private int MaxTargets { get; set; }
         private Color SelectionColour { get; set; }
 
-        private Func<IEnumerable<BaseCard>, IEnumerable<BaseEvent>> OnFinishSelection { get; set; }
+        private OnFinishSelection OnFinishSelection { get; set; }
 
         public bool IsProcessing { get; set; }
 
@@ -30,7 +30,7 @@ namespace Assets.Scripts.UI
             ValidCards = new HashSet<CardObject>();
         }
 
-        public void Begin(IEnumerable<CardObject> validCards, int maxTargets, Func<IEnumerable<BaseCard>, IEnumerable<BaseEvent>> onFinishSelection, SelectionType selectionType)
+        public void Begin(IEnumerable<CardObject> validCards, int maxTargets, OnFinishSelection onFinishSelection, SelectionType selectionType)
         {
             IsProcessing = true;
             ValidCards = new HashSet<CardObject>(validCards);

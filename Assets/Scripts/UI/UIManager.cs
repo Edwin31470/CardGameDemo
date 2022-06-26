@@ -169,7 +169,7 @@ namespace Assets.Scripts.UI
             IEnumerable<BaseCard> allowableTargets,
             IEnumerable<BaseCard> overrideTargets,
             int count,
-            Func<IEnumerable<BaseCard>, IEnumerable<BaseEvent>> onFinishSelection,
+            OnFinishSelection onFinishSelection,
             SelectionType selectionType)
         {
             // TODO: null or empty?

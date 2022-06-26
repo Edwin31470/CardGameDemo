@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.Effects.CardEffects
 {
-    public class AllOutAttack : BaseCardEffect<PermanentCard>
+    public class AllOutAttack : BaseSourceEffect<PermanentCard>
     {
         public override int Id => 11;
 
@@ -17,7 +17,10 @@ namespace Assets.Scripts.Effects.CardEffects
         {
             yield return new CustomPassiveAllCreaturesEvent<PermanentCard>(
                 source,
-                new() { PlayerType = board.GetCardOwner(source).PlayerType},
+                new TargetConditions()
+                {
+                    PlayerType = board.GetSourceOwner(source).PlayerType
+                },
                 (source, board, creatures) =>
                 {
                     foreach (var creature in creatures)
@@ -26,12 +29,12 @@ namespace Assets.Scripts.Effects.CardEffects
                         creature.BonusDefence.Remove(1);
                     }
                 });
-            yield return new CustomTriggerEvent(
+            yield return new CustomTriggerEvent<PermanentCard>(
                 source,
-                (triggeringEvent) => triggeringEvent is NewPhaseEvent phaseEvent && phaseEvent.Phase == Phase.Mana,
-                (board, triggeringEvent) =>
+                (source, board, triggeringEvent) => triggeringEvent is NewPhaseEvent phaseEvent && phaseEvent.Phase == Phase.Mana,
+                (source, board, triggeringEvent) =>
                 {
-                    return new[] { new GameEndEvent($"{board.GetCardOwner(source).PlayerType} Player loses due to All Out Attack!" ) };
+                    return new[] { new GameEndEvent($"{board.GetSourceOwner(source).PlayerType} Player loses due to All Out Attack!" ) };
                 });
         }
     }

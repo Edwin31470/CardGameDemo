@@ -9,6 +9,7 @@ using System.Linq;
 using Assets.Scripts.Extensions;
 using UnityEngine;
 using UnityEngine.UI;
+using Assets.Scripts.Events.Interfaces;
 
 namespace Assets.Scripts
 {
@@ -27,8 +28,8 @@ namespace Assets.Scripts
         private EventQueue<BaseGameplayEvent> EventQueue { get; set; } = new();
         private EventQueue<BasePhaseEvent> PhaseQueue { get; set; } = new();
         private List<BasePassiveEvent> PassiveEvents { get; set; } = new();
-        private List<BaseInteruptEvent> InteruptEvents { get; set; } = new();
-        private List<BaseTriggerEvent> TriggerEvents { get; set; } = new();
+        private List<IInteruptEvent> InteruptEvents { get; set; } = new();
+        private List<ITriggerEvent> TriggerEvents { get; set; } = new();
 
         // Board
         private BoardState Board { get; set; }
@@ -48,8 +49,8 @@ namespace Assets.Scripts
             var frontDeck = DeckManager.GetDeck("SmallRedDeck");
             var backDeck = DeckManager.GetDeck("SmallRedDeck");
 
-            var frontItems = ItemManager.GetItems(new[] { 0 });
-            var backItems = ItemManager.GetItems(new[] { 0 });
+            var frontItems = ItemManager.GetItems(new[] { 1 });
+            var backItems = ItemManager.GetItems(new[] { 2 });
 
             var frontPlayer = new Player(PlayerType.Front, frontDeck, frontItems);
             var backPlayer = new Player(PlayerType.Back, backDeck, backItems);
@@ -130,6 +131,14 @@ namespace Assets.Scripts
             {
                 GameEndQueue.Enqueue(gameEndEvent);
             }
+            else if (baseEvent is IInteruptEvent interuptEvent)
+            {
+                InteruptEvents.Add(interuptEvent);
+            }
+            else if (baseEvent is ITriggerEvent triggerEvent)
+            {
+                TriggerEvents.Add(triggerEvent);
+            }
             else if (baseEvent is BasePhaseEvent phaseEvent)
             {
                 PhaseQueue.Enqueue(phaseEvent);
@@ -141,14 +150,6 @@ namespace Assets.Scripts
             else if (baseEvent is BasePassiveEvent passiveEvent)
             {
                 PassiveEvents.Add(passiveEvent);
-            }
-            else if (baseEvent is BaseInteruptEvent interuptEvent)
-            {
-                InteruptEvents.Add(interuptEvent);
-            }
-            else if (baseEvent is BaseTriggerEvent triggerEvent)
-            {
-                TriggerEvents.Add(triggerEvent);
             }
             else
             {
@@ -226,8 +227,10 @@ namespace Assets.Scripts
         {
             //Timer.SetTickLength(0.5f);
 
-            EnqueueEvent(new RedrawCardsEvent(PlayerType.Front, 3));
-            EnqueueEvent(new RedrawCardsEvent(PlayerType.Back, 3));
+            foreach(var player in Board.BothPlayers)
+            {
+                EnqueueEvent(new RedrawCardsEvent<Player, BaseCard>(player, player.PlayerType, 3));
+            }
 
             EnqueueEvent(new NewPhaseEvent(Phase.Play));
         }
@@ -351,7 +354,7 @@ namespace Assets.Scripts
             var phaseEvent = PhaseQueue.Dequeue();
             if (phaseEvent != null)
             {
-                phaseEvent.Process(this);
+                phaseEvent.Process(this, Board);
                 return phaseEvent;
             }
 
@@ -408,9 +411,9 @@ namespace Assets.Scripts
                     continue;
                 }
 
-                var interupted = interuptEvent.Process(baseEvent);
+                var interupted = interuptEvent.Process(Board, baseEvent);
 
-                if (interupted && interuptEvent is BaseInteruptOnceEvent)
+                if (interupted && interuptEvent.TriggerOnce)
                     InteruptEvents.Remove(interuptEvent);
             }
         }
@@ -419,7 +422,7 @@ namespace Assets.Scripts
         {
             switch (gameplayEvent)
             {
-                case BaseUIInteractionEvent uIInteractionEvent:
+                case IUIInteractionEvent uIInteractionEvent:
                     return uIInteractionEvent.Process(UIManager, Board);
                 case BaseBoardEvent boardEvent:
                     return boardEvent.Process(Board);
@@ -432,7 +435,7 @@ namespace Assets.Scripts
         {
             foreach(var triggerEvent in TriggerEvents.ToList())
             {
-                if (triggerEvent.Conditions(triggeringEvent))
+                if (triggerEvent.Conditions(Board, triggeringEvent))
                 {
                     if (triggerEvent.TriggerOnce || !triggerEvent.IsValid(Board)) {
                         TriggerEvents.Remove(triggerEvent);

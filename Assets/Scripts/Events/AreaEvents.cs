@@ -50,7 +50,7 @@ namespace Assets.Scripts.Events
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            var player = board.GetCardOwner(Card);
+            var player = board.GetSourceOwner(Card);
 
             player.RemoveFromHand(Card);
             player.AddToDeck(Card);
@@ -70,7 +70,7 @@ namespace Assets.Scripts.Events
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            var player = board.GetCardOwner(Card);
+            var player = board.GetSourceOwner(Card);
 
             var slotEvents = player.RemoveFromField(Card);
             foreach (var slotEvent in slotEvents) {
@@ -100,9 +100,9 @@ namespace Assets.Scripts.Events
             // Work out who owns the card
             Player player;
             if (isActionCard)
-                player = board.GetCardOwner(Card); // Action cards are always owned by the player who uses them
+                player = board.GetSourceOwner(Card); // Action cards are always owned by the player who uses them
             else
-                player = board.GetSlotOwner(Slot); // Field cards are always owned by the player whose side they are played on
+                player = board.GetSourceOwner(Slot); // Field cards are always owned by the player whose side they are played on
 
             var effectEvents = Card.GetEvents(board).ToList(); // Generate effect events before removing from hand
 
@@ -144,7 +144,7 @@ namespace Assets.Scripts.Events
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            var player = board.GetCardOwner(Card);
+            var player = board.GetSourceOwner(Card);
 
             // stop duplicate destroys - a better way to do this?
             if (player.IsInDestroyed(Card) || player.IsInEliminated(Card))
@@ -210,7 +210,7 @@ namespace Assets.Scripts.Events
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            var player = board.GetCardOwner(Card);
+            var player = board.GetSourceOwner(Card);
 
             if (player.IsInHand(Card))
                 player.RemoveFromHand(Card);
@@ -246,7 +246,7 @@ namespace Assets.Scripts.Events
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            var player = board.GetCardOwner(Card);
+            var player = board.GetSourceOwner(Card);
 
             player.RemoveFromHand(Card);
             player.AddToEliminated(Card);
@@ -287,7 +287,7 @@ namespace Assets.Scripts.Events
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            var originalPlayer = board.GetCardOwner(Card);
+            var originalPlayer = board.GetSourceOwner(Card);
             var newPlayer = board.GetPlayer(originalPlayer.PlayerType.Opposite());
 
             var leaveSlotEvents = originalPlayer.RemoveFromField(Card);

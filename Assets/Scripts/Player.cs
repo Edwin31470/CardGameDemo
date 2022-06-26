@@ -6,10 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Events;
+using Assets.Scripts.Bases;
 
 namespace Assets.Scripts
 {
-    public class Player
+    public class Player : BaseSource
     {
         public PlayerType PlayerType { get; set; }
 
@@ -34,7 +35,7 @@ namespace Assets.Scripts
         private int TokenAttack => Tokens.Count(x => x == TokenType.Claw) - Tokens.Count(x => x == TokenType.Blunt);
         private int TokenDefence => Tokens.Count(x => x == TokenType.Shell) - Tokens.Count(x => x == TokenType.Cracked);
 
-        public List<BaseItem> Items { get; set; } = new();
+        public List<Item> Items { get; set; } = new();
 
         public Player(PlayerType playerType, IEnumerable<CardInfo> cardInfos, IEnumerable<ItemInfo> itemInfos)
         {
@@ -47,7 +48,7 @@ namespace Assets.Scripts
 
             foreach (var itemInfo in itemInfos)
             {
-                Items.Add(BaseItem.Create(itemInfo));
+                Items.Add(Item.Create(itemInfo));
             }
         }
 
@@ -70,14 +71,29 @@ namespace Assets.Scripts
         }
 
         // Exists
-        public bool OwnsCard(BaseCard card)
+        public bool IsSourceOwner(BaseSource source)
         {
-            return Hand
+            if (source is BaseCard card)
+            {
+                return Hand
                 .Concat(FieldCards)
                 .Concat(Deck)
                 .Concat(Destroyed)
                 .Concat(Eliminated)
                 .Contains(card);
+            }
+            else if (source is Item item)
+            {
+                return Items
+                    .Contains(item);
+            }
+            if (source is FieldSlot slot)
+            {
+                return Field
+                    .Contains(slot);
+            }
+
+            return false;
         }
 
         public bool IsInDeck(BaseCard card)
@@ -105,7 +121,7 @@ namespace Assets.Scripts
             return Eliminated.Contains(card);
         }
 
-        public bool OwnsItem(BaseItem item)
+        public bool OwnsItem(Item item)
         {
             return Items.Contains(item);
         }

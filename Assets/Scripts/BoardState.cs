@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Bases;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Extensions;
@@ -96,37 +97,14 @@ namespace Assets.Scripts
             }
         }
 
-        public Player GetCardOwner(BaseCard card)
+        public Player GetSourceOwner(BaseSource source)
         {
-            foreach (var player in BothPlayers)
-            {
-                if (player.OwnsCard(card))
+            foreach (var player in BothPlayers) {
+                if (player.IsSourceOwner(source))
                     return player;
             }
 
-            throw new ArgumentOutOfRangeException(nameof(card), "Card must be owned by a player");
-        }
-
-        public Player GetSlotOwner(FieldSlot slot)
-        {
-            foreach (var player in BothPlayers)
-            {
-                if (player.Field.Contains(slot))
-                    return player;
-            }
-
-            throw new ArgumentOutOfRangeException(nameof(slot), "Slot must be owned by a player");
-        }
-
-        public Player GetItemOwner(BaseItem item)
-        {
-            foreach (var player in BothPlayers)
-            {
-                if (player.Items.Contains(item))
-                    return player;
-            }
-
-            throw new ArgumentOutOfRangeException(nameof(item), "Item must be owned by a player");
+            throw new ArgumentOutOfRangeException(nameof(source), "Source must be owned by a player");
         }
     }
 }

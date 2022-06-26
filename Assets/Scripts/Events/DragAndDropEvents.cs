@@ -8,39 +8,37 @@ using Assets.Scripts.Cards;
 
 namespace Assets.Scripts.Events
 {
-    public class PlayCardEvent : BaseUIInteractionEvent
+    public class PlayCardEvent : BaseUIInteractionEvent<Player>
     {
         public override float Delay => 1f;
-        public override string EventTitle => $"{PlayingPlayer} Player's Turn";
+        public override string EventTitle => $"{Source.PlayerType} Player's Turn";
 
-        private PlayerType PlayingPlayer { get; set; }
         private bool HasOtherPlayerPassed { get; set; }
         private BoardState Board { get; set; }
 
-        public PlayCardEvent(PlayerType playingPlayer, bool hasOtherPlayerPassed)
+        public PlayCardEvent(Player source, bool hasOtherPlayerPassed) : base(source)
         {
-            PlayingPlayer = playingPlayer;
             HasOtherPlayerPassed = hasOtherPlayerPassed;
         }
 
         public override IEnumerable<BaseEvent> Process(UIManager uIManager, BoardState board)
         {
-            var player = board.GetPlayer(PlayingPlayer);
+            var player = Source;
 
             // If no cards in hand, automatically pass
             if (!player.Hand.Any()) {
                 return PassTurn();
             }
 
-            uIManager.SetTurn(PlayingPlayer);
+            uIManager.SetTurn(player.PlayerType);
             Board = board;
 
             var conditions = new TargetConditions {
-                PlayerType = PlayingPlayer,
+                PlayerType = player.PlayerType,
                 Area = Area.Hand
             };
 
-            uIManager.BeginDragAndDrop(player.Hand, player.Field.Where(x => x.Card == null), PlayingPlayer, PlayCard, SacrificeCard, PassTurn);
+            uIManager.BeginDragAndDrop(player.Hand, player.Field.Where(x => x.Card == null), player.PlayerType, PlayCard, SacrificeCard, PassTurn);
 
             // resulting events of PlayCard and PassTurn are handled in DragAndDropManager.Finish()
             return Enumerable.Empty<BaseEvent>();
@@ -48,7 +46,7 @@ namespace Assets.Scripts.Events
 
         protected IEnumerable<BaseEvent> PlayCard(BaseCard droppedCard, FieldSlot fieldSlot)
         {
-            var player = Board.GetCardOwner(droppedCard);
+            var player = Board.GetSourceOwner(droppedCard);
 
             // Don't play if unable to pay for card
             if (player.GetManaAmount(droppedCard.Colour) < droppedCard.Cost) {
@@ -59,7 +57,7 @@ namespace Assets.Scripts.Events
             player.RemoveMana(droppedCard.Colour, droppedCard.Cost);
             yield return new EnterFieldEvent(droppedCard, fieldSlot);
 
-            yield return new NewTurnEvent(PlayingPlayer.Opposite(), false);
+            yield return new NewTurnEvent(Source.PlayerType.Opposite(), false);
         }
 
         private IEnumerable<BaseEvent> SacrificeCard(BaseCard card)
@@ -76,7 +74,7 @@ namespace Assets.Scripts.Events
                 yield break;
             }
 
-            yield return new NewTurnEvent(PlayingPlayer.Opposite(), true);
+            yield return new NewTurnEvent(Source.PlayerType.Opposite(), true);
         }
     }
 }

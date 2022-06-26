@@ -1,7 +1,6 @@
 ﻿using Assets.Scripts.Bases;
 using Assets.Scripts.Cards;
-using Assets.Scripts.Enums;
-using Assets.Scripts.Extensions;
+using Assets.Scripts.Events.Interfaces;
 using System;
 using System.Collections.Generic;
 
@@ -9,59 +8,59 @@ namespace Assets.Scripts.Events
 {
     // Events that trigger once
 
-    public abstract class BaseActiveEvent<T> : BaseBoardEvent where T : BaseSource
+    public abstract class BaseActiveEvent<T> : BaseSourceEvent<T> where T : BaseSource
     {
-        protected T Source { get; set; }
-
-        public BaseActiveEvent(T source)
+        public BaseActiveEvent(T source) : base(source)
         {
-            Source = source;
         }
     }
 
-    public abstract class BaseStatEvent : BaseActiveEvent<CreatureCard>
+    // Source is where the damage/etc. is coming from, target is what is being damaged/etc.
+    public abstract class BaseStatEvent<T> : BaseActiveEvent<T>, IStatEvent where T : BaseSource
     {
-        public int Value { get; set; }
-        public Stat Stat { get; set; }
+        public CreatureCard Target { get; set; }
 
-        protected BaseStatEvent(CreatureCard source, int value, Stat stat) : base(source)
+        public int Value { get; set; }
+        private Action<int> Action { get; set; }
+
+        protected BaseStatEvent(T source, CreatureCard target, int value, Action<int> action) : base(source)
         {
+            Target = target;
             Value = value;
-            Stat = stat;
+            Action = action;
         }
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            Stat.Add(Value);
+            Action.Invoke(Value);
             yield break;
         }
     }
 
-    public class DamageCreatureEvent : BaseStatEvent
+    public class DamageCreatureEvent<T> : BaseStatEvent<T>, IDamageEvent where T : BaseSource
     {
-
-        public DamageCreatureEvent(CreatureCard card, int value) : base(card, -value, card.BaseDefence)
+        public DamageCreatureEvent(T source, CreatureCard target, int value) : base(source, target, value, target.BaseDefence.Remove)
         {
         }
     }
 
-    public class FortifyCreatureEvent : BaseStatEvent
+    public class FortifyCreatureEvent<T> : BaseStatEvent<T>, IFortifyEvent where T : BaseSource
     {
-        public FortifyCreatureEvent(CreatureCard card, int value) : base(card, value, card.BaseDefence)
+        public FortifyCreatureEvent(T source, CreatureCard target, int value) : base(source, target, value, target.BaseDefence.Add)
         {
         }
     }
 
-    public class WeakenCreatureEvent : BaseStatEvent
+    public class WeakenCreatureEvent<T> : BaseStatEvent<T>, IWeakenEvent where T : BaseSource
     {
-        public WeakenCreatureEvent(CreatureCard card, int value) : base(card, -value, card.BaseAttack)
+        public WeakenCreatureEvent(T source, CreatureCard target, int value) : base(source, target, value, target.BaseAttack.Remove)
         {
         }
     }
 
-    public class StrengthenCreatureEvent : BaseStatEvent
+    public class StrengthenCreatureEvent<T> : BaseStatEvent<T>, IStrengthenEvent where T : BaseSource
     {
-        public StrengthenCreatureEvent(CreatureCard card, int value) : base(card, value, card.BaseAttack)
+        public StrengthenCreatureEvent(T source, CreatureCard target, int value) : base(source, target, value, target.BaseAttack.Add)
         {
         }
     }

@@ -1,5 +1,7 @@
-﻿using Assets.Scripts.Cards;
+﻿using Assets.Scripts.Bases;
+using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
+using Assets.Scripts.Events.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,60 +10,31 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.Events
 {
-    // Like Triggers but modifies an event before it goes off
-    public abstract class BaseInteruptEvent : BaseEvent
+    // Modifies an event before it goes off
+    public abstract class BaseInteruptEvent<T> : BaseSourceEvent<T>, IInteruptEvent where T : BaseSource
     {
-        public BaseCard Source { get; set; }
+        public bool TriggerOnce { get; set; }
 
-        protected BaseInteruptEvent(BaseCard source)
+        protected BaseInteruptEvent(T source, bool triggerOnce) : base(source)
         {
-            Source = source;
+            TriggerOnce = triggerOnce;
         }
 
-        public abstract bool Process(BaseGameplayEvent baseEvent);
-
-        // Interupt events are only valid when their source is on the field
-        public bool IsValid(BoardState board)
-        {
-            return board.GetCardOwner(Source).IsOnField(Source);
-        }
+        public abstract bool Process(BoardState boardState, BaseEvent baseEvent);
     }
 
-    public abstract class BaseInteruptOnceEvent : BaseInteruptEvent
+    public class CustomInteruptEvent<T> : BaseInteruptEvent<T> where T : BaseSource
     {
-        protected BaseInteruptOnceEvent(BaseCard owner) : base(owner)
-        {
+        private Func<T, BoardState, BaseEvent, bool> Func { get; set; }
 
-        }
-    }
-
-    public class CustomInteruptEvent : BaseInteruptEvent
-    {
-        private Func<BaseGameplayEvent, bool> Func { get; set; }
-
-        public CustomInteruptEvent(BaseCard owner, Func<BaseGameplayEvent, bool> func) : base(owner)
+        public CustomInteruptEvent(T source, Func<T, BoardState, BaseEvent, bool> func, bool triggerOnce = false) : base(source, triggerOnce)
         {
             Func = func;
         }
 
-        public override bool Process(BaseGameplayEvent baseEvent)
+        public override bool Process(BoardState boardState, BaseEvent baseEvent)
         {
-            return Func.Invoke(baseEvent);
-        }
-    }
-
-    public class CustomInteruptOnceEvent : BaseInteruptOnceEvent
-    {
-        private Func<BaseGameplayEvent, bool> Func { get; set; }
-
-        public CustomInteruptOnceEvent(BaseCard owner, Func<BaseGameplayEvent, bool> func) : base(owner)
-        {
-            Func = func;
-        }
-
-        public override bool Process(BaseGameplayEvent triggeringEvent)
-        {
-            return Func.Invoke(triggeringEvent);
+            return Func.Invoke(Source, boardState, baseEvent);
         }
     }
 }

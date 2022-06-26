@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Cards;
+using Assets.Scripts.Bases;
+using Assets.Scripts.Events.Interfaces;
 
 namespace Assets.Scripts.Events
 {
@@ -35,19 +37,43 @@ namespace Assets.Scripts.Events
         }
     }
 
-    // Like a board event but requires UI interaction
-    public abstract class BaseUIInteractionEvent : BaseGameplayEvent
+    public abstract class BaseSourceEvent<T> : BaseBoardEvent, ISourceEvent where T : BaseSource
     {
+        public T Source { get; set; }
+        public BaseSource BaseSource => Source;
+
+        protected BaseSourceEvent(T source)
+        {
+            Source = source;
+        }
+
+        public bool IsValid(BoardState board)
+        {
+            // Card events are only valid when their source is on the field
+            if (Source is BaseCard card)
+                return board.GetSourceOwner(Source).IsOnField(card);
+
+            return true;
+        }
+    }
+
+    // Like a board event but requires UI interaction
+    public abstract class BaseUIInteractionEvent<T> : BaseSourceEvent<T>, IUIInteractionEvent where T: BaseSource
+    {
+        protected BaseUIInteractionEvent(T source) : base(source)
+        {
+        }
+
         public virtual IEnumerable<BaseEvent> Process(UIManager uIManager, BoardState board)
         {
-            throw new MethodAccessException($"{nameof(BaseUIInteractionEvent.Process)} should not be being called. Called by {GetType()}");
+            throw new MethodAccessException($"{nameof(BaseUIInteractionEvent<T>.Process)} should not be being called. Called by {GetType()}");
         }
     }
 
     public abstract class BasePhaseEvent : BaseEvent
     {
         public override float Delay => 1f;
-        public abstract void Process(MainController controller);
+        public abstract void Process(MainController controller, BoardState boardState);
     }
 
     public class MessageEvent : BaseGameplayEvent

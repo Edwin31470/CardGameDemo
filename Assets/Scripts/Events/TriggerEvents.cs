@@ -1,5 +1,7 @@
-﻿using Assets.Scripts.Cards;
+﻿using Assets.Scripts.Bases;
+using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
+using Assets.Scripts.Events.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,29 +10,21 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.Events
 {
-    public abstract class BaseTriggerEvent : BaseEvent
+    public abstract class BaseTriggerEvent<T> : BaseSourceEvent<T>, ITriggerEvent where T : BaseSource
     {
-        public BaseCard Source { get; set; }
         public bool TriggerOnce { get; set; }
 
-        protected BaseTriggerEvent(BaseCard source, bool triggerOnce = false)
+        protected BaseTriggerEvent(T source, bool triggerOnce = false) : base(source)
         {
-            Source = source;
             TriggerOnce = triggerOnce;
         }
 
-        public abstract bool Conditions(BaseEvent triggeringEvent);
+        public abstract bool Conditions(BoardState boardState, BaseEvent triggeringEvent);
         public abstract IEnumerable<BaseEvent> Process(BoardState boardState, BaseEvent triggeringEvent);
-
-        // Trigger events are only valid when their source is on the field
-        public bool IsValid(BoardState board)
-        {
-            return board.GetCardOwner(Source).IsOnField(Source);
-        }
     }
 
 
-    public class OnDestroyedEvent<T> : BaseTriggerEvent where T : BaseCard
+    public class OnDestroyedEvent<T> : BaseTriggerEvent<T> where T : BaseSource
     {
         // Function to trigger when the card is destroyed
         private Func<T, BoardState, IEnumerable<BaseEvent>> Func { get; set; }
@@ -40,40 +34,64 @@ namespace Assets.Scripts.Events
             Func = func;
         }
 
-        public override bool Conditions(BaseEvent triggeringEvent)
+        public override bool Conditions(BoardState boardState, BaseEvent triggeringEvent)
         {
             return triggeringEvent is DestroyCardEvent destroyCardEvent && destroyCardEvent.Card == Source;
         }
 
         public override IEnumerable<BaseEvent> Process(BoardState boardState, BaseEvent triggeringEvent)
         {
-            return Func.Invoke((T)Source, boardState);
+            return Func.Invoke(Source, boardState);
         }
     }
 
-    public class CustomTriggerEvent : BaseTriggerEvent
+    public class CustomTriggerEvent<T> : BaseTriggerEvent<T> where T : BaseSource
     {
-        private Func<BaseEvent, bool> FuncConditions { get; } 
-        private Func<BoardState, BaseEvent, IEnumerable<BaseEvent>> Func { get; }
+        private Func<T, BoardState, BaseEvent, bool> FuncConditions { get; } 
+        private Func<T, BoardState, BaseEvent, IEnumerable<BaseEvent>> Func { get; }
 
-        public CustomTriggerEvent(BaseCard owner, Func<BaseEvent, bool> conditions, Func<BoardState, BaseEvent, IEnumerable<BaseEvent>> func, bool triggerOnce = false) : base(owner, triggerOnce)
+        public CustomTriggerEvent(T owner, Func<T, BoardState, BaseEvent, bool> conditions, Func<T, BoardState, BaseEvent, IEnumerable<BaseEvent>> func, bool triggerOnce = false) : base(owner, triggerOnce)
         {
             FuncConditions = conditions;
             Func = func;
         }
 
-        public override bool Conditions(BaseEvent triggeringEvent)
+        public override bool Conditions(BoardState boardState, BaseEvent triggeringEvent)
         {
             // Prevents cards triggering on themselves
             if (triggeringEvent is EnterFieldEvent enterFieldEvent && enterFieldEvent.Card == Source)
                 return false;
 
-            return FuncConditions.Invoke(triggeringEvent);
+            return FuncConditions.Invoke(Source, boardState, triggeringEvent);
         }
 
         public override IEnumerable<BaseEvent> Process(BoardState boardState, BaseEvent triggeringEvent)
         {
-            return Func.Invoke(boardState, triggeringEvent);
+            return Func.Invoke(Source, boardState, triggeringEvent);
+        }
+    }
+
+    public class CustomOnGameStartEvent<T> : CustomTriggerEvent<T> where T : BaseSource
+    {
+        public CustomOnGameStartEvent(T owner, Func<T, BoardState, BaseEvent, IEnumerable<BaseEvent>> onRoundStart) : base(owner, IsGameStart, onRoundStart)
+        {
+        }
+
+        private static bool IsGameStart(T source, BoardState boardState, BaseEvent triggeringEvent)
+        {
+            return triggeringEvent is NewPhaseEvent newPhaseEvent && newPhaseEvent.Phase == Phase.GameStart;
+        }
+    }
+
+    public class CustomOnRoundStartEvent<T> : CustomTriggerEvent<T> where T : BaseSource
+    {
+        public CustomOnRoundStartEvent(T owner, Func<T, BoardState, BaseEvent, IEnumerable<BaseEvent>> onRoundStart) : base(owner, IsRoundStart, onRoundStart)
+        {
+        }
+
+        private static bool IsRoundStart(T source, BoardState boardState, BaseEvent triggeringEvent)
+        {
+            return triggeringEvent is NewPhaseEvent newPhaseEvent && newPhaseEvent.Phase == Phase.Play;
         }
     }
 }

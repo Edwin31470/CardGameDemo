@@ -73,7 +73,7 @@
     <Compile Include="Assets\Scripts\Cards\CardInfo.cs" />
     <Compile Include="Assets\Scripts\Items\ItemInfo.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
-    <Compile Include="Assets\Scripts\Items\BaseItem.cs" />
+    <Compile Include="Assets\Scripts\Items\Item.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\GreenActionEffects.cs" />
     <Compile Include="Assets\Scripts\Enums\TokenType.cs" />
     <Compile Include="Assets\Scripts\Enums\TriggerType.cs" />
@@ -89,6 +89,7 @@
     <Compile Include="Assets\Scripts\Managers\ShowTokensManager.cs" />
     <Compile Include="Assets\Scripts\Enums\PileType.cs" />
     <Compile Include="Assets\Scripts\Managers\PileManager.cs" />
+    <Compile Include="Assets\Scripts\IO\BaseData.cs" />
     <Compile Include="Assets\Scripts\Events\PassiveEvents.cs" />
     <Compile Include="Assets\Scripts\Cards\CreatureCard.cs" />
     <Compile Include="Assets\Scripts\Extensions\GameObjectExtensions.cs" />
@@ -132,14 +133,18 @@
     <Compile Include="Assets\Scripts\Managers\CardEffectsManager.cs" />
     <Compile Include="Assets\Scripts\Enums\PlayerType.cs" />
     <Compile Include="Assets\Scripts\Events\GameEndEvents.cs" />
+    <Compile Include="Assets\Scripts\ManageItemsController.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\BlueActionEffects.cs" />
     <Compile Include="Assets\Scripts\Effects\BaseEffects.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumerableExtensions.cs" />
+    <Compile Include="Assets\Scripts\BaseManagerController.cs" />
     <Compile Include="Assets\Scripts\Enums\UIMode.cs" />
     <Compile Include="Assets\Scripts\Events\UIEvents.cs" />
-    <Compile Include="Assets\Scripts\LegendkeeperIntegration\Project.cs" />
+    <Compile Include="Assets\Scripts\Events\Interfaces\ITriggerEvent.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\RedCreatureEffects.cs" />
     <Compile Include="Assets\Scripts\EditDeckController.cs" />
+    <Compile Include="Assets\Scripts\LegendkeeperIntegration\Project.cs" />
+    <Compile Include="Assets\Scripts\IO\DataIO.cs" />
     <Compile Include="Assets\Scripts\ManageCardsController.cs" />
     <Compile Include="Assets\Scripts\Bases\BaseSource.cs" />
     <Compile Include="Assets\Scripts\Effects\SimpleEffects.cs" />
@@ -149,10 +154,10 @@
     <Compile Include="Assets\Scripts\MainController.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
     <Compile Include="Assets\Scripts\Managers\ItemManager.cs" />
-    <Compile Include="Assets\Scripts\ManageItemsController.cs" />
-    <Compile Include="Assets\Scripts\BaseManagerController.cs" />
-    <Compile Include="Assets\Scripts\IO\DataIO.cs" />
-    <Compile Include="Assets\Scripts\IO\BaseData.cs" />
+    <Compile Include="Assets\Scripts\Events\Interfaces\IInteruptEvent.cs" />
+    <Compile Include="Assets\Scripts\Events\Interfaces\ISourceEvent.cs" />
+    <Compile Include="Assets\Scripts\Events\Interfaces\IStatEvents.cs" />
+    <Compile Include="Assets\Scripts\Events\Interfaces\IUIInteractionEvent.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

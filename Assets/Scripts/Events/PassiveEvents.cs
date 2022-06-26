@@ -20,7 +20,7 @@ namespace Assets.Scripts.Events
         // Passive events are only valid when their source is on the field
         public bool IsValid(BoardState board)
         {
-            return board.GetCardOwner(Source).IsOnField(Source);
+            return board.GetSourceOwner(Source).IsOnField(Source);
         }
     }
 

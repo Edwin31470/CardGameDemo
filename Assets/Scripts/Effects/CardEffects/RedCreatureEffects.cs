@@ -42,28 +42,28 @@ namespace Assets.Scripts.Effects.CardEffects
                 cardInfo.CardData.Attack = 2;
                 cardInfo.CardData.Defence = 2;
 
-                yield return new SummonCardEvent(cardInfo, boardState.GetCardOwner(source).PlayerType);
+                yield return new SummonCardEvent(cardInfo, boardState.GetSourceOwner(source).PlayerType);
             }
         }
     }
 
-    public class BoilingElemental : BaseCardEffect<CreatureCard>
+    public class BoilingElemental : BaseSourceEffect<CreatureCard>
     {
         public override int Id => 2;
 
         public override IEnumerable<BaseEvent> GetEffect(CreatureCard source, BoardState board)
         {
-            yield return new DamageTargetsEvent(new() { CardType = CardType.Creature }, 1, 4);
+            yield return new DamageTargetsEvent<CreatureCard>(source, new(), 1, 4);
         }
     }
 
-    public class FlameTongueKijiti : BaseCardEffect<CreatureCard>
+    public class FlameTongueKijiti : BaseSourceEffect<CreatureCard>
     {
         public override int Id => 3;
 
         public override IEnumerable<BaseEvent> GetEffect(CreatureCard source, BoardState board)
         {
-            yield return new AddTokensEvent(board.GetCardOwner(source).PlayerType, TokenType.Claw, 2);
+            yield return new AddTokensEvent(board.GetSourceOwner(source).PlayerType, TokenType.Claw, 2);
         }
     }
 
@@ -73,7 +73,7 @@ namespace Assets.Scripts.Effects.CardEffects
 
         protected override IEnumerable<BaseEvent> Effect(CreatureCard source, BoardState boardState)
         {
-            yield return new DestroyTargetsEvent(new TargetConditions { CardType = CardType.Creature }, 1);
+            yield return new DestroyTargetsEvent<CreatureCard, CreatureCard>(source, new(), 1);
         }
     }
 
@@ -84,7 +84,7 @@ namespace Assets.Scripts.Effects.CardEffects
         protected override TargetConditions GetTargetConditions(CreatureCard source, BoardState board) => new()
         {
             CardType = CardType.Creature,
-            PlayerType = board.GetCardOwner(source).PlayerType,
+            PlayerType = board.GetSourceOwner(source).PlayerType,
         };
 
         protected override IEnumerable<BaseEvent> Effect(CreatureCard source, CreatureCard target)
@@ -94,11 +94,11 @@ namespace Assets.Scripts.Effects.CardEffects
 
             if (FlipCoin.Flip)
             {
-                yield return new DamageCreatureEvent(target, 5);
+                yield return new DamageCreatureEvent<CreatureCard>(source, target, 5);
             }
             else
             {
-                yield return new WeakenCreatureEvent(target, 5);
+                yield return new WeakenCreatureEvent<CreatureCard>(source, target, 5);
             }
         }
     }

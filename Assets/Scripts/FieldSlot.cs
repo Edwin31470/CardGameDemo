@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Bases;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Events;
 
 namespace Assets.Scripts
 {
-    public class FieldSlot
+    public class FieldSlot : BaseSource
     {
         public FieldCard Card { get; set; }
 

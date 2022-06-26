@@ -13,10 +13,10 @@ namespace Assets.Scripts.Managers
     {
         private static readonly Dictionary<int, ItemData> ItemLibrary = DataIO.ReadAll<ItemData>().ToDictionary(x => x.Id, x => x);
 
-        private static readonly Dictionary<int, BaseItemEffect> EffectLibrary = Assembly.GetAssembly(typeof(BaseItemEffect))
+        private static readonly Dictionary<int, BaseEffect> EffectLibrary = Assembly.GetAssembly(typeof(BaseEffect))
             .GetTypes()
-            .Where(x => x.IsClass && !x.IsAbstract && x.IsSubclassOf(typeof(BaseItemEffect)))
-            .Select(x => (BaseItemEffect)Activator.CreateInstance(x))
+            .Where(x => x.IsSubclassOf(typeof(BaseSourceEffect<Item>)))
+            .Select(x => (BaseEffect)Activator.CreateInstance(x))
             .ToDictionary(x => x.Id, x => x);
 
         public static List<ItemInfo> GetItems(IEnumerable<int> itemIds)
@@ -26,7 +26,7 @@ namespace Assets.Scripts.Managers
             return itemIds.Select(x => new ItemInfo
             {
                 ItemData = ItemLibrary[x],
-                GenerateEvents = EffectLibrary.TryGetValue(x, out var effect) ? effect.GenerateEffects : (x, y) => Enumerable.Empty<BaseEvent>()
+                Effect = EffectLibrary[x]
             }).ToList();
         }
     }

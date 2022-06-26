@@ -4,10 +4,11 @@ using Assets.Scripts.Events;
 using System.Collections.Generic;
 using Assets.Scripts.Bases;
 using Assets.Scripts.IO;
+using Assets.Scripts.Effects;
 
 namespace Assets.Scripts.Cards
 {
-    public abstract class BaseCard : BaseSource
+    public abstract class BaseCard : BaseEffectSource
     {
         public string Name { get; set; }
         public Colour Colour { get; set; }
@@ -21,7 +22,6 @@ namespace Assets.Scripts.Cards
         public bool HasPersistence { get; set; }
         public bool IsUnique { get; set; }
 
-        private Func<BaseCard /* this */, BoardState, IEnumerable<BaseEvent>> GenerateEvents { get; set; }
         public bool IsSummoned { get; set; }
 
 
@@ -37,13 +37,8 @@ namespace Assets.Scripts.Cards
             HasPersistence = cardInfo.CardData.HasPersistence;
             IsUnique = cardInfo.CardData.IsUnique;
 
-            GenerateEvents = cardInfo.GenerateEvents;
+            Effect = cardInfo.Effect;
             IsSummoned = cardInfo.IsSummoned;
-        }
-
-        public IEnumerable<BaseEvent> GetEvents(BoardState board)
-        {
-            return GenerateEvents.Invoke(this, board);
         }
 
         public CardInfo ToCardInfo()
@@ -61,7 +56,7 @@ namespace Assets.Scripts.Cards
                     FlavourText = FlavourText,
                     HasPersistence = HasPersistence
                 },
-                GenerateEvents = GenerateEvents,
+                Effect = Effect,
                 IsSummoned = IsSummoned,
             };
 

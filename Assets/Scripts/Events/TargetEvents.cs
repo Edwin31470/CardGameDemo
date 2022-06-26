@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Cards;
+﻿using Assets.Scripts.Bases;
+using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
 using Assets.Scripts.UI;
 using System;
@@ -7,16 +8,18 @@ using System.Linq;
 
 namespace Assets.Scripts.Events
 {
-    public abstract class BaseCardSelectionEvent : BaseUIInteractionEvent
+    public abstract class BaseCardSelectionEvent<TSource, TTarget> : BaseUIInteractionEvent<TSource>
+        where TSource : BaseSource
+        where TTarget : BaseCard
     {
         protected TargetConditions TargetConditions { get; set; }
         public int Count { get; set; }
         protected SelectionType SelectionType { get; set; }
 
-        public IEnumerable<BaseCard> OverrideTargets { get; set; } // For use with interupt events
+        public IEnumerable<TTarget> OverrideTargets { get; set; } // For use with interupt events
         protected BoardState BoardState { get; set; } // Save the board state to be used in TriggerEffect
 
-        protected BaseCardSelectionEvent(TargetConditions targetConditions, int count, SelectionType selectionType = SelectionType.Neutral)
+        protected BaseCardSelectionEvent(TSource source, TargetConditions targetConditions, int count, SelectionType selectionType = SelectionType.Neutral) : base(source)
         {
             TargetConditions = targetConditions;
             Count = count;
@@ -35,157 +38,146 @@ namespace Assets.Scripts.Events
         // Get targets
         public IEnumerable<BaseEvent> FinishSelection(IEnumerable<BaseCard> selectedCards)
         {
-            return TriggerEffect(selectedCards);
+            var v = selectedCards.Cast<TTarget>().ToList();
+            return TriggerEffect(selectedCards.Cast<TTarget>());
         }
 
 
         // Return new events
-        public abstract IEnumerable<BaseEvent> TriggerEffect(IEnumerable<BaseCard> selectedCards);
+        public abstract IEnumerable<BaseEvent> TriggerEffect(IEnumerable<TTarget> selectedCards);
     }
 
-    public class RedrawCardsEvent : BaseCardSelectionEvent
+    public class RedrawCardsEvent<TSource, TTarget> : BaseCardSelectionEvent<TSource, TTarget> 
+        where TSource : BaseSource
+        where TTarget : BaseCard
     {
-        public override string EventTitle => $"{SourcePlayer} Player chooses {Count} cards to redraw";
+        public override string EventTitle => $"{PlayerType} Player chooses {Count} cards to redraw";
 
-        protected PlayerType SourcePlayer { get; set; }
+        PlayerType PlayerType { get; set; }
 
-        public RedrawCardsEvent(PlayerType sourcePlayer, int count)
-            : base(new TargetConditions { PlayerType = sourcePlayer, Area = Area.Hand }, count)
+        public RedrawCardsEvent(TSource source, PlayerType playerType, int count)
+            : base(source, new TargetConditions { PlayerType = playerType, Area = Area.Hand }, count)
         {
-            SourcePlayer = sourcePlayer;
+            PlayerType = playerType;
         }
 
-        public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<BaseCard> selectedCards)
+        public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<TTarget> selectedCards)
         {
             foreach (var card in selectedCards)
             {
                 yield return new ReturnToDeckEvent(card);
-                yield return new DrawCardEvent(SourcePlayer);
+                yield return new DrawCardEvent(PlayerType);
             }
         }
     }
 
-    public abstract class BaseTargetCreaturesEvent : BaseCardSelectionEvent
+    public abstract class BaseTargetCreaturesEvent<TSource> : BaseCardSelectionEvent<TSource, CreatureCard> where TSource : BaseSource
+    {
+        protected BaseTargetCreaturesEvent(TSource source, TargetConditions targetConditions, int count, SelectionType selectionType)
+            : base(source, targetConditions, count, selectionType)
+        {
+            targetConditions.CardType = CardType.Creature;
+        }
+    }
+
+    public abstract class BaseTargetStatEvent<TSource, TStatEvent> : BaseTargetCreaturesEvent<TSource>
+        where TSource : BaseSource
+        where TStatEvent : BaseStatEvent<TSource>
     {
         public int Value { get; set; }
 
-        protected BaseTargetCreaturesEvent(TargetConditions targetConditions, int count, int value, SelectionType selectionType)
-            : base(targetConditions, count, selectionType)
+        protected BaseTargetStatEvent(TSource source, TargetConditions targetConditions, int count, int value, SelectionType selectionType)
+            : base(source, targetConditions, count, selectionType)
         {
+            targetConditions.CardType = CardType.Creature;
             Value = value;
+        }
+
+        public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<CreatureCard> selectedCards)
+        {
+            foreach (var card in selectedCards)
+            {
+                yield return (TStatEvent)Activator.CreateInstance(typeof(TStatEvent), Source, card, Value);
+            }
         }
     }
 
-    public class DamageTargetsEvent : BaseTargetCreaturesEvent
+    public class DamageTargetsEvent<T> : BaseTargetStatEvent<T, DamageCreatureEvent<T>> where T : BaseSource
     {
         public override string EventTitle => $"Damage {Count} creatures by {Value}";
 
-        public DamageTargetsEvent(TargetConditions targetConditions, int count, int value)
-            : base(targetConditions, count, value, SelectionType.Negative)
+        public DamageTargetsEvent(T source, TargetConditions targetConditions, int count, int value)
+            : base(source, targetConditions, count, value, SelectionType.Negative)
         {
-            targetConditions.CardType = CardType.Creature;
-        }
-
-        public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<BaseCard> selectedCards)
-        {
-            foreach (var card in selectedCards.Cast<CreatureCard>())
-            {
-                yield return new DamageCreatureEvent(card, Value);
-            }
         }
     }
 
-    public class FortifyTargetsEvent : BaseTargetCreaturesEvent
+    public class FortifyTargetsEvent<T> : BaseTargetStatEvent<T, DamageCreatureEvent<T>> where T : BaseSource
     {
         public override string EventTitle => $"Fortify {Count} creatures by {Value}";
 
-        public FortifyTargetsEvent(TargetConditions targetConditions, int count, int value)
-            : base(targetConditions, count, value, SelectionType.Positive)
+        public FortifyTargetsEvent(T source, TargetConditions targetConditions, int count, int value)
+            : base(source, targetConditions, count, value, SelectionType.Positive)
         {
-            targetConditions.CardType = CardType.Creature;
-        }
-
-        public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<BaseCard> selectedCards)
-        {
-            foreach (var card in selectedCards.Cast<CreatureCard>())
-            {
-                yield return new FortifyCreatureEvent(card, Value);
-            }
         }
     }
 
-    public class WeakenTargetsEvent : BaseTargetCreaturesEvent
+    public class WeakenTargetsEvent<T> : BaseTargetStatEvent<T, DamageCreatureEvent<T>> where T : BaseSource
     {
         public override string EventTitle => $"Weaken {Count} creatures by {Value}";
 
-        public WeakenTargetsEvent(TargetConditions targetConditions, int count, int value)
-            : base(targetConditions, count, value, SelectionType.Negative)
+        public WeakenTargetsEvent(T source, TargetConditions targetConditions, int count, int value)
+            : base(source, targetConditions, count, value, SelectionType.Negative)
         {
-            targetConditions.CardType = CardType.Creature;
-        }
-
-        public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<BaseCard> selectedCards)
-        {
-            foreach (var card in selectedCards.Cast<CreatureCard>())
-            {
-                yield return new WeakenCreatureEvent(card, Value);
-            }
         }
     }
 
-    public class StrengthenTargetsEvent : BaseTargetCreaturesEvent
+    public class StrengthenTargetsEvent<T> : BaseTargetStatEvent<T, DamageCreatureEvent<T>> where T : BaseSource
     {
         public override string EventTitle => $"Strengthen {Count} creatures by {Value}";
 
-        public StrengthenTargetsEvent(TargetConditions targetConditions, int count, int value)
-            : base(targetConditions, count, value, SelectionType.Positive)
+        public StrengthenTargetsEvent(T source, TargetConditions targetConditions, int count, int value)
+            : base(source, targetConditions, count, value, SelectionType.Positive)
         {
-            targetConditions.CardType = CardType.Creature;
-        }
-
-        public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<BaseCard> selectedCards)
-        {
-            foreach (var card in selectedCards.Cast<CreatureCard>())
-            {
-                yield return new StrengthenCreatureEvent(card, Value);
-            }
         }
     }
 
-    public class AddStatsTargetsEvent : BaseTargetCreaturesEvent
+    public class AddStatsTargetsEvent<T> : BaseCardSelectionEvent<T, CreatureCard> where T : BaseSource
     {
         public override string EventTitle => $"Add {Attack}/{Defence} to {Count} creatures";
 
         public int Attack { get; set; }
         public int Defence { get; set; }
 
-        public AddStatsTargetsEvent(TargetConditions targetConditions, int count, int attack, int defence, SelectionType selectionType = SelectionType.Neutral)
-            : base(targetConditions, count, attack + defence, selectionType)
+        public AddStatsTargetsEvent(T source, TargetConditions targetConditions, int count, int attack, int defence, SelectionType selectionType = SelectionType.Neutral)
+            : base(source, targetConditions, count, selectionType)
         {
             targetConditions.CardType = CardType.Creature;
             Attack = attack;
             Defence = defence;
         }
 
-        public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<BaseCard> selectedCards)
+        public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<CreatureCard> selectedCards)
         {
-            foreach (var card in selectedCards.Cast<CreatureCard>())
+            foreach (var card in selectedCards)
             {
-                yield return new StrengthenCreatureEvent(card, Attack);
-                yield return new FortifyCreatureEvent(card, Defence);
+                yield return new StrengthenCreatureEvent<BaseSource>(Source, card, Attack);
+                yield return new FortifyCreatureEvent<BaseSource>(Source, card, Defence);
             }
         }
     }
 
-    public class DestroyTargetsEvent : BaseCardSelectionEvent
+    public class DestroyTargetsEvent<TSource, TTarget> : BaseCardSelectionEvent<TSource, TTarget>
+        where TSource : BaseSource
+        where TTarget : BaseCard
     {
-        public override string EventTitle => $"Destroy {Count} creatures";
+        public override string EventTitle => $"Destroy {Count} cards";
 
-        public DestroyTargetsEvent(TargetConditions targetConditions, int count) : base(targetConditions, count, SelectionType.Negative)
+        public DestroyTargetsEvent(TSource source, TargetConditions targetConditions, int count) : base(source, targetConditions, count, SelectionType.Negative)
         {
         }
 
-        public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<BaseCard> selectedCards)
+        public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<TTarget> selectedCards)
         {
             foreach (var card in selectedCards)
             {
@@ -194,15 +186,17 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public class EliminateTargetsEvent : BaseCardSelectionEvent
+    public class EliminateTargetsEvent<TSource, TTarget> : BaseCardSelectionEvent<TSource, TTarget>
+        where TSource : BaseSource
+        where TTarget : BaseCard
     {
         public override string EventTitle => $"Eliminate {Count} cards";
 
-        public EliminateTargetsEvent(TargetConditions targetConditions, int count) : base(targetConditions, count, SelectionType.Negative)
+        public EliminateTargetsEvent(TSource source, TargetConditions targetConditions, int count) : base(source, targetConditions, count, SelectionType.Negative)
         {
         }
 
-        public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<BaseCard> selectedCards)
+        public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<TTarget> selectedCards)
         {
             foreach (var card in selectedCards)
             {
@@ -212,49 +206,54 @@ namespace Assets.Scripts.Events
     }
 
     // Keep track of source card
-    public abstract class BaseCustomTargetEvent<T> : BaseCardSelectionEvent where T : BaseCard
+    public abstract class BaseCustomTargetEvent<TSource, TTarget> : BaseCardSelectionEvent<TSource, TTarget>
+        where TSource : BaseSource
+        where TTarget : BaseCard
     {
-        protected T Source { get; set; }
         public override string EventTitle => Message;
         private string Message { get; }
 
-        protected BaseCustomTargetEvent(T source, TargetConditions targetConditions, int count, SelectionType selectionType, string message) : base(targetConditions, count, selectionType)
+        protected BaseCustomTargetEvent(TSource source, TargetConditions targetConditions, int count, SelectionType selectionType, string message) : base(source, targetConditions, count, selectionType)
         {
             Source = source;
             Message = message;
         }
     }
 
-    public class CustomMultiTargetEvent<T> : BaseCustomTargetEvent<T> where T : BaseCard
+    public class CustomMultiTargetEvent<TSource, TTarget> : BaseCustomTargetEvent<TSource, TTarget>
+        where TSource : BaseSource
+        where TTarget : BaseCard
     {
-        private SelectMultipleTargets<T> CustomFinishSelection { get; }
+        private SelectMultipleTargets<TSource, TTarget> CustomFinishSelection { get; }
 
-        public CustomMultiTargetEvent(T source, TargetConditions targetConditions, int count, SelectMultipleTargets<T> onFinishSelection, SelectionType selectionType, string message)
+        public CustomMultiTargetEvent(TSource source, TargetConditions targetConditions, int count, SelectMultipleTargets<TSource, TTarget> onFinishSelection, SelectionType selectionType, string message)
             : base(source, targetConditions, count, selectionType, message)
         {
             CustomFinishSelection = onFinishSelection;
         }
 
-        public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<BaseCard> selectedCards)
+        public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<TTarget> selectedCards)
         {
-            return CustomFinishSelection.Invoke(Source, BoardState, selectedCards);
+            return CustomFinishSelection.Invoke((TSource)Source, BoardState, selectedCards);
         }
     }
 
-    public class CustomSingleTargetEvent<T> : BaseCustomTargetEvent<T> where T : BaseCard
+    public class CustomSingleTargetEvent<TSource, TTarget> : BaseCustomTargetEvent<TSource, TTarget>
+        where TSource : BaseSource
+        where TTarget : BaseCard
     {
-        private SelectSingleTarget<T> CustomFinishSelection { get; }
+        private SelectSingleTarget<TSource, TTarget> CustomFinishSelection { get; }
 
-        public CustomSingleTargetEvent(T source, TargetConditions targetConditions, SelectSingleTarget<T> onFinishSelection, SelectionType selectionType, string message)
+        public CustomSingleTargetEvent(TSource source, TargetConditions targetConditions, SelectSingleTarget<TSource, TTarget> onFinishSelection, SelectionType selectionType, string message)
             : base(source, targetConditions, 1, selectionType, message)
         {
             CustomFinishSelection = onFinishSelection;
         }
 
-        public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<BaseCard> targets)
+        public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<TTarget> targets)
         {
             var target = targets.SingleOrDefault();
-            return target != null ? CustomFinishSelection.Invoke(Source, BoardState, target) : Enumerable.Empty<BaseEvent>();
+            return target != null ? CustomFinishSelection.Invoke((TSource)Source, BoardState, target) : Enumerable.Empty<BaseEvent>();
         }
     };
 }

@@ -1,12 +1,9 @@
 ﻿using Assets.Scripts.Bases;
 using Assets.Scripts.Enums;
-using Assets.Scripts.Events;
-using System;
-using System.Collections.Generic;
 
 namespace Assets.Scripts.Items
 {
-    public class BaseItem : BaseSource
+    public class Item : BaseEffectSource
     {
         public string Name { get; set; }
         public ItemType Type { get; }
@@ -14,29 +11,21 @@ namespace Assets.Scripts.Items
         public string FlavourText { get; set; }
         public bool IsLegendary { get; set; }
 
-        private Func<BaseItem /* this */, BoardState, IEnumerable<BaseEvent>> GenerateEvents { get; set; }
-
-        protected BaseItem(ItemInfo itemInfo)
+        protected Item(ItemInfo itemInfo)
         {
             Name = itemInfo.ItemData.Name;
             EffectText = itemInfo.ItemData.EffectText;
             FlavourText = itemInfo.ItemData.FlavourText;
             Type = itemInfo.ItemData.ItemType;
-            GenerateEvents = itemInfo.GenerateEvents;
             IsLegendary = itemInfo.ItemData.IsLegendary;
 
-            GenerateEvents = itemInfo.GenerateEvents;
-        }
-
-        public IEnumerable<BaseEvent> GetEvents(BoardState board)
-        {
-            return GenerateEvents.Invoke(this, board);
+            Effect = itemInfo.Effect;
         }
 
         // Factory method to create
-        public static BaseItem Create(ItemInfo itemInfo)
+        public static Item Create(ItemInfo itemInfo)
         {
-            return new BaseItem(itemInfo);
+            return new Item(itemInfo);
         }
     }
 }
