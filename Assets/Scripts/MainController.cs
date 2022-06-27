@@ -49,7 +49,7 @@ namespace Assets.Scripts
             var frontDeck = DeckManager.GetDeck("RedDeck");
             var backDeck = DeckManager.GetDeck("RedDeck");
 
-            var frontItems = ItemManager.GetItems(new[] { 1, 3, 4, 5, 7 });
+            var frontItems = ItemManager.GetItems(new[] { 4 });
             var backItems = ItemManager.GetItems(new[] { 2 });
 
             var frontPlayer = new Player(PlayerType.Front, frontDeck, frontItems);
