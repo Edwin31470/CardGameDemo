@@ -77,6 +77,7 @@
     <Compile Include="Assets\Scripts\Effects\CardEffects\GreenActionEffects.cs" />
     <Compile Include="Assets\Scripts\Enums\TokenType.cs" />
     <Compile Include="Assets\Scripts\Enums\TriggerType.cs" />
+    <Compile Include="Assets\Scripts\Events\Interfaces\ISourceEvent.cs" />
     <Compile Include="Assets\Scripts\Cards\FieldCard.cs" />
     <Compile Include="Assets\Scripts\Enums\SubType.cs" />
     <Compile Include="Assets\Scripts\BoardState.cs" />
@@ -104,6 +105,7 @@
     <Compile Include="Assets\Scripts\Events\TokenEvents.cs" />
     <Compile Include="Assets\Scripts\Events\PlayerEvents.cs" />
     <Compile Include="Assets\Scripts\Enums\Phase.cs" />
+    <Compile Include="Assets\Scripts\Events\Interfaces\IInteruptEvent.cs" />
     <Compile Include="Assets\Scripts\Cards\ActionCard.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\RedActionEffects.cs" />
     <Compile Include="Assets\Scripts\LegendkeeperIntegration\Extensions.cs" />
@@ -117,12 +119,14 @@
     <Compile Include="Assets\Scripts\Enums\EffectType.cs" />
     <Compile Include="Assets\Scripts\UI\SlotObject.cs" />
     <Compile Include="Assets\Scripts\Enums\Area.cs" />
+    <Compile Include="Assets\Scripts\Events\Interfaces\IStatEvents.cs" />
     <Compile Include="Assets\Scripts\UI\CardObject.cs" />
     <Compile Include="Assets\Scripts\Events\BaseEvents.cs" />
     <Compile Include="Assets\Scripts\Cards\PermanentCard.cs" />
     <Compile Include="Assets\Scripts\IO\DeckIO.cs" />
     <Compile Include="Assets\Scripts\UI\SelectionManager.cs" />
     <Compile Include="Assets\Scripts\Managers\LabelManager.cs" />
+    <Compile Include="Assets\Scripts\Events\Interfaces\IUIInteractionEvent.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\BlueCreatureEffects.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\RedPermanentEffects.cs" />
     <Compile Include="Assets\Scripts\LegendkeeperIntegration\Document.cs" />
@@ -154,10 +158,8 @@
     <Compile Include="Assets\Scripts\MainController.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
     <Compile Include="Assets\Scripts\Managers\ItemManager.cs" />
-    <Compile Include="Assets\Scripts\Events\Interfaces\IInteruptEvent.cs" />
-    <Compile Include="Assets\Scripts\Events\Interfaces\ISourceEvent.cs" />
-    <Compile Include="Assets\Scripts\Events\Interfaces\IStatEvents.cs" />
-    <Compile Include="Assets\Scripts\Events\Interfaces\IUIInteractionEvent.cs" />
+    <Compile Include="Assets\Scripts\Events\Interfaces\IDestroyCardEvent.cs" />
+    <Compile Include="Assets\Scripts\Events\Interfaces\IEnterFieldEvent.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

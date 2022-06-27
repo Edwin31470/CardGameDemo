@@ -8,7 +8,7 @@ namespace Assets.Scripts.Events
 
     public class BasePlayerEvent : BaseBoardEvent
     {
-        protected PlayerType PlayerType { get; set; }
+        public PlayerType PlayerType { get; set; }
 
         public BasePlayerEvent(PlayerType playerType)
         {
@@ -19,19 +19,19 @@ namespace Assets.Scripts.Events
     public class DamagePlayerEvent : BasePlayerEvent
     {
         public override float Delay => 1f;
-        public override string EventTitle => $"{PlayerType} Player takes {Amount} damage";
+        public override string EventTitle => $"{PlayerType} Player takes {Value} damage";
 
-        private int Amount { get; set; }
+        public int Value { get; set; }
 
-        public DamagePlayerEvent(PlayerType playerType, int amount) : base(playerType)
+        public DamagePlayerEvent(PlayerType playerType, int value) : base(playerType)
         {
-            Amount = amount;
+            Value = value;
         }
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
             var player = board.GetPlayer(PlayerType);
-            player.Health.Remove(Amount);
+            player.Health.Remove(Value);
 
             if (player.Health.Get() <= 0)
                 yield return new GameEndEvent($"{player.PlayerType} Player has run out of life!");

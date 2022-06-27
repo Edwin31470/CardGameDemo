@@ -46,10 +46,10 @@ namespace Assets.Scripts
         {
             // Register Players
 
-            var frontDeck = DeckManager.GetDeck("SmallRedDeck");
-            var backDeck = DeckManager.GetDeck("SmallRedDeck");
+            var frontDeck = DeckManager.GetDeck("RedDeck");
+            var backDeck = DeckManager.GetDeck("RedDeck");
 
-            var frontItems = ItemManager.GetItems(new[] { 1 });
+            var frontItems = ItemManager.GetItems(new[] { 1, 3, 4, 5, 7 });
             var backItems = ItemManager.GetItems(new[] { 2 });
 
             var frontPlayer = new Player(PlayerType.Front, frontDeck, frontItems);
@@ -216,8 +216,10 @@ namespace Assets.Scripts
 
             for (int i = 0; i < 7; i++)
             {
-                EnqueueEvent(new DrawCardEvent(PlayerType.Front));
-                EnqueueEvent(new DrawCardEvent(PlayerType.Back));
+                foreach(var player in Board.BothPlayers)
+                {
+                    EnqueueEvent(new DrawCardEvent<Player>(player, player.PlayerType));
+                }
             }
 
             EnqueueEvent(new NewPhaseEvent(Phase.Redraw));
@@ -263,7 +265,7 @@ namespace Assets.Scripts
                     if (card.HasPersistence)
                         continue;
 
-                    EnqueueEvent(new DestroyCardEvent(card));
+                    EnqueueEvent(new DestroyCardEvent<FieldCard>(card));
                 }
             }
 
@@ -272,14 +274,14 @@ namespace Assets.Scripts
             {
                 foreach (var card in player.Hand)
                 {
-                    EnqueueEvent(new ReturnToDeckEvent(card));
+                    EnqueueEvent(new ReturnToDeckEvent<Player>(player, card));
                 }
             }
 
             // Empty Destroyed
             foreach (var player in Board.BothPlayers)
             {
-                EnqueueEvent(new EmptyDestroyPileEvent(player.PlayerType));
+                EnqueueEvent(new EmptyDestroyPileEvent(player));
             }
 
             EnqueueEvent(new NewPhaseEvent(Phase.Draw));
@@ -396,7 +398,7 @@ namespace Assets.Scripts
             {
                 if(creatureCard.Defence <= 0)
                 {
-                    EnqueueEvent(new DestroyCreatureByDamageEvent(creatureCard));
+                    EnqueueEvent(new DestroyByDamageEvent(creatureCard));
                 }
             }
         }

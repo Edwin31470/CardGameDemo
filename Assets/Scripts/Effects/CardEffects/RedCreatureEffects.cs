@@ -42,7 +42,9 @@ namespace Assets.Scripts.Effects.CardEffects
                 cardInfo.CardData.Attack = 2;
                 cardInfo.CardData.Defence = 2;
 
-                yield return new SummonCardEvent(cardInfo, boardState.GetSourceOwner(source).PlayerType);
+                var player = boardState.GetSourceOwner(source);
+
+                yield return new SummonCardEvent(player, cardInfo, player.PlayerType);
             }
         }
     }
@@ -87,7 +89,7 @@ namespace Assets.Scripts.Effects.CardEffects
             PlayerType = board.GetSourceOwner(source).PlayerType,
         };
 
-        protected override IEnumerable<BaseEvent> Effect(CreatureCard source, CreatureCard target)
+        protected override IEnumerable<BaseEvent> Effect(CreatureCard source, CreatureCard target, BoardState board)
         {
             if (target == source)
                 yield break;

@@ -23,9 +23,9 @@ namespace Assets.Scripts.Events
     // Targets all field creatures
     public class CustomAllCreaturesEvent<T> : BaseAllEvent<T> where T : BaseCard
     {
-        private Func<T, CreatureCard, IEnumerable<BaseEvent>> Func { get; set; }
+        private Func<T, CreatureCard, BoardState, IEnumerable<BaseEvent>> Func { get; set; }
 
-        public CustomAllCreaturesEvent(T source, TargetConditions targetConditions, Func<T, CreatureCard, IEnumerable<BaseEvent>> func) : base(source, targetConditions)
+        public CustomAllCreaturesEvent(T source, TargetConditions targetConditions, Func<T, CreatureCard, BoardState, IEnumerable<BaseEvent>> func) : base(source, targetConditions)
         {
             targetConditions.CardType = CardType.Creature;
             Func = func;
@@ -38,7 +38,7 @@ namespace Assets.Scripts.Events
             var events = new List<BaseEvent>();
             foreach (var card in cards)
             {
-                events.AddRange(Func.Invoke(Source, card));
+                events.AddRange(Func.Invoke(Source, card, board));
             }
 
             return events;

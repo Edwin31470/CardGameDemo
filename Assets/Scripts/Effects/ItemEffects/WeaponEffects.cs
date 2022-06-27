@@ -59,11 +59,13 @@ namespace Assets.Scripts.Effects.ItemEffects
 
         private IEnumerable<BaseEvent> OnGameStart(Item source, BoardState board, BaseEvent triggeringEvent)
         {
+            yield return new MessageEvent("Molten Gauntlets");
             yield return new AddTokensEvent(board.GetSourceOwner(source).PlayerType, TokenType.Claw, 6);
         }
 
         private IEnumerable<BaseEvent> OnRoundStart(Item source, BoardState board, BaseEvent triggeringEvent)
         {
+            yield return new MessageEvent("Molten Gauntlets");
             yield return new AddTokensEvent(board.GetSourceOwner(source).PlayerType, TokenType.Cracked, 2);
         }
     }

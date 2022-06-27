@@ -3,21 +3,25 @@ using Assets.Scripts.Enums;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Extensions;
+using Assets.Scripts.Bases;
+using System;
 
 namespace Assets.Scripts.Events
 {
     // Any event that may move cards from or to areas (hand, field, deck, destroyed, eliminated)
     // Usually returns a UI event
-    public abstract class BaseAreaEvent : BaseBoardEvent
+    public abstract class BaseAreaEvent<T> : BaseSourceEvent<T> where T : BaseSource
     {
-
+        protected BaseAreaEvent(T source) : base(source)
+        {
+        }
     }
 
-    public class DrawCardEvent : BaseAreaEvent
+    public class DrawCardEvent<T> : BaseAreaEvent<T> where T : BaseSource
     {
         private PlayerType PlayerType { get; set; }
 
-        public DrawCardEvent(PlayerType playerType)
+        public DrawCardEvent(T source, PlayerType playerType) : base(source)
         {
             PlayerType = playerType;
         }
@@ -39,11 +43,11 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public class ReturnToDeckEvent : BaseAreaEvent
+    public class ReturnToDeckEvent<T> : BaseAreaEvent<T> where T : BaseSource
     {
         private BaseCard Card { get; set; }
 
-        public ReturnToDeckEvent(BaseCard card)
+        public ReturnToDeckEvent(T source, BaseCard card) : base(source)
         {
             Card = card;
         }
@@ -59,11 +63,11 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public class ReturnFromFieldToHandEvent : BaseAreaEvent
+    public class ReturnFromFieldToHandEvent<T> : BaseAreaEvent<T> where T : BaseSource
     {
         private FieldCard Card { get; set; }
 
-        public ReturnFromFieldToHandEvent(FieldCard card)
+        public ReturnFromFieldToHandEvent(T source, FieldCard card) : base(source)
         {
             Card = card;
         }
@@ -82,235 +86,224 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public class EnterFieldEvent : BaseAreaEvent
+    // Enter field for creature and permanent cards
+    public class EnterFieldEvent<T> : BaseAreaEvent<T> where T : BaseCard
     {
-        public BaseCard Card { get; set; }
         private FieldSlot Slot { get; set; } // null for action card
 
-        public EnterFieldEvent(BaseCard card, FieldSlot slot)
+        public EnterFieldEvent(T card, FieldSlot slot) : base(card)
         {
-            Card = card;
             Slot = slot;
         }
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            var isActionCard = Card is ActionCard;
-
-            // Work out who owns the card
-            Player player;
-            if (isActionCard)
-                player = board.GetSourceOwner(Card); // Action cards are always owned by the player who uses them
-            else
-                player = board.GetSourceOwner(Slot); // Field cards are always owned by the player whose side they are played on
-
-            var effectEvents = Card.GetEvents(board).ToList(); // Generate effect events before removing from hand
-
-            // Add card to slot
-            if (!isActionCard)
+            if (Source is FieldCard fieldCard)
             {
-                if (player.IsInHand(Card))
-                    player.RemoveFromHand(Card);
+                // Work out who owns the card
+                var player = board.GetSourceOwner(Slot); // Field cards are always owned by the player whose side they are played on
 
-                var slotEvents = Slot.Add(Card);
+                // Add card to slot
+                if (player.IsInHand(fieldCard))
+                    player.RemoveFromHand(fieldCard);
+
+                var slotEvents = Slot.Add(fieldCard);
                 foreach (var slotEvent in slotEvents)
                 {
                     yield return slotEvent;
                 }
+
+                // Get the card's events
+                foreach (var baseEvent in Source.GetEvents(board).ToList())
+                {
+                    yield return baseEvent;
+                }
+
+                yield break;
+            }
+            else if (Source is ActionCard actionCard)
+            {
+                // Destroy
+                yield return new DestroyCardEvent<ActionCard>(actionCard);
+
+                // Get the card's events
+                foreach (var baseEvent in Source.GetEvents(board).ToList())
+                {
+                    yield return baseEvent;
+                }
+
+                yield break;
             }
 
-            // Get the card's events
-            foreach (var baseEvent in effectEvents)
-            {
-                yield return baseEvent;
-            }
-
-            // Destroy if an action card
-            if (isActionCard)
-            {
-                yield return new DestroyCardEvent(Card);
-            }
+            throw new ArgumentOutOfRangeException(nameof(Source), $"Card type must be {typeof(FieldCard)} or {typeof(ActionCard)}");
         }
     }
 
-    public class DestroyCardEvent : BaseAreaEvent
+    public class DestroyCardEvent<T> : BaseAreaEvent<T> where T : BaseCard
     {
-        public BaseCard Card { get; set; }
-
-        public DestroyCardEvent(BaseCard card)
+        public DestroyCardEvent(T card) : base(card)
         {
-            Card = card;
         }
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            var player = board.GetSourceOwner(Card);
+            var player = board.GetSourceOwner(Source);
 
             // stop duplicate destroys - a better way to do this?
-            if (player.IsInDestroyed(Card) || player.IsInEliminated(Card))
+            if (player.IsInDestroyed(Source) || player.IsInEliminated(Source))
                 yield break;
 
-            if (player.IsInHand(Card)) {
-                player.RemoveFromHand(Card);
-                yield return new DestroyCardUIEvent(player.PlayerType, Card);
+            // From hand
+            if (player.IsInHand(Source)) {
+                player.RemoveFromHand(Source);
+                yield return new DestroyCardUIEvent(player.PlayerType, Source);
             }
 
-            if (Card is FieldCard fieldCard && player.IsOnField(Card)) {
+            // From field
+            if (Source is FieldCard fieldCard && player.IsOnField(Source)) {
                 var slotEvents = player.RemoveFromField(fieldCard);
                 foreach (var slotEvent in slotEvents) {
                     yield return slotEvent;
                 }
-                yield return new DestroyCardUIEvent(player.PlayerType, Card);
+                yield return new DestroyCardUIEvent(player.PlayerType, Source);
             }
 
-            if (player.IsInDeck(Card)) {
-                player.RemoveFromDeck(Card);
-
+            // From deck
+            if (player.IsInDeck(Source)) {
+                player.RemoveFromDeck(Source);
             }
 
-            if (!Card.IsSummoned) {
-                player.AddToDestroyed(Card);
+            // Add to pile
+            if (!Source.IsSummoned) {
+                player.AddToDestroyed(Source);
             }
             else
             {
-                player.AddToEliminated(Card);
+                player.AddToEliminated(Source);
             }
         }
     }
 
-    public class DestroyCreatureByDamageEvent : BaseAreaEvent
+    public class DestroyByDamageEvent : BaseAreaEvent<CreatureCard>
     {
-        public CreatureCard Card { get; set; }
-
-        public DestroyCreatureByDamageEvent(CreatureCard card)
+        public DestroyByDamageEvent(CreatureCard card) : base(card)
         {
-            Card = card;
         }
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
             // Check card hasn't now got more defence
-            if (Card.Defence > 0)
+            if (Source.Defence > 0)
                 yield break;
 
-            yield return new DestroyCardEvent(Card);
+            yield return new DestroyCardEvent<CreatureCard>(Source);
         }
     }
 
-    public class EliminateCardEvent : BaseAreaEvent
+    public class EliminateCardEvent<T> : BaseAreaEvent<T> where T : BaseCard
     {
-        private BaseCard Card { get; set; }
         private bool CreateUIEvent { get; set; }
 
-        public EliminateCardEvent(BaseCard card, bool createUIEvent = true)
+        public EliminateCardEvent(T card, bool createUIEvent = true) : base(card)
         {
-            Card = card;
             CreateUIEvent = createUIEvent;
         }
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            var player = board.GetSourceOwner(Card);
+            var player = board.GetSourceOwner(Source);
 
-            if (player.IsInHand(Card))
-                player.RemoveFromHand(Card);
+            if (player.IsInHand(Source))
+                player.RemoveFromHand(Source);
 
-            if (Card is FieldCard fieldCard && player.IsOnField(Card)) {
+            if (Source is FieldCard fieldCard && player.IsOnField(Source)) {
                 var slotEvents = player.RemoveFromField(fieldCard);
                 foreach (var slotEvent in slotEvents) {
                     yield return slotEvent;
                 }
             }
 
-            if (player.IsInDeck(Card))
-                player.RemoveFromDeck(Card);
+            if (player.IsInDeck(Source))
+                player.RemoveFromDeck(Source);
 
-            if (player.IsInDestroyed(Card))
-                player.RemoveFromDestroyed(Card);
+            if (player.IsInDestroyed(Source))
+                player.RemoveFromDestroyed(Source);
 
-            player.AddToEliminated(Card);
+            player.AddToEliminated(Source);
 
-            if (CreateUIEvent && player.IsInHand(Card) && player.IsOnField(Card))
-                yield return new DestroyCardUIEvent(player.PlayerType, Card);
+            if (CreateUIEvent && player.IsInHand(Source) && player.IsOnField(Source))
+                yield return new DestroyCardUIEvent(player.PlayerType, Source);
         }
     }
 
-    public class ManaSacrificeEvent : BaseAreaEvent
+    public class ManaSacrificeEvent : BaseAreaEvent<Player>
     {
         private BaseCard Card { get; set; }
 
-        public ManaSacrificeEvent(BaseCard card)
+        public ManaSacrificeEvent(Player player, BaseCard card) : base(player)
         {
             Card = card;
         }
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            var player = board.GetSourceOwner(Card);
-
-            player.RemoveFromHand(Card);
-            player.AddToEliminated(Card);
+            Source.RemoveFromHand(Card);
+            Source.AddToEliminated(Card);
 
             yield return new SacrificeCardUIEvent(Card);
         }
     }
 
-    public class EmptyDestroyPileEvent : BaseAreaEvent
+    public class EmptyDestroyPileEvent : BaseAreaEvent<Player>
     {
         public override float Delay => 1f;
-        public override string EventTitle => $"Emptying Destroyed pile for {Player} Player" ;
+        public override string EventTitle => $"Emptying Destroyed pile for {Source.PlayerType} Player" ;
 
-        private PlayerType Player { get; set; }
-
-        public EmptyDestroyPileEvent(PlayerType player)
+        public EmptyDestroyPileEvent(Player player) : base(player)
         {
-            Player = player;
         }
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            foreach (var card in board.GetPlayer(Player).Destroyed)
+            foreach (var card in Source.Destroyed)
             {
-                yield return new EliminateCardEvent(card, false);
+                yield return new EliminateCardEvent<BaseCard>(card, false);
             }
         }
     }
 
-    public class GainControlEvent : BaseAreaEvent
+    public class GainControlEvent<T> : BaseAreaEvent<T> where T : FieldCard
     {
-        private FieldCard Card { get; set; }
-
-        public GainControlEvent(FieldCard card)
+        public GainControlEvent(T card) : base(card)
         {
-            Card = card;
         }
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            var originalPlayer = board.GetSourceOwner(Card);
+            var originalPlayer = board.GetSourceOwner(Source);
             var newPlayer = board.GetPlayer(originalPlayer.PlayerType.Opposite());
 
-            var leaveSlotEvents = originalPlayer.RemoveFromField(Card);
+            var leaveSlotEvents = originalPlayer.RemoveFromField(Source);
             foreach (var slotEvent in leaveSlotEvents) {
                 yield return slotEvent;
             }
 
             var slot = newPlayer.GetRandomEmptySlot();
             if (slot == null) {
-                yield return new DestroyCardUIEvent(originalPlayer.PlayerType, Card);
+                yield return new DestroyCardUIEvent(originalPlayer.PlayerType, Source);
             }
             else
             {
-                var enterSlotEvents = slot.Add(Card);
+                var enterSlotEvents = slot.Add(Source);
                 foreach (var slotEvent in enterSlotEvents) {
                     yield return slotEvent;
                 }
-                yield return new MoveCardToFieldUIEvent(Card, slot);
+                yield return new MoveCardToFieldUIEvent(Source, slot);
             }
         }
     }
 
-    public class SummonCardEvent : BaseAreaEvent
+    public class SummonCardEvent : BaseAreaEvent<Player>
     {
         public override float Delay => 1f;
         public override string EventTitle => $"Summoning {CardInfo.CardData.Name}";
@@ -318,7 +311,7 @@ namespace Assets.Scripts.Events
         private CardInfo CardInfo { get; set; }
         private PlayerType PlayerType { get; set; }
 
-        public SummonCardEvent(CardInfo cardInfo, PlayerType playerType)
+        public SummonCardEvent(Player player, CardInfo cardInfo, PlayerType playerType) : base(player)
         {
             cardInfo.IsSummoned = true;
             CardInfo = cardInfo;
@@ -327,16 +320,14 @@ namespace Assets.Scripts.Events
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            var isActionCard = CardInfo.CardData.CardType == CardType.Action;
-
             var player = board.GetPlayer(PlayerType);
             var summonedCard = BaseCard.Create(CardInfo);
 
-            if (isActionCard)
+            if (summonedCard is ActionCard actionCard)
             {
-                yield return new EnterFieldEvent(summonedCard, null);
+                yield return new EnterFieldEvent<ActionCard>(actionCard, null);
             }
-            else
+            else if (summonedCard is FieldCard fieldCard)
             {
                 var slot = player.GetRandomEmptySlot();
                 if (slot == null)
@@ -346,7 +337,7 @@ namespace Assets.Scripts.Events
                 }
 
                 yield return new CreateCardInSlotUIEvent(PlayerType, summonedCard, slot);
-                yield return new EnterFieldEvent(summonedCard, slot);
+                yield return new EnterFieldEvent<FieldCard>(fieldCard, slot);
             }
         }
     }

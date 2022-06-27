@@ -56,7 +56,7 @@ namespace Assets.Scripts.Effects
             yield return new CustomAllCreaturesEvent<T>(source, GetTargetConditions(source, board), Effect);
         }
 
-        protected abstract IEnumerable<BaseEvent> Effect(T source, CreatureCard target);
+        protected abstract IEnumerable<BaseEvent> Effect(T source, CreatureCard target, BoardState board);
     }
 
     // Apply one effect on one trigger definition (default more than once)

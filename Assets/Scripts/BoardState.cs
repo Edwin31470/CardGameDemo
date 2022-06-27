@@ -100,6 +100,9 @@ namespace Assets.Scripts
         public Player GetSourceOwner(BaseSource source)
         {
             foreach (var player in BothPlayers) {
+                if (source == player)
+                    return player;
+
                 if (player.IsSourceOwner(source))
                     return player;
             }

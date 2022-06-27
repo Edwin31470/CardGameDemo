@@ -21,7 +21,7 @@ namespace Assets.Scripts.Bases
 
         public IEnumerable<BaseEvent> GetEvents(BoardState board)
         {
-            return Effect.GenerateEffects(this, board);
+            return Effect?.GenerateEffects(this, board) ?? Enumerable.Empty<BaseEvent>();
         }
     }
 }

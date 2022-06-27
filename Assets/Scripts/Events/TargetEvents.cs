@@ -65,8 +65,8 @@ namespace Assets.Scripts.Events
         {
             foreach (var card in selectedCards)
             {
-                yield return new ReturnToDeckEvent(card);
-                yield return new DrawCardEvent(PlayerType);
+                yield return new ReturnToDeckEvent<BaseSource>(Source, card);
+                yield return new DrawCardEvent<BaseSource>(Source, PlayerType);
             }
         }
     }
@@ -85,7 +85,7 @@ namespace Assets.Scripts.Events
         where TStatEvent : BaseStatEvent<TSource>
     {
         public int Value { get; set; }
-
+        
         protected BaseTargetStatEvent(TSource source, TargetConditions targetConditions, int count, int value, SelectionType selectionType)
             : base(source, targetConditions, count, selectionType)
         {
@@ -95,7 +95,7 @@ namespace Assets.Scripts.Events
 
         public override IEnumerable<BaseEvent> TriggerEffect(IEnumerable<CreatureCard> selectedCards)
         {
-            foreach (var card in selectedCards)
+            foreach (var card in selectedCards.ToList())
             {
                 yield return (TStatEvent)Activator.CreateInstance(typeof(TStatEvent), Source, card, Value);
             }
@@ -112,7 +112,7 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public class FortifyTargetsEvent<T> : BaseTargetStatEvent<T, DamageCreatureEvent<T>> where T : BaseSource
+    public class FortifyTargetsEvent<T> : BaseTargetStatEvent<T, FortifyCreatureEvent<T>> where T : BaseSource
     {
         public override string EventTitle => $"Fortify {Count} creatures by {Value}";
 
@@ -122,7 +122,7 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public class WeakenTargetsEvent<T> : BaseTargetStatEvent<T, DamageCreatureEvent<T>> where T : BaseSource
+    public class WeakenTargetsEvent<T> : BaseTargetStatEvent<T, WeakenCreatureEvent<T>> where T : BaseSource
     {
         public override string EventTitle => $"Weaken {Count} creatures by {Value}";
 
@@ -132,7 +132,7 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public class StrengthenTargetsEvent<T> : BaseTargetStatEvent<T, DamageCreatureEvent<T>> where T : BaseSource
+    public class StrengthenTargetsEvent<T> : BaseTargetStatEvent<T, StrengthenCreatureEvent<T>> where T : BaseSource
     {
         public override string EventTitle => $"Strengthen {Count} creatures by {Value}";
 
@@ -181,7 +181,7 @@ namespace Assets.Scripts.Events
         {
             foreach (var card in selectedCards)
             {
-                yield return new DestroyCardEvent(card);
+                yield return new DestroyCardEvent<TTarget>(card);
             }
         }
     }
@@ -200,7 +200,7 @@ namespace Assets.Scripts.Events
         {
             foreach (var card in selectedCards)
             {
-                yield return new EliminateCardEvent(card);
+                yield return new EliminateCardEvent<TTarget>(card);
             }
         }
     }

@@ -84,7 +84,7 @@ namespace Assets.Scripts.Events
         private string Message { get; set; }
         private float Time { get; set; }
 
-        public MessageEvent(string message, float time)
+        public MessageEvent(string message, float time = 2)
         {
             Message = message;
             Time = time;

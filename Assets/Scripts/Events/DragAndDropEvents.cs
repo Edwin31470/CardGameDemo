@@ -55,14 +55,14 @@ namespace Assets.Scripts.Events
 
             // Pay and play card
             player.RemoveMana(droppedCard.Colour, droppedCard.Cost);
-            yield return new EnterFieldEvent(droppedCard, fieldSlot);
+            yield return new EnterFieldEvent<BaseCard>(droppedCard, fieldSlot);
 
             yield return new NewTurnEvent(Source.PlayerType.Opposite(), false);
         }
 
         private IEnumerable<BaseEvent> SacrificeCard(BaseCard card)
         {
-            yield return new ManaSacrificeEvent(card);
+            yield return new ManaSacrificeEvent(Source, card);
         }
 
         protected IEnumerable<BaseEvent> PassTurn()

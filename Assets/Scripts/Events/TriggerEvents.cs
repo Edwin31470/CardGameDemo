@@ -36,7 +36,7 @@ namespace Assets.Scripts.Events
 
         public override bool Conditions(BoardState boardState, BaseEvent triggeringEvent)
         {
-            return triggeringEvent is DestroyCardEvent destroyCardEvent && destroyCardEvent.Card == Source;
+            return triggeringEvent is IDestroyCardEvent destroyCardEvent && destroyCardEvent.BaseSource == Source;
         }
 
         public override IEnumerable<BaseEvent> Process(BoardState boardState, BaseEvent triggeringEvent)
@@ -59,7 +59,7 @@ namespace Assets.Scripts.Events
         public override bool Conditions(BoardState boardState, BaseEvent triggeringEvent)
         {
             // Prevents cards triggering on themselves
-            if (triggeringEvent is EnterFieldEvent enterFieldEvent && enterFieldEvent.Card == Source)
+            if (triggeringEvent is IEnterFieldEvent enterFieldEvent && enterFieldEvent.BaseSource == Source)
                 return false;
 
             return FuncConditions.Invoke(Source, boardState, triggeringEvent);

@@ -1,12 +1,10 @@
 ﻿using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Events;
+using Assets.Scripts.Events.Interfaces;
 using Assets.Scripts.Extensions;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Assets.Scripts.Effects.CardEffects
 {
@@ -41,7 +39,7 @@ namespace Assets.Scripts.Effects.CardEffects
 
         public override IEnumerable<BaseEvent> GetEffect(ActionCard source, BoardState board)
         {
-            var destroyEvent = new DestroyTargetsEvent<ActionCard, CreatureCard>(
+            var destroyTargetEvent = new DestroyTargetsEvent<ActionCard, CreatureCard>(
                 source,
                 new TargetConditions
                 {
@@ -50,11 +48,25 @@ namespace Assets.Scripts.Effects.CardEffects
                 }, 
                 1);
 
-            return new List<BaseEvent>() { destroyEvent }.Concat(base.GetEffect(source, board));
+            yield return destroyTargetEvent;
+            yield return new CustomTriggerEvent<ActionCard>(
+                source,
+                (source, board, triggeringEvent) =>
+                {
+                    return triggeringEvent is IDestroyCardEvent destroyEvent;
+                },
+                (source, board, triggeringEvent) =>
+                {
+                    return base.GetEffect(source, board);
+                });
         }
 
-        protected override IEnumerable<BaseEvent> Effect(ActionCard source, CreatureCard target)
+        protected override IEnumerable<BaseEvent> Effect(ActionCard source, CreatureCard target, BoardState board)
         {
+            // Prevents boosting the destroyed card
+            if (!board.GetSourceOwner(target).IsOnField(target))
+                yield break;
+
             yield return new StrengthenCreatureEvent<ActionCard>(source, target, 3);
             yield return new FortifyCreatureEvent<ActionCard>(source, target, 3);
         }
@@ -75,12 +87,12 @@ namespace Assets.Scripts.Effects.CardEffects
             yield return new CustomAllCreaturesEvent<ActionCard>(
                 source,
                 new() { PlayerType = board.GetSourceOwner(source).PlayerType.Opposite() },
-                (source, target) => new[] { new DamageCreatureEvent<ActionCard>(source, target, 3) });
+                (source, target, board) => new[] { new DamageCreatureEvent<ActionCard>(source, target, 3) });
 
             yield return new CustomAllCreaturesEvent<ActionCard>(
                 source,
                 new() { PlayerType = board.GetSourceOwner(source).PlayerType },
-                (source, target) => new[] { new DamageCreatureEvent<ActionCard>(source, target, 1) });
+                (source, target, board) => new[] { new DamageCreatureEvent<ActionCard>(source, target, 1) });
         }
     }
 }

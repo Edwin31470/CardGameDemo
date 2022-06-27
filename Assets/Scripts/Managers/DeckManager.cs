@@ -29,7 +29,7 @@ namespace Assets.Scripts.Managers
             return cardIds.Select(x => new CardInfo
             {
                 CardData = CardLibrary[x],
-                Effect = EffectLibrary[x],
+                Effect = EffectLibrary.GetValueOrDefault(x),
             }).ToList();
         }
     }
