@@ -29,7 +29,7 @@ namespace Assets.Scripts
             DeckContentTransform = GameObject.Find("Canvas/DeckView/Viewport/DeckContent").transform;
 
             DeckDropdown = GameObject.Find("Canvas/DeckDropdown").GetComponent<Dropdown>();
-            DeckDropdown.AddOptions(Enumerable.Repeat("Select Deck", 1).Concat(DeckIO.ReadDeckNames()).ToList());
+            DeckDropdown.AddOptions(Enumerable.Repeat("Select Deck", 1).Concat(PlayerIO.ReadDeckNames()).ToList());
             DeckDropdown.onValueChanged.AddListener(DeckDropdownChanged);
 
             Cards = DataIO.ReadAll<CardData>().ToList();
@@ -48,7 +48,7 @@ namespace Assets.Scripts
         private void DeckDropdownChanged(int index)
         {
             var deckName = DeckDropdown.captionText.text;
-            var deckCards = DeckIO.ReadDeck(deckName);
+            var deckCards = PlayerIO.ReadDeck(deckName);
 
             // Clear current deck
             for (var i = 0; i < DeckContentTransform.childCount; i++) {
@@ -85,7 +85,7 @@ namespace Assets.Scripts
                 newDeck.Add(id);
             }
 
-            DeckIO.WriteDeck(DeckDropdown.captionText.text, newDeck.OrderBy(x => x));
+            PlayerIO.WriteDeck(DeckDropdown.captionText.text, newDeck.OrderBy(x => x));
         }
 
         private void CreateEmptyDeck()
@@ -94,7 +94,7 @@ namespace Assets.Scripts
 
             DeckDropdown.AddOptions(new List<string>() { deckName });
 
-            DeckIO.WriteDeck(deckName, Enumerable.Empty<int>());
+            PlayerIO.WriteDeck(deckName, Enumerable.Empty<int>());
         }
     }
 }

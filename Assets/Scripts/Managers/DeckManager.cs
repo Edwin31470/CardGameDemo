@@ -24,7 +24,7 @@ namespace Assets.Scripts.Managers
 
         public static List<CardInfo> GetDeck(string deckName)
         {
-            var cardIds = DeckIO.ReadDeck(deckName);
+            var cardIds = PlayerIO.ReadDeck(deckName);
 
             return cardIds.Select(x => new CardInfo
             {
