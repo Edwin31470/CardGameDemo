@@ -47,7 +47,7 @@
   <PropertyGroup>
     <ProjectTypeGuids>{E097FAD1-6243-4DAD-9C02-E9B9EFC3FFC1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <UnityProjectGenerator>Package</UnityProjectGenerator>
-    <UnityProjectGeneratorVersion>2.0.15</UnityProjectGeneratorVersion>
+    <UnityProjectGeneratorVersion>2.0.16</UnityProjectGeneratorVersion>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows64:19</UnityBuildTarget>
     <UnityVersion>2021.3.2f1</UnityVersion>
@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Effects\ItemEffects\AccessoryEffects.cs" />
+    <Compile Include="Assets\Scripts\Events\Interfaces\IEnterFieldEvent.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\BluePermanentEffects.cs" />
     <Compile Include="Assets\Scripts\Events\AreaEvents.cs" />
     <Compile Include="Assets\Scripts\Events\InteruptEvents.cs" />
@@ -121,6 +122,7 @@
     <Compile Include="Assets\Scripts\Enums\Area.cs" />
     <Compile Include="Assets\Scripts\Events\Interfaces\IStatEvents.cs" />
     <Compile Include="Assets\Scripts\UI\CardObject.cs" />
+    <Compile Include="Assets\Scripts\Events\Interfaces\IDestroyCardEvent.cs" />
     <Compile Include="Assets\Scripts\Events\BaseEvents.cs" />
     <Compile Include="Assets\Scripts\Cards\PermanentCard.cs" />
     <Compile Include="Assets\Scripts\IO\DeckIO.cs" />
@@ -158,8 +160,6 @@
     <Compile Include="Assets\Scripts\MainController.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
     <Compile Include="Assets\Scripts\Managers\ItemManager.cs" />
-    <Compile Include="Assets\Scripts\Events\Interfaces\IDestroyCardEvent.cs" />
-    <Compile Include="Assets\Scripts\Events\Interfaces\IEnterFieldEvent.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
