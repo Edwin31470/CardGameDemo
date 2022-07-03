@@ -85,8 +85,7 @@ namespace Assets.Scripts.Effects.CardEffects
 
         protected override TargetConditions GetTargetConditions(CreatureCard source, BoardState board) => new()
         {
-            CardType = CardType.Creature,
-            PlayerType = board.GetSourceOwner(source).PlayerType,
+            CardType = CardType.Creature
         };
 
         protected override IEnumerable<BaseEvent> Effect(CreatureCard source, CreatureCard target, BoardState board)

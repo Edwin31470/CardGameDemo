@@ -5,6 +5,7 @@ using System.Linq;
 using Assets.Scripts.Extensions;
 using Assets.Scripts.Bases;
 using System;
+using Assets.Scripts.Events.Interfaces;
 
 namespace Assets.Scripts.Events
 {
@@ -139,7 +140,7 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public class DestroyCardEvent<T> : BaseAreaEvent<T> where T : BaseCard
+    public class DestroyCardEvent<T> : BaseAreaEvent<T>, IDestroyCardEvent where T : BaseCard
     {
         public DestroyCardEvent(T card) : base(card)
         {
