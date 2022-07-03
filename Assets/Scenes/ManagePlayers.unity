@@ -834,7 +834,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Weapon Text
+  m_Text: 
 --- !u!222 &224668609
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3374,7 +3374,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Accessory Text
+  m_Text: 
 --- !u!222 &1130750487
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3661,7 +3661,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Armour Text
+  m_Text: 
 --- !u!222 &1225207760
 CanvasRenderer:
   m_ObjectHideFlags: 0

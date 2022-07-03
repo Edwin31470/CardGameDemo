@@ -19,6 +19,10 @@ namespace Assets.Scripts
         private Dropdown ArmourDropdown { get; set; }
         private Dropdown AccessoryDropdown { get; set; }
 
+        private Text WeaponText { get; set; }
+        private Text ArmourText { get; set; }
+        private Text AccessoryText { get; set; }
+
         private List<ItemData> Items { get; set; }
 
         public void Start()
@@ -40,12 +44,19 @@ namespace Assets.Scripts
 
             WeaponDropdown = GameObject.Find("Canvas/WeaponDropdown").GetComponent<Dropdown>();
             WeaponDropdown.AddOptions(Items.Where(x => x.ItemType == ItemType.Weapon || x.ItemType == ItemType.None).Select(x => x.Name).ToList());
+            WeaponDropdown.onValueChanged.AddListener(x => PopulateItemText(WeaponDropdown, WeaponText));
 
             ArmourDropdown = GameObject.Find("Canvas/ArmourDropdown").GetComponent<Dropdown>();
             ArmourDropdown.AddOptions(Items.Where(x => x.ItemType == ItemType.Armour || x.ItemType == ItemType.None).Select(x => x.Name).ToList());
+            ArmourDropdown.onValueChanged.AddListener(x => PopulateItemText(ArmourDropdown, ArmourText));
 
             AccessoryDropdown = GameObject.Find("Canvas/AccessoryDropdown").GetComponent<Dropdown>();
             AccessoryDropdown.AddOptions(Items.Where(x => x.ItemType == ItemType.Accessory || x.ItemType == ItemType.None).Select(x => x.Name).ToList());
+            AccessoryDropdown.onValueChanged.AddListener(x => PopulateItemText(AccessoryDropdown, AccessoryText));
+
+            WeaponText = GameObject.Find("Canvas/WeaponText").GetComponent<Text>();
+            ArmourText = GameObject.Find("Canvas/ArmourText").GetComponent<Text>();
+            AccessoryText = GameObject.Find("Canvas/AccessoryText").GetComponent<Text>();
 
             // Register button
             GameObject.Find("Canvas/SubmitButton").GetComponent<Button>()
@@ -54,7 +65,15 @@ namespace Assets.Scripts
             PopulateWithExisting(0);
         }
 
-        protected virtual void Submit()
+        private void PopulateItemText(Dropdown dropdown, Text text)
+        {
+            var itemName = dropdown.captionText.text;
+            var item = Items.Single(x => x.Name == itemName);
+
+            text.text = item.EffectText;
+        }
+
+        private void Submit()
         {
             var data = new PlayerData
             {
@@ -67,9 +86,6 @@ namespace Assets.Scripts
 
             // Write
             PlayerIO.WritePlayer(data);
-
-            // Clear and prepare UI
-            PopulateComponents(data);
         }
 
         // Populate the dropdowns and fields with the data of selected player

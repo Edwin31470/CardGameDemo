@@ -75,6 +75,7 @@
     <Compile Include="Assets\Scripts\Items\ItemInfo.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
     <Compile Include="Assets\Scripts\Items\Item.cs" />
+    <Compile Include="Assets\Scripts\ManagePlayersController.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\GreenActionEffects.cs" />
     <Compile Include="Assets\Scripts\Enums\TokenType.cs" />
     <Compile Include="Assets\Scripts\Enums\TriggerType.cs" />
@@ -137,6 +138,7 @@
     <Compile Include="Assets\Scripts\Events\SlotEffectEvents.cs" />
     <Compile Include="Assets\Scripts\Stat.cs" />
     <Compile Include="Assets\Scripts\Managers\CardEffectsManager.cs" />
+    <Compile Include="Assets\Scripts\IO\PlayerData.cs" />
     <Compile Include="Assets\Scripts\Enums\PlayerType.cs" />
     <Compile Include="Assets\Scripts\Events\GameEndEvents.cs" />
     <Compile Include="Assets\Scripts\ManageItemsController.cs" />
@@ -160,8 +162,6 @@
     <Compile Include="Assets\Scripts\MainController.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
     <Compile Include="Assets\Scripts\Managers\ItemManager.cs" />
-    <Compile Include="Assets\Scripts\ManagePlayersController.cs" />
-    <Compile Include="Assets\Scripts\IO\PlayerData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
