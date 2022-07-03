@@ -45,15 +45,8 @@ namespace Assets.Scripts
         void Start()
         {
             // Register Players
-
-            var frontDeck = DeckManager.GetDeck("RedDeck");
-            var backDeck = DeckManager.GetDeck("RedDeck");
-
-            var frontItems = ItemManager.GetItems(new int[] { });
-            var backItems = ItemManager.GetItems(new int[] { });
-
-            var frontPlayer = new Player(PlayerType.Front, frontDeck, frontItems);
-            var backPlayer = new Player(PlayerType.Back, backDeck, backItems);
+            var frontPlayer = new Player(PlayerManager.GetPlayer(PlayerType.Front));
+            var backPlayer = new Player(PlayerManager.GetPlayer(PlayerType.Back));
 
             Board = new BoardState(frontPlayer, backPlayer);
 

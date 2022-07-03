@@ -29,5 +29,12 @@ namespace Assets.Scripts.Managers
                 Effect = EffectLibrary[x]
             }).ToList();
         }
+
+        public static List<ItemInfo> GetItems(PlayerData playerData)
+        {
+            var itemsIds = new[] { playerData.WeaponId, playerData.ArmourId, playerData.AccessoryId };
+
+            return GetItems(itemsIds.Where(x => x != -1));
+        }
     }
 }

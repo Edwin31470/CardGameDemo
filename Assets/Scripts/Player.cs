@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Events;
 using Assets.Scripts.Bases;
+using Assets.Scripts.Managers;
 
 namespace Assets.Scripts
 {
@@ -37,16 +38,16 @@ namespace Assets.Scripts
 
         public List<Item> Items { get; set; } = new();
 
-        public Player(PlayerType playerType, IEnumerable<CardInfo> cardInfos, IEnumerable<ItemInfo> itemInfos)
+        public Player(PlayerInfo playerInfo)
         {
-            PlayerType = playerType;
+            PlayerType = playerInfo.PlayerData.PlayerType;
 
-            foreach (var cardInfo in cardInfos.OrderBy(x => Guid.NewGuid()))
+            foreach (var cardInfo in playerInfo.Deck.Shuffle())
             {
                 Deck.Enqueue(BaseCard.Create(cardInfo));
             }
 
-            foreach (var itemInfo in itemInfos)
+            foreach (var itemInfo in playerInfo.Items)
             {
                 Items.Add(Item.Create(itemInfo));
             }

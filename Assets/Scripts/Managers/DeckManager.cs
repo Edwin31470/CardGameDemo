@@ -32,5 +32,10 @@ namespace Assets.Scripts.Managers
                 Effect = EffectLibrary.GetValueOrDefault(x),
             }).ToList();
         }
+
+        public static List<CardInfo> GetDeck(PlayerData player)
+        {
+            return GetDeck(player.DeckName);
+        }
     }
 }
