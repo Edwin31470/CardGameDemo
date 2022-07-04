@@ -94,6 +94,7 @@
     <Compile Include="Assets\Scripts\Managers\PileManager.cs" />
     <Compile Include="Assets\Scripts\IO\BaseData.cs" />
     <Compile Include="Assets\Scripts\Events\PassiveEvents.cs" />
+    <Compile Include="Assets\Scripts\Managers\PlayerManager.cs" />
     <Compile Include="Assets\Scripts\Cards\CreatureCard.cs" />
     <Compile Include="Assets\Scripts\Extensions\GameObjectExtensions.cs" />
     <Compile Include="Assets\Scripts\Events\TargetEvents.cs" />
@@ -162,7 +163,6 @@
     <Compile Include="Assets\Scripts\MainController.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
     <Compile Include="Assets\Scripts\Managers\ItemManager.cs" />
-    <Compile Include="Assets\Scripts\Managers\PlayerManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

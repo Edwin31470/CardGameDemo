@@ -63,6 +63,7 @@ namespace Assets.Scripts.Events
         private IEnumerable<BaseEvent> SacrificeCard(BaseCard card)
         {
             yield return new ManaSacrificeEvent(Source, card);
+            yield return new NewTurnEvent(Source.PlayerType.Opposite(), false);
         }
 
         protected IEnumerable<BaseEvent> PassTurn()
