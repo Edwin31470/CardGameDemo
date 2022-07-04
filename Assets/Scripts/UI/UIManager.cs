@@ -63,8 +63,9 @@ namespace Assets.Scripts.UI
 
             foreach (var player in board.BothPlayers)
             {
-                var fieldSlotObjects = FindObjectsOfType<SlotObject>()
-                    .Where(x => x.Owner == player.PlayerType && x.SlotType == SlotType.Field)
+                var slotObjects = FindObjectsOfType<SlotObject>().Where(x => x.Owner == player.PlayerType);
+
+                var fieldSlotObjects = slotObjects.Where(x => x.SlotType == SlotType.Field)
                     .ToArray();
 
                 foreach (var slotObject in fieldSlotObjects)
@@ -73,6 +74,7 @@ namespace Assets.Scripts.UI
                 }
 
                 FieldSlotObjects.AddRange(fieldSlotObjects);
+                ManaSlotObjects.Add(slotObjects.Single(x => x.SlotType == SlotType.Mana));
             }
         }
 
