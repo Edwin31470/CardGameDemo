@@ -8,7 +8,7 @@ using Assets.Scripts.Events;
 
 namespace Assets.Scripts
 {
-    public class FieldSlot : BaseSource
+    public class FieldSlot : BaseEffectSource
     {
         public FieldCard Card { get; set; }
 

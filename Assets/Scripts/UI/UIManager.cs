@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Assets.Scripts.Events;
 using UnityEngine;
+using Assets.Scripts.Bases;
 
 namespace Assets.Scripts.UI
 {
@@ -15,8 +16,9 @@ namespace Assets.Scripts.UI
         public bool IsProcessing => SelectionManager.IsProcessing || DragAndDropManager.IsProcessing;
 
         private static CardObject CardObject { get; set; }
-        private SelectionManager SelectionManager { get; set; }
+        private TargetManager SelectionManager { get; set; }
         private DragAndDropManager DragAndDropManager { get; set; }
+        private Action<IEnumerable<BaseEvent>> EnqueueEvents { get; set; }
 
         // Locations on screen
         private static Vector2 FrontDeckOrigin { get; set; }
@@ -40,7 +42,7 @@ namespace Assets.Scripts.UI
             CardObject = Resources.Load<CardObject>("Prefabs/CardObject");
 
             // Setup Managers
-            SelectionManager = gameObject.AddComponent(typeof(SelectionManager)) as SelectionManager;
+            SelectionManager = gameObject.AddComponent(typeof(TargetManager)) as TargetManager;
             DragAndDropManager = gameObject.AddComponent(typeof(DragAndDropManager)) as DragAndDropManager;
 
             // Get Locations
@@ -54,8 +56,10 @@ namespace Assets.Scripts.UI
             BackTurnLight = GameObject.Find("BackPlayer/ActiveTurnLight").GetComponent<SpriteRenderer>();
         }
 
-        public void Initialize(BoardState board)
+        public void Initialize(BoardState board, Action<IEnumerable<BaseEvent>> enqueueEvents)
         {
+            EnqueueEvents = enqueueEvents;
+
             // Initialize collections
             CardObjects = new HashSet<CardObject>();
             FieldSlotObjects = new List<SlotObject>();
@@ -70,7 +74,7 @@ namespace Assets.Scripts.UI
 
                 foreach (var slotObject in fieldSlotObjects)
                 {
-                    slotObject.FieldSlot = player.Field[slotObject.Index];
+                    slotObject.SourceReference = player.Field[slotObject.Index];
                 }
 
                 FieldSlotObjects.AddRange(fieldSlotObjects);
@@ -90,27 +94,39 @@ namespace Assets.Scripts.UI
 
         private IEnumerable<SlotObject> GetSlotObjects(PlayerType playerType, IEnumerable<FieldSlot> fieldSlots)
         {
-            return SlotObjects.Where(x => fieldSlots.Contains(x.FieldSlot)).Concat(ManaSlotObjects.Where(x => x.Owner == playerType));
-        }
-
-        private IEnumerable<SlotObject> GetFieldSlotObjects(IEnumerable<FieldSlot> fieldSlots)
-        {
-            return FieldSlotObjects.Where(x => fieldSlots.Contains(x.FieldSlot));
+            return SlotObjects.Where(x => fieldSlots.Contains(x.SourceReference)).Concat(ManaSlotObjects.Where(x => x.Owner == playerType));
         }
 
         private SlotObject GetFieldSlotObject(FieldSlot slot)
         {
-            return FieldSlotObjects.Single(x => x.FieldSlot == slot);
-        }
-
-        private IEnumerable<CardObject> GetCardObjects(IEnumerable<BaseCard> cardReferences)
-        {
-            return CardObjects.Where(x => cardReferences.Contains(x.CardReference));
+            return FieldSlotObjects.Single(x => x.SourceReference == slot);
         }
 
         private CardObject GetCardObject(BaseCard card)
         {
-            return CardObjects.Single(x => x.CardReference == card);
+            return CardObjects.Single(x => x.SourceReference == card);
+        }
+
+        private IEnumerable<CardObject> GetCardObjects(IEnumerable<BaseCard> cardReferences)
+        {
+            return GetObjects(cardReferences).Cast<CardObject>();
+        }
+
+        private IEnumerable<BaseUIObject> GetObjects<T>(IEnumerable<T> sourceReferences) where T : BaseSource
+        {
+            IEnumerable<BaseUIObject> sourceObjects;
+
+            if (typeof(BaseCard).IsAssignableFrom(typeof(T))) {
+                sourceObjects = CardObjects;
+            }
+            else if (typeof(FieldSlot).IsAssignableFrom(typeof(FieldSlot))) {
+                sourceObjects = FieldSlotObjects;
+            }
+            else { 
+                throw new ArgumentOutOfRangeException(nameof(T), $"Type must be {typeof(BaseCard)} or {typeof(FieldSlot)}");
+            }
+
+            return sourceObjects.Where(x => sourceReferences.Contains(x.SourceReference));
         }
 
         private IEnumerable<Vector2> GetHandPoints(PlayerType player, int numberOfPoints)
@@ -167,26 +183,45 @@ namespace Assets.Scripts.UI
             BackTurnLight.enabled = playerType == PlayerType.Back;
         }
 
-        public void BeginCardSelection(
-            IEnumerable<BaseCard> allowableTargets,
-            IEnumerable<BaseCard> overrideTargets,
+        public void BeginTargeting<T>(
+            IEnumerable<T> allowableTargets,
+            IEnumerable<T> overrideTargets,
             int count,
-            OnFinishSelection onFinishSelection,
-            SelectionType selectionType)
+            OnTargetsChosen<T> onTargetsChosen,
+            SelectionType selectionType) 
+            where T : BaseSource
         {
             // TODO: null or empty?
-            var targets = overrideTargets != null ?
-                GetCardObjects(overrideTargets) :
-                GetCardObjects(allowableTargets);
+            var validTargets = overrideTargets != null ?
+                GetObjects(overrideTargets) :
+                GetObjects(allowableTargets);
 
-            SelectionManager.Begin(
-                targets,
+            SelectionManager.Begin<T>(
+                validTargets,
                 count,
-                onFinishSelection,
+                FinishTargeting,
                 selectionType);
+
+            // Translates objects to sources and invokes event delegate
+            void FinishTargeting(IEnumerable<BaseUIObject> targetedObjects)
+            {
+                var chosenTargets = targetedObjects.Select(x => x.SourceReference).Cast<T>();
+
+                var events = onTargetsChosen.Invoke(chosenTargets);
+
+                EnqueueEvents(events);
+            }
         }
 
-        public void BeginDragAndDrop(IEnumerable<BaseCard> draggableCards, IEnumerable<FieldSlot> availableFieldSlots, PlayerType playingPlayer, Func<BaseCard, FieldSlot, IEnumerable<BaseEvent>> onDrop, Func<BaseCard, IEnumerable<BaseEvent>> onSacrifice, Func<IEnumerable<BaseEvent>> onPass)
+
+
+        public void BeginDragAndDrop(
+            IEnumerable<BaseCard> draggableCards,
+            IEnumerable<FieldSlot> availableFieldSlots,
+            PlayerType playingPlayer,
+            Func<BaseCard, FieldSlot, IEnumerable<BaseEvent>> onDrop,
+            Func<BaseCard, IEnumerable<BaseEvent>> onSacrifice,
+            Func<IEnumerable<BaseEvent>> onPass)
         {
             DragAndDropManager.Begin(
                 GetCardObjects(draggableCards),
@@ -195,6 +230,11 @@ namespace Assets.Scripts.UI
                 onSacrifice,
                 onPass);
         }
+
+        //public IEnumerable<BaseEvent> FinishDragAndDrop(IEnumerable<MonoBehaviour> selectedCards)
+        //{
+
+        //}
 
         public void CreateInHand(PlayerType playerType, BaseCard card)
         {

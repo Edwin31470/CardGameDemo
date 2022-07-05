@@ -52,7 +52,7 @@ namespace Assets.Scripts
 
             // Register GameObject Managers
             UIManager = gameObject.AddComponent(typeof(UIManager)) as UIManager;
-            UIManager.Initialize(Board);
+            UIManager.Initialize(Board, EnqueueEvents);
 
             LabelManager = gameObject.AddComponent(typeof(LabelManager)) as LabelManager;
             LabelManager.Initialize(frontPlayer, backPlayer);

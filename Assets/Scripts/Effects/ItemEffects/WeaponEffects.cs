@@ -41,6 +41,9 @@ namespace Assets.Scripts.Effects.ItemEffects
             if(boardState.GetSourceOwner(damageEvent.BaseSource) == boardState.GetSourceOwner(source))
                 return false;
 
+            if (damageEvent.Value < 4)
+                return false;
+
             damageEvent.Value += 1;
 
             return true;

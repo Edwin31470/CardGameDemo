@@ -76,6 +76,7 @@
     <Compile Include="Assets\Scripts\Player.cs" />
     <Compile Include="Assets\Scripts\Items\Item.cs" />
     <Compile Include="Assets\Scripts\ManagePlayersController.cs" />
+    <Compile Include="Assets\Scripts\UI\BaseObject.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\GreenActionEffects.cs" />
     <Compile Include="Assets\Scripts\Enums\TokenType.cs" />
     <Compile Include="Assets\Scripts\Enums\TriggerType.cs" />
@@ -128,7 +129,7 @@
     <Compile Include="Assets\Scripts\Events\BaseEvents.cs" />
     <Compile Include="Assets\Scripts\Cards\PermanentCard.cs" />
     <Compile Include="Assets\Scripts\IO\PlayerIO.cs" />
-    <Compile Include="Assets\Scripts\UI\SelectionManager.cs" />
+    <Compile Include="Assets\Scripts\UI\TargetManager.cs" />
     <Compile Include="Assets\Scripts\Managers\LabelManager.cs" />
     <Compile Include="Assets\Scripts\Events\Interfaces\IUIInteractionEvent.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\BlueCreatureEffects.cs" />

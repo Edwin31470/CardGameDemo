@@ -2,6 +2,7 @@
 using Assets.Scripts.Bases;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Events;
+using Assets.Scripts.UI;
 
 namespace Assets.Scripts
 {
@@ -13,5 +14,8 @@ namespace Assets.Scripts
         where TSource : BaseSource
         where TTarget : BaseCard;
 
-    public delegate IEnumerable<BaseEvent> OnFinishSelection(IEnumerable<BaseCard> targets);
+    public delegate IEnumerable<BaseEvent> OnTargetsChosen<T>(IEnumerable<T> targets) where T : BaseSource;
+
+    public delegate void OnFinishTargeting<out T>(IEnumerable<BaseUIObject> targetObjects)
+        where T : BaseSource;
 }

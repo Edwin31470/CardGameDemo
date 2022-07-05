@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Enums;
+﻿using Assets.Scripts.Bases;
+using Assets.Scripts.Enums;
 using UnityEngine;
 
 namespace Assets.Scripts.UI
@@ -6,12 +7,15 @@ namespace Assets.Scripts.UI
     /// <summary>
     /// Unity object to 
     /// </summary>
-    public class SlotObject : MonoBehaviour
+    public class SlotObject : BaseUIObject
     {
+        // Source Reference is null for mana slot
+        // TODO: does this need changing?
+        public FieldSlot SlotReference => (FieldSlot)SourceReference;
+
         public SlotType SlotType;
         public PlayerType Owner;
         public int Index;
-        public FieldSlot FieldSlot { get; set; } // null for mana slot
         private SpriteRenderer Glow { get; set; }
 
         public void Start()
@@ -25,7 +29,7 @@ namespace Assets.Scripts.UI
         // TODO: Update colour based on effect type
         public void SetGlow(EffectType effectType)
         {
-            if (FieldSlot.EffectType != EffectType.None) {
+            if (SlotReference.EffectType != EffectType.None) {
                 Glow.enabled = true;
                 return;
             }

@@ -1,3 +1,4 @@
+using Assets.Scripts.Bases;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Extensions;
 using Assets.Scripts.Managers;
@@ -7,10 +8,11 @@ using UnityEngine.UI;
 
 namespace Assets.Scripts.UI
 {
-    public class CardObject : MonoBehaviour
+    public class CardObject : BaseUIObject
     {
+        public BaseCard CardReference => (BaseCard)SourceReference;
+
         private const int MoveSpeed = 5;
-        public BaseCard CardReference { get; private set; }
         private Vector2 TargetPosition { get; set; }
 
         // Small Card
@@ -20,7 +22,6 @@ namespace Assets.Scripts.UI
         private SpriteRenderer CostSymbol { get; set; }
         private Text AttackLabel { get; set; }
         private Text DefenceLabel { get; set; }
-        private SpriteRenderer HighlightSprite { get; set; }
 
         // Large Card
         private GameObject LargeCard { get; set; }
@@ -35,17 +36,16 @@ namespace Assets.Scripts.UI
 
         public void Initialize(BaseCard cardReference)
         {
-            CardReference = cardReference;
+            SourceReference = cardReference;
 
-            var colour = CardReference.Colour.ToString();
-            var cost = CardReference.Cost;
+            var colour = cardReference.Colour.ToString();
+            var cost = cardReference.Cost;
 
             // Small Card
             SmallCard = transform.Find("SmallCard").gameObject;
 
             AttackLabel = SmallCard.transform.Find("Canvas/Attack").GetComponent<Text>();
             DefenceLabel = SmallCard.transform.Find("Canvas/Defence").GetComponent<Text>();
-            HighlightSprite = SmallCard.transform.Find("Highlight").GetComponent<SpriteRenderer>();
 
             AttackLabel.text = string.Empty;
             DefenceLabel.text = string.Empty;
@@ -98,18 +98,6 @@ namespace Assets.Scripts.UI
             SmallCard.GetComponent<SortingGroup>().sortingOrder = order;
         }
 
-        public void Highlight(Color colour)
-        {
-            HighlightSprite.enabled = true;
-            HighlightSprite.color = colour;
-        }
-
-        public void Dehighlight()
-        {
-            HighlightSprite.enabled = false;
-            HighlightSprite.color = Color.white;
-        }
-
         // Movement
         public void SetTargetPosition(Vector2 position)
         {
@@ -137,7 +125,7 @@ namespace Assets.Scripts.UI
             }
 
             // Update Labels
-            if (CardReference is CreatureCard creatureCard)
+            if (SourceReference is CreatureCard creatureCard)
             {
                 AttackLabel.text = creatureCard.Attack.Clamp(0, 99).ToString();
                 DefenceLabel.text = creatureCard.Defence.Clamp(0, 99).ToString();

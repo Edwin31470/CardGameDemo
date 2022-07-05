@@ -45,7 +45,7 @@ namespace Assets.Scripts.UI
             }
             else
             {
-                newEvents.AddRange(OnDrop.Invoke(SelectedCard.CardReference, slot.FieldSlot));
+                newEvents.AddRange(OnDrop.Invoke(SelectedCard.CardReference, slot.SlotReference));
                 // If no new events, unable to pay mana cost
                 if (!newEvents.Any()) {
                     // Not enough mana message
