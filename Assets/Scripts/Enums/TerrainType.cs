@@ -1,6 +1,6 @@
 ﻿namespace Assets.Scripts.Enums
 {
-    public enum EffectType
+    public enum TerrainType
     {
         None,
         Neutral,

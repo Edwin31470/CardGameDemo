@@ -358,17 +358,17 @@ namespace Assets.Scripts
 
         private void ProcessBoardState()
         {
-            var allCreatureCards = Board.GetMatchingCards(new TargetConditions
+            var allCreatureCards = Board.GetMatchingTargets<CreatureCard>(new TargetConditions
             {
                 CardType = CardType.Creature,
                 Area = Area.PlayArea
-            }).OfType<CreatureCard>();
+            });
 
-            var fieldCreatureCards = Board.GetMatchingCards(new TargetConditions
+            var fieldCreatureCards = Board.GetMatchingTargets<CreatureCard>(new TargetConditions
             {
                 CardType = CardType.Creature,
                 Area = Area.Field
-            }).OfType<CreatureCard>();
+            });
 
             foreach (var creatureCard in allCreatureCards)
             {

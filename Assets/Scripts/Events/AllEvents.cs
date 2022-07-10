@@ -33,7 +33,7 @@ namespace Assets.Scripts.Events
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            var cards = board.GetMatchingCards(TargetConditions).OfType<CreatureCard>();
+            var cards = board.GetMatchingTargets<CreatureCard>(TargetConditions);
 
             var events = new List<BaseEvent>();
             foreach (var card in cards)

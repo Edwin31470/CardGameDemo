@@ -3,6 +3,7 @@
 using Assets.Scripts.Enums;
 using Assets.Scripts.UI;
 using UnityEngine.XR;
+using Assets.Scripts.Terrains;
 
 namespace Assets.Scripts.Events
 {
@@ -128,21 +129,20 @@ namespace Assets.Scripts.Events
         }
     }
 
-
-    public class UpdateSlotGlowUIEvent : BaseUIEvent
+    public class AddTerrainUIEvent : BaseUIEvent
     {
+        private BaseTerrain Terrain { get; }
         private FieldSlot Slot { get; }
-        private EffectType Type { get; }
 
-        public UpdateSlotGlowUIEvent(FieldSlot slot, EffectType type)
+        public AddTerrainUIEvent(BaseTerrain terrain, FieldSlot slot)
         {
+            Terrain = terrain;
             Slot = slot;
-            Type = type;
         }
 
         public override void Process(UIManager uIManager)
         {
-            uIManager.UpdateSlotGlow(Slot, Type);
+            uIManager.CreateTerrainInSlot(Terrain, Slot);
         }
     }
 }

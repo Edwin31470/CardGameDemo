@@ -3,60 +3,77 @@ using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Bases;
 using Assets.Scripts.Cards;
+using Assets.Scripts.Effects;
+using Assets.Scripts.Effects.ItemEffects;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Events;
+using Assets.Scripts.Events.Interfaces;
+using Assets.Scripts.Interfaces;
+using Assets.Scripts.Terrains;
 
 namespace Assets.Scripts
 {
-    public class FieldSlot : BaseEffectSource
+    public class FieldSlot : ITargetable
     {
-        public FieldCard Card { get; set; }
+        public FieldCard Occupier { get; set; }
+        public BaseTerrain Terrain { get; set; }
 
-        public EffectType EffectType { get; set; }
-        private TriggerType TriggerType { get; set; }
-        private bool TriggerOnce { get; set; }
-        private Func<FieldCard, IEnumerable<BaseEvent>> SlotEffect { get; set; }
-
-        public IEnumerable<BaseEvent> Remove()
+        public BaseCard RemoveCard()
         {
-            var card = Card;
-            Card = null;
-
-            if (TriggerType.HasFlag(TriggerType.Leave)) {
-                return Trigger(card);
-            }
-
-            return Enumerable.Empty<BaseEvent>();
+            var card = Occupier;
+            Occupier = null;
+            return card;
         }
 
-        public IEnumerable<BaseEvent> Add(FieldCard card)
+        public BaseTerrain RemoveTerrain()
         {
-            Card = card;
-
-            if (TriggerType.HasFlag(TriggerType.Enter)) {
-                return Trigger(Card);
-            }
-
-            return Enumerable.Empty<BaseEvent>();
+            var terrain = Terrain;
+            Terrain = null;
+            return terrain;
         }
 
-        private IEnumerable<BaseEvent> Trigger(FieldCard card)
+        public void AddCard(FieldCard card)
         {
-            var newEvents = SlotEffect.Invoke(Card);
-
-            if (TriggerOnce) {
-                TriggerType = TriggerType.None;
-                SlotEffect = null;
-            }
-
-            return newEvents;
+            Occupier = card;
         }
 
-        public void SetEffect(Func<FieldCard, IEnumerable<BaseEvent>> effect, TriggerType triggerType, EffectType type)
+        public void AddTerrain(BaseTerrain terrain)
         {
-            SlotEffect = effect;
-            TriggerType = triggerType;
-            EffectType = type;
+            Terrain = terrain;
         }
     }
+
+    //public abstract class BaseTriggerSlotEffect : BaseSlotEffect
+    //{
+    //    public override TriggerType TriggerType => TriggerType.Trigger;
+
+    //    public abstract bool Conditions(BaseEvent triggeringEvent, BoardState board);
+    //    public abstract IEnumerable<BaseEvent> GetEvents( BaseEvent triggeringEvent, BoardState board);
+    //}
+
+    //public class BlessedGround : BaseSlotEffect
+    //{
+    //    public override int Id => 0;
+
+    //    public override TriggerType TriggerType => TriggerType.Trigger;
+
+    //    public override TerrainEffectType EffectType => TerrainEffectType.Positive;
+
+
+    //    public override IEnumerable<BaseEvent> GetEffect(FieldSlot source, BoardState board)
+    //    {
+    //        yield return new CustomInteruptEvent<FieldSlot>(source, PreventDamage);
+    //    }
+
+    //    public bool PreventDamage(FieldSlot source, BoardState board, BaseEvent triggeringEvent)
+    //    {
+    //        if (triggeringEvent is IDamageEvent damageEvent && damageEvent.BaseSource == source.Occupier)
+    //        {
+    //            damageEvent.Value =- 1;
+    //            return true;
+    //        }
+
+    //        return false;
+    //    }
+    //}
 }

@@ -38,7 +38,7 @@ namespace Assets.Scripts.Events
                 Area = Area.Hand
             };
 
-            uIManager.BeginDragAndDrop(player.Hand, player.Field.Where(x => x.Card == null), player.PlayerType, PlayCard, SacrificeCard, PassTurn);
+            uIManager.BeginDragAndDrop(player.Hand, player.Field.Where(x => x.Occupier == null), player.PlayerType, PlayCard, SacrificeCard, PassTurn);
 
             // resulting events of PlayCard and PassTurn are handled in DragAndDropManager.Finish()
             return Enumerable.Empty<BaseEvent>();
@@ -55,7 +55,12 @@ namespace Assets.Scripts.Events
 
             // Pay and play card
             player.RemoveMana(droppedCard.Colour, droppedCard.Cost);
-            yield return new EnterFieldEvent<BaseCard>(droppedCard, fieldSlot);
+
+            if (droppedCard is FieldCard fieldCard) {
+                yield return new EnterFieldEvent<FieldCard>(fieldCard, fieldSlot);
+            } else if (droppedCard is ActionCard actionCard) {
+                yield return new PlayActionCardEvent(actionCard);
+            }
 
             yield return new NewTurnEvent(Source.PlayerType.Opposite(), false);
         }

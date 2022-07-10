@@ -2,6 +2,7 @@
 using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Events;
+using Assets.Scripts.Interfaces;
 using System.Collections.Generic;
 
 namespace Assets.Scripts.Effects
@@ -23,7 +24,7 @@ namespace Assets.Scripts.Effects
     // Apply an effect to a single target
     public abstract class CustomSingleTargetEffect<TSource, TTarget> : BaseTargetingEffect<TSource>
         where TSource : BaseSource
-        where TTarget : BaseCard
+        where TTarget : ITargetable
     {
         protected abstract SelectionType SelectionType { get; }
         protected abstract string Message { get; }
@@ -34,7 +35,7 @@ namespace Assets.Scripts.Effects
             yield return new CustomSingleTargetEvent<TSource, TTarget>(source, GetTargetConditions(source, board), Effect, SelectionType, Message);
         }
 
-        protected abstract IEnumerable<BaseEvent> Effect(TSource source, BoardState boardState, BaseCard target);
+        protected abstract IEnumerable<BaseEvent> Effect(TSource source, BoardState boardState, TTarget target);
     }
 
     // Apply an effect when the source is destroyed

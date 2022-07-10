@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Bases;
+using Assets.Scripts.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,6 @@ namespace Assets.Scripts.UI
     // A UI object is something that can be targeted by effects
     public class BaseUIObject : MonoBehaviour
     {
-        public BaseSource SourceReference { get; set; }
+        public ITargetable SourceReference { get; set; }
     }
 }

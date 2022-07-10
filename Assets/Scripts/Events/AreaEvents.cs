@@ -77,20 +77,16 @@ namespace Assets.Scripts.Events
         {
             var player = board.GetSourceOwner(Card);
 
-            var slotEvents = player.RemoveFromField(Card);
-            foreach (var slotEvent in slotEvents) {
-                yield return slotEvent;
-            }
+            player.RemoveFromField(Card);
             player.AddToHand(Card);
 
             yield return new UpdateHandUIEvent(player.PlayerType, player.Hand);
         }
     }
 
-    // Enter field for creature and permanent cards
-    public class EnterFieldEvent<T> : BaseAreaEvent<T> where T : BaseCard
+    public class EnterFieldEvent<T> : BaseAreaEvent<T>, IEnterFieldEvent where T : FieldCard
     {
-        private FieldSlot Slot { get; set; } // null for action card
+        public FieldSlot Slot { get; set; }
 
         public EnterFieldEvent(T card, FieldSlot slot) : base(card)
         {
@@ -99,44 +95,38 @@ namespace Assets.Scripts.Events
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            if (Source is FieldCard fieldCard)
+            // Work out who owns the card
+            var player = board.GetSourceOwner(Slot); // Field cards are always owned by the player whose side they are played on
+
+            // Add card to slot
+            if (player.IsInHand(Source))
+                player.RemoveFromHand(Source);
+
+            Slot.AddCard(Source);
+
+            // Get the card's events
+            foreach (var baseEvent in Source.GetEvents(board).ToList())
             {
-                // Work out who owns the card
-                var player = board.GetSourceOwner(Slot); // Field cards are always owned by the player whose side they are played on
-
-                // Add card to slot
-                if (player.IsInHand(fieldCard))
-                    player.RemoveFromHand(fieldCard);
-
-                var slotEvents = Slot.Add(fieldCard);
-                foreach (var slotEvent in slotEvents)
-                {
-                    yield return slotEvent;
-                }
-
-                // Get the card's events
-                foreach (var baseEvent in Source.GetEvents(board).ToList())
-                {
-                    yield return baseEvent;
-                }
-
-                yield break;
+                yield return baseEvent;
             }
-            else if (Source is ActionCard actionCard)
-            {
-                // Destroy
-                yield return new DestroyCardEvent<ActionCard>(actionCard);
+        }
+    }
 
-                // Get the card's events
-                foreach (var baseEvent in Source.GetEvents(board).ToList())
-                {
-                    yield return baseEvent;
-                }
+    public class PlayActionCardEvent : BaseAreaEvent<ActionCard>
+    {
+        public PlayActionCardEvent(ActionCard source) : base(source)
+        {
+        }
 
-                yield break;
+        public override IEnumerable<BaseEvent> Process(BoardState board)
+        {
+            // Destroy
+            yield return new DestroyCardEvent<ActionCard>(Source);
+
+            // Get the card's events
+            foreach (var baseEvent in Source.GetEvents(board).ToList()) {
+                yield return baseEvent;
             }
-
-            throw new ArgumentOutOfRangeException(nameof(Source), $"Card type must be {typeof(FieldCard)} or {typeof(ActionCard)}");
         }
     }
 
@@ -162,10 +152,7 @@ namespace Assets.Scripts.Events
 
             // From field
             if (Source is FieldCard fieldCard && player.IsOnField(Source)) {
-                var slotEvents = player.RemoveFromField(fieldCard);
-                foreach (var slotEvent in slotEvents) {
-                    yield return slotEvent;
-                }
+                player.RemoveFromField(fieldCard);
                 yield return new DestroyCardUIEvent(player.PlayerType, Source);
             }
 
@@ -218,10 +205,7 @@ namespace Assets.Scripts.Events
                 player.RemoveFromHand(Source);
 
             if (Source is FieldCard fieldCard && player.IsOnField(Source)) {
-                var slotEvents = player.RemoveFromField(fieldCard);
-                foreach (var slotEvent in slotEvents) {
-                    yield return slotEvent;
-                }
+                player.RemoveFromField(fieldCard);
             }
 
             if (player.IsInDeck(Source))
@@ -284,10 +268,7 @@ namespace Assets.Scripts.Events
             var originalPlayer = board.GetSourceOwner(Source);
             var newPlayer = board.GetPlayer(originalPlayer.PlayerType.Opposite());
 
-            var leaveSlotEvents = originalPlayer.RemoveFromField(Source);
-            foreach (var slotEvent in leaveSlotEvents) {
-                yield return slotEvent;
-            }
+            originalPlayer.RemoveFromField(Source);
 
             var slot = newPlayer.GetRandomEmptySlot();
             if (slot == null) {
@@ -295,10 +276,7 @@ namespace Assets.Scripts.Events
             }
             else
             {
-                var enterSlotEvents = slot.Add(Source);
-                foreach (var slotEvent in enterSlotEvents) {
-                    yield return slotEvent;
-                }
+                slot.AddCard(Source);
                 yield return new MoveCardToFieldUIEvent(Source, slot);
             }
         }
@@ -326,7 +304,7 @@ namespace Assets.Scripts.Events
 
             if (summonedCard is ActionCard actionCard)
             {
-                yield return new EnterFieldEvent<ActionCard>(actionCard, null);
+                yield return new PlayActionCardEvent(actionCard);
             }
             else if (summonedCard is FieldCard fieldCard)
             {

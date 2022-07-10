@@ -8,5 +8,6 @@ namespace Assets.Scripts.Events.Interfaces
 {
     public interface IEnterFieldEvent : ISourceEvent
     {
+        FieldSlot Slot { get; }
     }
 }

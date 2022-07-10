@@ -21,8 +21,6 @@ namespace Assets.Scripts.Managers
 
         public static List<ItemInfo> GetItems(IEnumerable<int> itemIds)
         {
-            // eventually will read ids from a player config file
-
             return itemIds.Select(x => new ItemInfo
             {
                 ItemData = ItemLibrary[x],

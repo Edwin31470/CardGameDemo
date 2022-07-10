@@ -120,7 +120,7 @@
     <Compile Include="Assets\Scripts\Effects\CustomEffects.cs" />
     <Compile Include="Assets\Scripts\Enums\ItemType.cs" />
     <Compile Include="Assets\Scripts\Events\CardEvents.cs" />
-    <Compile Include="Assets\Scripts\Enums\EffectType.cs" />
+    <Compile Include="Assets\Scripts\Enums\TerrainType.cs" />
     <Compile Include="Assets\Scripts\UI\SlotObject.cs" />
     <Compile Include="Assets\Scripts\Enums\Area.cs" />
     <Compile Include="Assets\Scripts\Events\Interfaces\IStatEvents.cs" />
@@ -137,7 +137,7 @@
     <Compile Include="Assets\Scripts\LegendkeeperIntegration\Document.cs" />
     <Compile Include="Assets\Scripts\Extensions\MathExtensions.cs" />
     <Compile Include="Assets\Scripts\Effects\ItemEffects\ArmourEffects.cs" />
-    <Compile Include="Assets\Scripts\Events\SlotEffectEvents.cs" />
+    <Compile Include="Assets\Scripts\Events\SlotEvents.cs" />
     <Compile Include="Assets\Scripts\Stat.cs" />
     <Compile Include="Assets\Scripts\Managers\CardEffectsManager.cs" />
     <Compile Include="Assets\Scripts\IO\PlayerData.cs" />
@@ -164,6 +164,13 @@
     <Compile Include="Assets\Scripts\MainController.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
     <Compile Include="Assets\Scripts\Managers\ItemManager.cs" />
+    <Compile Include="Assets\Scripts\UI\TerrainObject.cs" />
+    <Compile Include="Assets\Scripts\Terrains\BaseTerrain.cs" />
+    <Compile Include="Assets\Scripts\Effects\TerrainEffects\TerrainEffects.cs" />
+    <Compile Include="Assets\Scripts\Managers\TerrainManager.cs" />
+    <Compile Include="Assets\Scripts\IO\TerrainData.cs" />
+    <Compile Include="Assets\Scripts\Terrains\TerrainInfo.cs" />
+    <Compile Include="Assets\Scripts\Interfaces\ITargetable.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

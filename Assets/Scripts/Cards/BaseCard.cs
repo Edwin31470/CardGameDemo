@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using Assets.Scripts.Bases;
 using Assets.Scripts.IO;
 using Assets.Scripts.Effects;
+using Assets.Scripts.Interfaces;
 
 namespace Assets.Scripts.Cards
 {
-    public abstract class BaseCard : BaseEffectSource
+    public abstract class BaseCard : BaseEffectSource, ITargetable
     {
         public string Name { get; set; }
         public Colour Colour { get; set; }
