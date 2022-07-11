@@ -13,7 +13,22 @@ namespace Assets.Scripts.UI
 
     public class HoverManager : MonoBehaviour
     {
-        private GameObject LargeCardHover { get; set; }
+        private GameObject _largeCardHover;
+        private float _largeCardWidth;
+        private float _largeCardHeight;
+
+        private GameObject LargeCardHover
+        {
+            get => _largeCardHover;
+            set
+            {
+                _largeCardHover = value;
+                var spriteRender = LargeCardHover.GetComponent<SpriteRenderer>();
+                _largeCardWidth = spriteRender.size.x;
+                _largeCardHeight = spriteRender.size.y;
+            }
+        }
+
 
         private Dictionary<Colour, Sprite> LargeCardSprites { get; set; }
 
@@ -53,6 +68,11 @@ namespace Assets.Scripts.UI
             {
                 CreateCardHover(hoveredCard);
             }
+
+            if (hoveredTerrain != null)
+            {
+                CreateTerrainHover(hoveredTerrain, hoveredCard != null);
+            }
         }
 
         private void CreateCardHover(CardObject hoveredCard)
@@ -71,24 +91,44 @@ namespace Assets.Scripts.UI
             HoverObjects.Add(hoverObject);
         }
 
+        // TODO: create a seperate graphic for terrain rather than using the red card graphic
+        private void CreateTerrainHover(TerrainObject hoveredTerrain, bool hoveringOnCard)
+        {
+            var hoverObject = Instantiate(LargeCardHover, GetHoverCoordiantes(hoveredTerrain, hoveringOnCard), Quaternion.identity);
+
+            // set sprite colour
+            hoverObject.GetComponent<SpriteRenderer>().sprite = LargeCardSprites[Colour.Red]; 
+
+            // set text
+            var canvas = hoverObject.transform.Find("Canvas");
+            canvas.transform.Find("Name").GetComponent<Text>().text = hoveredTerrain.TerrainReference.Name;
+            canvas.transform.Find("EffectText").GetComponent<Text>().text = hoveredTerrain.TerrainReference.EffectText;
+            canvas.transform.Find("Types").GetComponent<Text>().text = string.Empty;
+
+            HoverObjects.Add(hoverObject);
+        }
+
         // Place the hover to the right and extending down from the card, unless it would go out of bounds in that direction
         private Vector2 GetHoverCoordiantes(CardObject hoveredCard)
         {
-            // TODO: work out how to work out the hovered card will be out of bounds
+            // TODO: work out how to work out if the hovered card will be out of bounds
 
             var pos = hoveredCard.transform.position;
 
-            pos.x += LargeCardHover.GetComponent<SpriteRenderer>().bounds.size.x;
+            pos.x += _largeCardWidth * 1.25f;
 
             return pos;
         }
 
-        //private Vector2 GetHoverCoordiantes(TerrainObject hoveredTerrain, bool cardInSlot)
-        //{
+        private Vector2 GetHoverCoordiantes(TerrainObject hoveredTerrain, bool hoveringOnCard)
+        {
+            var pos = hoveredTerrain.transform.position;
 
-        //}
+            pos.x -= _largeCardWidth * 1.25f;
 
-        // Gets the UI object the mouse is on and returns it if it is a valid target, otherwise returns null
+            return pos;
+        }
+
         private (CardObject, TerrainObject) GetHoveredObjects()
         {
             // Get Colliding Targets

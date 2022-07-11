@@ -1,6 +1,7 @@
 using Assets.Scripts.Bases;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Extensions;
+using Assets.Scripts.Interfaces;
 using Assets.Scripts.Managers;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -10,7 +11,8 @@ namespace Assets.Scripts.UI
 {
     public class CardObject : BaseUIObject
     {
-        public BaseCard CardReference => (BaseCard)SourceReference;
+        public BaseCard CardReference { get; set; }
+        public override ITargetable SourceReference => CardReference;
 
         private const int MoveSpeed = 5;
         private Vector2 TargetPosition { get; set; }
@@ -31,7 +33,7 @@ namespace Assets.Scripts.UI
 
         public void Initialize(BaseCard cardReference)
         {
-            SourceReference = cardReference;
+            CardReference = cardReference;
 
             var colour = cardReference.Colour.ToString();
             var cost = cardReference.Cost;

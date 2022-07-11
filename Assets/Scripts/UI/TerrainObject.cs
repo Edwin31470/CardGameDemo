@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Enums;
+using Assets.Scripts.Interfaces;
 using Assets.Scripts.Terrains;
 using System;
 using System.Collections.Generic;
@@ -11,10 +12,15 @@ namespace Assets.Scripts.UI
 {
     public class TerrainObject : BaseUIObject
     {
+        public BaseTerrain TerrainReference { get; set; }
+        public override ITargetable SourceReference => TerrainReference;
+
         private SpriteRenderer Glow { get; set; }
 
         public void Initialize(BaseTerrain terrainReference)
         {
+            TerrainReference = terrainReference;
+
             Glow = transform.Find("Glow").gameObject.GetComponent<SpriteRenderer>();
             Glow.color = GetGlowColour(terrainReference.TerrainType);
         }

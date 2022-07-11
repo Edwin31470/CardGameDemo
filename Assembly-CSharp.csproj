@@ -134,6 +134,7 @@
     <Compile Include="Assets\Scripts\Events\BaseEvents.cs" />
     <Compile Include="Assets\Scripts\Cards\PermanentCard.cs" />
     <Compile Include="Assets\Scripts\IO\PlayerIO.cs" />
+    <Compile Include="Assets\Scripts\UI\HoverManager.cs" />
     <Compile Include="Assets\Scripts\UI\TargetManager.cs" />
     <Compile Include="Assets\Scripts\Managers\LabelManager.cs" />
     <Compile Include="Assets\Scripts\Events\Interfaces\IUIInteractionEvent.cs" />
@@ -171,7 +172,6 @@
     <Compile Include="Assets\Scripts\MainController.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
     <Compile Include="Assets\Scripts\Managers\ItemManager.cs" />
-    <Compile Include="Assets\Scripts\UI\HoverManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

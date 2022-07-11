@@ -79,7 +79,7 @@ namespace Assets.Scripts.UI
 
                 foreach (var slotObject in fieldSlotObjects)
                 {
-                    slotObject.SourceReference = player.Field[slotObject.Index];
+                    slotObject.SlotReference = player.Field[slotObject.Index];
                 }
 
                 FieldSlotObjects.AddRange(fieldSlotObjects);
