@@ -10,58 +10,48 @@ namespace Assets.Scripts.UI
 {
     class DragAndDropManager : MonoBehaviour
     {
-        // Allowing reference to main controller here due to nature of Update()
-        private MainController MainController { get; set; }
-
         private HashSet<CardObject> AvailableCards { get; set; }
         private HashSet<SlotObject> AvailableSlots { get; set; }
-        private Func<BaseCard, FieldSlot, IEnumerable<BaseEvent>> OnDrop { get; set; }
-        private Func<BaseCard, IEnumerable<BaseEvent>> OnSacrifice { get; set; }
-        private Func<IEnumerable<BaseEvent>> OnPass { get; set; }
+        private Func<CardObject, SlotObject, bool> OnDroppedInSlot { get; set; }
+        private Action OnPassed { get; set; }
 
-        private CardObject SelectedCard { get; set; }
+        private CardObject SelectedCard { get; set; } // card currently being held
         private Vector2 OriginalPosition { get; set; }
 
         public bool IsProcessing { get; set; }
 
-        public void Begin(IEnumerable<CardObject> availableCards, IEnumerable<SlotObject> availableSlots, Func<BaseCard, FieldSlot, IEnumerable<BaseEvent>> onDrop, Func<BaseCard, IEnumerable<BaseEvent>> onSacrifice, Func<IEnumerable<BaseEvent>> onPass)
+        public void Begin(
+            IEnumerable<CardObject> availableCards,
+            IEnumerable<SlotObject> availableSlots,
+            Func<CardObject, SlotObject, bool> onDroppedInSlot,
+            Action onPassed)
         {
-            MainController = MainController.Get();
             AvailableCards = new HashSet<CardObject>(availableCards);
             AvailableSlots = new HashSet<SlotObject>(availableSlots);
-            OnDrop = onDrop;
-            OnSacrifice = onSacrifice;
-            OnPass = onPass;
+            OnDroppedInSlot = onDroppedInSlot;
+            OnPassed = onPassed;
             IsProcessing = true;
         }
 
-        public void Finish(SlotObject slot)
+        private void Finish(SlotObject slot)
         {
-            var newEvents = new List<BaseEvent>();
+            var succesfullyDropped = OnDroppedInSlot(SelectedCard, slot);
 
-            if (slot.SlotType == SlotType.Mana) {
-                newEvents.AddRange(OnSacrifice.Invoke(SelectedCard.CardReference));
-                DropInSlot(slot, true);
-            }
-            else
+            if (succesfullyDropped) 
             {
-                newEvents.AddRange(OnDrop.Invoke(SelectedCard.CardReference, slot.SlotReference));
-                // If no new events, unable to pay mana cost
-                if (!newEvents.Any()) {
-                    // Not enough mana message
-                    DropCard();
-                    return;
-                }
                 DropInSlot(slot);
             }
+            else 
+            {
+                DropCard();
+            }
 
-            MainController.EnqueueEvents(newEvents);
             IsProcessing = false;
         }
 
-        public void Pass()
+        private void Pass()
         {
-            MainController.EnqueueEvents(OnPass.Invoke());
+            OnPassed();
 
             SelectedCard = null;
             IsProcessing = false;
@@ -76,7 +66,7 @@ namespace Assets.Scripts.UI
 
         private void DropInSlot(SlotObject slot, bool dropActionCards = false)
         {
-            // Only drop non-action cards if dropActionCard is false
+            // Only drop non-action cards and action cards if dropActionCard is false
             if (dropActionCards || SelectedCard.CardReference.Type != CardType.Action)
             {
                 SelectedCard.MoveToPosition(slot.transform.position);

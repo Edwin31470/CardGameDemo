@@ -35,13 +35,6 @@ namespace Assets.Scripts
         // Board
         private BoardState Board { get; set; }
 
-        // Static method to be used by scripts requiring Update()
-        public static MainController Get()
-        {
-            return GameObject.Find("MainController").GetComponent<MainController>();
-        }
-
-
         // Start is called before the first frame update
         void Start()
         {

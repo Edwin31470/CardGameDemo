@@ -232,8 +232,6 @@ namespace Assets.Scripts.UI
             }
         }
 
-
-
         public void BeginDragAndDrop(
             IEnumerable<BaseCard> draggableCards,
             IEnumerable<FieldSlot> availableFieldSlots,
@@ -245,9 +243,33 @@ namespace Assets.Scripts.UI
             DragAndDropManager.Begin(
                 GetCardObjects(draggableCards),
                 GetSlotObjects(playingPlayer, availableFieldSlots),
-                onDrop,
-                onSacrifice,
-                onPass);
+                DroppedInSlot,
+                EnterPressed);
+
+            // Translates objects to sources and invokes event delegate
+            bool DroppedInSlot(CardObject cardObject, SlotObject slotObject)
+            {
+                if (slotObject.SlotType == SlotType.Mana)
+                {
+                    EnqueueEvents(onSacrifice.Invoke(cardObject.CardReference));
+                }
+                else
+                {
+                    var droppedEvents = onDrop.Invoke(cardObject.CardReference, slotObject.SlotReference).ToList();
+                    EnqueueEvents(droppedEvents);
+
+                    // Check if playing the card has been succesful - better way to do this?
+                    if (!droppedEvents.Any(x => x is NewTurnEvent))
+                        return false;
+                }
+
+                return true;
+            }
+
+            void EnterPressed()
+            {
+                EnqueueEvents(onPass.Invoke());
+            }
         }
 
         public void CreateInHand(PlayerType playerType, BaseCard card)

@@ -14,7 +14,6 @@ namespace Assets.Scripts.Events
         public override string EventTitle => $"{Source.PlayerType} Player's Turn";
 
         private bool HasOtherPlayerPassed { get; set; }
-        private BoardState Board { get; set; }
 
         public PlayCardEvent(Player source, bool hasOtherPlayerPassed) : base(source)
         {
@@ -23,38 +22,46 @@ namespace Assets.Scripts.Events
 
         public override IEnumerable<BaseEvent> Process(UIManager uIManager, BoardState board)
         {
-            var player = Source;
+            var availableCards = Source.Hand;
+            var availableSlots = Source.Field.Where(x => x.Occupier == null);
 
             // If no cards in hand, automatically pass
-            if (!player.Hand.Any()) {
-                return PassTurn();
+            if (!availableCards.Any()) {
+                foreach (var @event in PassTurn()) {
+                    yield return @event;
+                }
             }
 
-            uIManager.SetTurn(player.PlayerType);
-            Board = board;
+            uIManager.SetTurn(Source.PlayerType);
 
             var conditions = new TargetConditions {
-                PlayerType = player.PlayerType,
+                PlayerType = Source.PlayerType,
                 Area = Area.Hand
             };
 
-            uIManager.BeginDragAndDrop(player.Hand, player.Field.Where(x => x.Occupier == null), player.PlayerType, PlayCard, SacrificeCard, PassTurn);
+            uIManager.BeginDragAndDrop(
+                availableCards,
+                availableSlots,
+                Source.PlayerType,
+                PlayCard,
+                SacrificeCard,
+                PassTurn);
 
             // resulting events of PlayCard and PassTurn are handled in DragAndDropManager.Finish()
-            return Enumerable.Empty<BaseEvent>();
+            yield break;
         }
 
         protected IEnumerable<BaseEvent> PlayCard(BaseCard droppedCard, FieldSlot fieldSlot)
         {
-            var player = Board.GetSourceOwner(droppedCard);
-
-            // Don't play if unable to pay for card
-            if (player.GetManaAmount(droppedCard.Colour) < droppedCard.Cost) {
+            // Play again if unable to pay for card
+            if (Source.GetManaAmount(droppedCard.Colour) < droppedCard.Cost) {
+                yield return new MessageEvent("Unable to pay for card cost");
+                yield return new PlayCardEvent(Source, false);
                 yield break;
             }
 
             // Pay and play card
-            player.RemoveMana(droppedCard.Colour, droppedCard.Cost);
+            Source.RemoveMana(droppedCard.Colour, droppedCard.Cost);
 
             if (droppedCard is FieldCard fieldCard) {
                 yield return new EnterFieldEvent<FieldCard>(fieldCard, fieldSlot);

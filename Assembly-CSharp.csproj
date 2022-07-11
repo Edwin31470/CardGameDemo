@@ -80,7 +80,6 @@
     <Compile Include="Assets\Scripts\UI\BaseObject.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\GreenActionEffects.cs" />
     <Compile Include="Assets\Scripts\Enums\TokenType.cs" />
-    <Compile Include="Assets\Scripts\Enums\TriggerType.cs" />
     <Compile Include="Assets\Scripts\Events\Interfaces\ISourceEvent.cs" />
     <Compile Include="Assets\Scripts\Cards\FieldCard.cs" />
     <Compile Include="Assets\Scripts\Enums\SubType.cs" />
@@ -155,7 +154,6 @@
     <Compile Include="Assets\Scripts\Effects\BaseEffects.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumerableExtensions.cs" />
     <Compile Include="Assets\Scripts\BaseManagerController.cs" />
-    <Compile Include="Assets\Scripts\Enums\UIMode.cs" />
     <Compile Include="Assets\Scripts\Events\UIEvents.cs" />
     <Compile Include="Assets\Scripts\Events\Interfaces\ITriggerEvent.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\RedCreatureEffects.cs" />
