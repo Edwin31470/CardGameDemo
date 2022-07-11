@@ -24,8 +24,10 @@ namespace Assets.Scripts.UI
             {
                 _largeCardHover = value;
                 var spriteRender = LargeCardHover.GetComponent<SpriteRenderer>();
-                _largeCardWidth = spriteRender.size.x;
-                _largeCardHeight = spriteRender.size.y;
+
+                // 1.25f because the sprite is scaled by 1.5 - may change later
+                _largeCardWidth = spriteRender.size.x * 1.25f;
+                _largeCardHeight = spriteRender.size.y * 1.25f;
             }
         }
 
@@ -64,7 +66,7 @@ namespace Assets.Scripts.UI
             // Get the new objects hovered over
             (CardObject hoveredCard, TerrainObject hoveredTerrain) = GetHoveredObjects();
 
-            if (hoveredCard != null)
+            if (hoveredCard != null && hoveredCard.IsInPosition)
             {
                 CreateCardHover(hoveredCard);
             }
@@ -108,14 +110,14 @@ namespace Assets.Scripts.UI
             HoverObjects.Add(hoverObject);
         }
 
-        // Place the hover to the right and extending down from the card, unless it would go out of bounds in that direction
         private Vector2 GetHoverCoordiantes(CardObject hoveredCard)
         {
-            // TODO: work out how to work out if the hovered card will be out of bounds
-
             var pos = hoveredCard.transform.position;
 
-            pos.x += _largeCardWidth * 1.25f;
+            pos.x += _largeCardWidth;
+            pos.y -= _largeCardHeight / 3;
+
+            FixPositioning(ref pos);
 
             return pos;
         }
@@ -124,9 +126,24 @@ namespace Assets.Scripts.UI
         {
             var pos = hoveredTerrain.transform.position;
 
-            pos.x -= _largeCardWidth * 1.25f;
+            pos.x -= _largeCardWidth;
+            pos.y -= _largeCardHeight / 3;
 
             return pos;
+        }
+
+        // If a side of the hover would be out of the screen, move it into the screen
+        private void FixPositioning(ref Vector3 hoverObjectPos)
+        {
+            if (Camera.main.WorldToViewportPoint(new Vector2(hoverObjectPos.x, hoverObjectPos.y - _largeCardHeight / 3)).y < 0)
+                hoverObjectPos.y += _largeCardHeight / 1.5f;
+            else if (Camera.main.WorldToViewportPoint(new Vector2(hoverObjectPos.x, hoverObjectPos.y + _largeCardHeight / 3)).y > 1)
+                hoverObjectPos.y -= _largeCardHeight / 1.5f;
+
+            if (Camera.main.WorldToViewportPoint(new Vector2(hoverObjectPos.x - _largeCardWidth / 3, hoverObjectPos.y)).x < 0)
+                hoverObjectPos.x += _largeCardWidth * 2f;
+            else if (Camera.main.WorldToViewportPoint(new Vector2(hoverObjectPos.x + _largeCardWidth / 3, hoverObjectPos.y)).x > 1)
+                hoverObjectPos.x -= _largeCardWidth * 2f;
         }
 
         private (CardObject, TerrainObject) GetHoveredObjects()
