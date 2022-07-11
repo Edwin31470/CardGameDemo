@@ -20,6 +20,7 @@ namespace Assets.Scripts
         private LabelManager LabelManager { get; set; }
         private PileManager PileManager { get; set; }
         private ShowTokensManager ShowTokensManager { get; set; }
+        private HoverManager HoverManager { get; set; }
 
         // Queues and collections
         private RepeatingTimer Timer { get; set; }
@@ -60,6 +61,7 @@ namespace Assets.Scripts
             PileManager = gameObject.AddComponent(typeof(PileManager)) as PileManager;
             ShowTokensManager = gameObject.AddComponent(typeof(ShowTokensManager)) as ShowTokensManager;
 
+            HoverManager = gameObject.AddComponent(typeof(HoverManager)) as HoverManager;
 
             // Register Buttons
             GameObject.Find("Canvas/FrontPlayer/DestroyedCount").GetComponent<Button>()
@@ -220,6 +222,8 @@ namespace Assets.Scripts
 
         private void RedrawPhase()
         {
+            //HoverManager.Activated = true;
+
             //Timer.SetTickLength(0.5f);
 
             foreach(var player in Board.BothPlayers)
@@ -237,6 +241,8 @@ namespace Assets.Scripts
 
         private void DamagePhase()
         {
+            //HoverManager.Activated = false;
+
             foreach (var player in Board.BothPlayers)
             {
                 var damageTaken = Math.Max(Board.GetPlayer(player.PlayerType.Opposite()).TotalAttack - player.TotalDefence, 0);

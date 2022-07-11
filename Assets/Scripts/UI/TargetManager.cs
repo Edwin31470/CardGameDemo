@@ -136,7 +136,7 @@ namespace Assets.Scripts.UI
         {
             // Get Colliding Target
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, LayerMask.GetMask("Card", "Slot"));
+            RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, LayerMask.GetMask("Card", "Slot", "Terrain"));
 
             // Null when not hovering
             var hoveredTarget = hit.collider?.GetComponentInParent<BaseUIObject>();

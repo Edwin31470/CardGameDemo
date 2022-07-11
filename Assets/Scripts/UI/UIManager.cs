@@ -13,15 +13,13 @@ using Assets.Scripts.Interfaces;
 
 namespace Assets.Scripts.UI
 {
+    // Manages the interaction between the game logic and the UI
     public class UIManager : MonoBehaviour
     {
-        public bool IsProcessing => TargetManager.IsProcessing || DragAndDropManager.IsProcessing;
-
         private static CardObject CardObject { get; set; }
         private static TerrainObject TerrainObject { get; set; }
         private TargetManager TargetManager { get; set; }
         private DragAndDropManager DragAndDropManager { get; set; }
-        private Action<IEnumerable<BaseEvent>> EnqueueEvents { get; set; }
 
         // Locations on screen
         private static Vector2 FrontDeckOrigin { get; set; }
@@ -33,12 +31,18 @@ namespace Assets.Scripts.UI
         private SpriteRenderer FrontTurnLight { get; set; }
         private SpriteRenderer BackTurnLight { get; set; }
 
+
         // Keep track of cards and slots
         private HashSet<CardObject> CardObjects { get; set; } = new();
         private List<SlotObject> FieldSlotObjects { get; set; } = new();
         private HashSet<SlotObject> ManaSlotObjects { get; set; } = new();
         private HashSet<TerrainObject> TerrainObjects { get; set; } = new();
         private IEnumerable<SlotObject> SlotObjects => FieldSlotObjects.Concat(ManaSlotObjects);
+
+        // MainController method to add events to the queue
+        private Action<IEnumerable<BaseEvent>> EnqueueEvents { get; set; }
+
+        public bool IsProcessing => TargetManager.IsProcessing || DragAndDropManager.IsProcessing;
 
         public void Start()
         {
@@ -65,6 +69,7 @@ namespace Assets.Scripts.UI
         {
             EnqueueEvents = enqueueEvents;
 
+            // Find and register slot objects - TODO: Generate and place the slot objects here instead
             foreach (var player in board.BothPlayers)
             {
                 var slotObjects = FindObjectsOfType<SlotObject>().Where(x => x.Owner == player.PlayerType);
@@ -91,7 +96,6 @@ namespace Assets.Scripts.UI
             CardObjects.Add(newCard);
             return newCard;
         }
-
 
         private TerrainObject CreateTerrain(BaseTerrain terrain, SlotObject slotObject)
         {

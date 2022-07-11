@@ -51,6 +51,6 @@ TagManager:
   - name: Card Overlay
     uniqueID: 2573719241
     locked: 0
-  - name: Card Hover
+  - name: Hover
     uniqueID: 631951549
     locked: 0
