@@ -49,7 +49,7 @@ namespace Assets.Scripts.Effects.ItemEffects
 
         protected override string Message => "Choose a slot to add Blessed Soil to";
 
-        protected override IEnumerable<BaseEvent> Effect(Item source, BoardState boardState, FieldSlot target)
+        protected override IEnumerable<BaseEvent> OnTargetChosen(Item source, BoardState boardState, FieldSlot target)
         {
             yield return new AddTerrainToSlotEvent<Item>(source, BaseTerrain.Create(TerrainManager.GetTerrain("Blessed Soil")), target);
         }

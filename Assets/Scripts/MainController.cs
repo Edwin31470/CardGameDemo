@@ -239,7 +239,7 @@ namespace Assets.Scripts
             foreach (var player in Board.BothPlayers)
             {
                 var damageTaken = Math.Max(Board.GetPlayer(player.PlayerType.Opposite()).TotalAttack - player.TotalDefence, 0);
-                EnqueueEvent(new DamagePlayerEvent(player.PlayerType, damageTaken));
+                EnqueueEvent(new DamagePlayerEvent(player, damageTaken));
             }
 
             EnqueueEvent(new NewPhaseEvent(Phase.Mana));

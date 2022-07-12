@@ -25,11 +25,11 @@ namespace Assets.Scripts.Effects.CardEffects
 
         public override IEnumerable<BaseEvent> GetEffect(ActionCard source, BoardState board)
         {
-            var playerType = board.GetSourceOwner(source).PlayerType;
+            var player = board.GetSourceOwner(source);
 
-            yield return new AddTokensEvent(playerType, TokenType.Claw, 3);
-            yield return new AddTokensEvent(playerType, TokenType.Cracked, 2);
-            yield return new AddLifePlayerEvent(playerType, 5);
+            yield return new AddTokensEvent(player, TokenType.Claw, 3);
+            yield return new AddTokensEvent(player, TokenType.Cracked, 2);
+            yield return new AddLifePlayerEvent(player, 5);
         }
     }
 

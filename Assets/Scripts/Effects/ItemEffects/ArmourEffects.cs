@@ -46,17 +46,19 @@ namespace Assets.Scripts.Effects.ItemEffects
         public override bool Conditions(Item source, BoardState boardState, BaseEvent triggeringEvent)
         {
             return triggeringEvent is DamagePlayerEvent damagePlayerEvent &&
-                damagePlayerEvent.PlayerType == boardState.GetSourceOwner(source).PlayerType &&
+                damagePlayerEvent.Source == boardState.GetSourceOwner(source) &&
                 damagePlayerEvent.Value > 10;
         }
 
         public override IEnumerable<BaseEvent> OnTrigger(Item source, BoardState boardState, BaseEvent triggeringEvent)
         {
             var damageEvent = (DamagePlayerEvent)triggeringEvent;
-            var damage = damageEvent.Value;
 
-            yield return new MessageEvent($"Spiked Frills damages {damageEvent.PlayerType.Opposite()} Player by {damage / 10}");
-            yield return new DamagePlayerEvent(damageEvent.PlayerType.Opposite(), damage / 10);
+            var otherPlayer = boardState.GetPlayer(damageEvent.Source.PlayerType);
+            var damageToDo = damageEvent.Value;
+
+            yield return new MessageEvent($"Spiked Frills damages {otherPlayer.PlayerType} Player by {damageToDo}");
+            yield return new DamagePlayerEvent(otherPlayer, damageToDo);
         }
     }
 }

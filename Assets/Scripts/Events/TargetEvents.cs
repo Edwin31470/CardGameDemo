@@ -18,7 +18,7 @@ namespace Assets.Scripts.Events
         protected SelectionType SelectionType { get; set; }
 
         public IEnumerable<TTarget> OverrideTargets { get; set; } // For use with interupt events
-        protected BoardState BoardState { get; set; } // Save the board state to be used in TriggerEffect
+        protected BoardState BoardState { get; set; } // Save the board state to be used when targeting has finished
 
         protected BaseUITargetingEvent(TSource source, TargetConditions targetConditions, int count, SelectionType selectionType) : base(source)
         {
@@ -30,11 +30,10 @@ namespace Assets.Scripts.Events
         // Begin card selection in UI
         public override IEnumerable<BaseEvent> Process(UIManager uIManager, BoardState board)
         {
-            BoardState = BoardState;
+            BoardState = board;
 
             // Get targetable UI objects
             var allowableTargets = OverrideTargets ?? board.GetMatchingTargets<TTarget>(TargetConditions);
-
 
             uIManager.BeginTargeting(allowableTargets, Count, FinishSelection, SelectionType);
 

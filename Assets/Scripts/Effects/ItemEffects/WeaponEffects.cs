@@ -18,7 +18,7 @@ namespace Assets.Scripts.Effects.ItemEffects
 
         public override IEnumerable<BaseEvent> GetEffect(Item source, BoardState board)
         {
-            var player = board.GetSourceOwner(source).PlayerType;
+            var player = board.GetSourceOwner(source);
 
             yield return new MessageEvent("Adding mana from Vital Core", 1);
             yield return new AddManaEvent(player, Colour.Red, 1);
@@ -63,13 +63,13 @@ namespace Assets.Scripts.Effects.ItemEffects
         private IEnumerable<BaseEvent> OnGameStart(Item source, BoardState board, BaseEvent triggeringEvent)
         {
             yield return new MessageEvent("Molten Gauntlets");
-            yield return new AddTokensEvent(board.GetSourceOwner(source).PlayerType, TokenType.Claw, 6);
+            yield return new AddTokensEvent(board.GetSourceOwner(source), TokenType.Claw, 6);
         }
 
         private IEnumerable<BaseEvent> OnRoundStart(Item source, BoardState board, BaseEvent triggeringEvent)
         {
             yield return new MessageEvent("Molten Gauntlets");
-            yield return new AddTokensEvent(board.GetSourceOwner(source).PlayerType, TokenType.Cracked, 2);
+            yield return new AddTokensEvent(board.GetSourceOwner(source), TokenType.Cracked, 2);
         }
     }
 }

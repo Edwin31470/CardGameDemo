@@ -1,20 +1,20 @@
 ﻿using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Events;
+using Assets.Scripts.Events.Interfaces;
 using Assets.Scripts.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Assets.Scripts.Effects.CardEffects
 {
-
     public class BirdOfParadise : BaseSourceEffect<CreatureCard>
     {
         public override int Id => 12;
 
         public override IEnumerable<BaseEvent> GetEffect(CreatureCard source, BoardState board)
         {
-            var player = board.GetSourceOwner(source).PlayerType;
+            var player = board.GetSourceOwner(source);
 
             yield return new AddManaEvent(player, Colour.Green, 1);
         }
@@ -42,12 +42,13 @@ namespace Assets.Scripts.Effects.CardEffects
 
         public override bool TryInterupt(CreatureCard source, BoardState boardState, BaseEvent triggeringEvent)
         {
-            if (triggeringEvent is not DamageCreatureEvent<CreatureCard> damageEvent)
-                return false;
+            if (triggeringEvent is IDamageEvent damageEvent && damageEvent.Target == source)
+            {
+                damageEvent.Value = 0;
+                return true;
+            }
 
-            damageEvent.Value = 0;
-
-            return true;
+            return false;
         }
     }
 
@@ -57,16 +58,20 @@ namespace Assets.Scripts.Effects.CardEffects
 
         public override IEnumerable<BaseEvent> GetEffect(CreatureCard source, BoardState board)
         {
-            var player = board.GetSourceOwner(source).PlayerType;
+            var player = board.GetSourceOwner(source);
 
             yield return new AddTokensEvent(player, TokenType.Shell, 2);
         }
     }
 
-    public class BrideOfTheForest : BaseTargetingEffect<CreatureCard>
+    public class BrideOfTheForest : CustomSingleTargetEffect<CreatureCard, CreatureCard>
     {
         public override int Id => 16;
-                
+
+        protected override SelectionType SelectionType => SelectionType.NeutralHighlight;
+
+        protected override string Message => "Charm an opponent’s creature with 8 or less defence.";
+
         protected override TargetConditions GetTargetConditions(CreatureCard source, BoardState boardState) => new()
         {
             PlayerType = boardState.GetSourceOwner(source).PlayerType.Opposite(),
@@ -74,10 +79,11 @@ namespace Assets.Scripts.Effects.CardEffects
             MaxDefence = 8
         };
 
-
-        public override IEnumerable<BaseEvent> GetEffect(CreatureCard source, BoardState board)
+        protected override IEnumerable<BaseEvent> OnTargetChosen(CreatureCard source, BoardState boardState, CreatureCard target)
         {
-            yield return new GainControlEvent<CreatureCard>(source);
+            var player = boardState.GetSourceOwner(source);
+
+            yield return new GainControlOfFieldCardEvent(player, target);
         }
     }
 
@@ -87,7 +93,7 @@ namespace Assets.Scripts.Effects.CardEffects
 
         public override IEnumerable<BaseEvent> GetEffect(CreatureCard source, BoardState board)
         {
-            var player = board.GetSourceOwner(source).PlayerType;
+            var player = board.GetSourceOwner(source);
 
             yield return new AddLifePlayerEvent(player, 5);
         }

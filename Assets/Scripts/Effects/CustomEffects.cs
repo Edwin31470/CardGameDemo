@@ -32,10 +32,10 @@ namespace Assets.Scripts.Effects
 
         public override IEnumerable<BaseEvent> GetEffect(TSource source, BoardState board)
         {
-            yield return new CustomSingleTargetEvent<TSource, TTarget>(source, GetTargetConditions(source, board), Effect, SelectionType, Message);
+            yield return new CustomSingleTargetEvent<TSource, TTarget>(source, GetTargetConditions(source, board), OnTargetChosen, SelectionType, Message);
         }
 
-        protected abstract IEnumerable<BaseEvent> Effect(TSource source, BoardState boardState, TTarget target);
+        protected abstract IEnumerable<BaseEvent> OnTargetChosen(TSource source, BoardState boardState, TTarget target);
     }
 
     // Apply an effect when the source is destroyed

@@ -44,7 +44,7 @@ namespace Assets.Scripts.Effects.CardEffects
 
                 var player = boardState.GetSourceOwner(source);
 
-                yield return new SummonCardEvent(player, cardInfo, player.PlayerType);
+                yield return new SummonCardEvent(player, cardInfo);
             }
         }
     }
@@ -65,7 +65,7 @@ namespace Assets.Scripts.Effects.CardEffects
 
         public override IEnumerable<BaseEvent> GetEffect(CreatureCard source, BoardState board)
         {
-            yield return new AddTokensEvent(board.GetSourceOwner(source).PlayerType, TokenType.Claw, 2);
+            yield return new AddTokensEvent(board.GetSourceOwner(source), TokenType.Claw, 2);
         }
     }
 
