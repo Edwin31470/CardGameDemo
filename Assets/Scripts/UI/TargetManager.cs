@@ -156,7 +156,7 @@ namespace Assets.Scripts.UI
                 var spriteRenderer = renderTarget.gameObject.AddComponent<SpriteRenderer>();
                 spriteRenderer.sprite = TargetSprite;
                 spriteRenderer.color = TargetColour;
-                spriteRenderer.sortingLayerName = "Card Hover";
+                spriteRenderer.sortingLayerName = "Hover";
                 spriteRenderer.enabled = true;
 
                 RenderedTargets.Add(renderTarget);
