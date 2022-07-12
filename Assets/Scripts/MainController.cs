@@ -20,6 +20,7 @@ namespace Assets.Scripts
         private LabelManager LabelManager { get; set; }
         private PileManager PileManager { get; set; }
         private ShowTokensManager ShowTokensManager { get; set; }
+        private HoverManager HoverManager { get; set; }
 
         // Queues and collections
         private RepeatingTimer Timer { get; set; }
@@ -33,13 +34,6 @@ namespace Assets.Scripts
 
         // Board
         private BoardState Board { get; set; }
-
-        // Static method to be used by scripts requiring Update()
-        public static MainController Get()
-        {
-            return GameObject.Find("MainController").GetComponent<MainController>();
-        }
-
 
         // Start is called before the first frame update
         void Start()
@@ -60,6 +54,7 @@ namespace Assets.Scripts
             PileManager = gameObject.AddComponent(typeof(PileManager)) as PileManager;
             ShowTokensManager = gameObject.AddComponent(typeof(ShowTokensManager)) as ShowTokensManager;
 
+            HoverManager = gameObject.AddComponent(typeof(HoverManager)) as HoverManager;
 
             // Register Buttons
             GameObject.Find("Canvas/FrontPlayer/DestroyedCount").GetComponent<Button>()
@@ -220,6 +215,8 @@ namespace Assets.Scripts
 
         private void RedrawPhase()
         {
+            //HoverManager.Activated = true;
+
             //Timer.SetTickLength(0.5f);
 
             foreach(var player in Board.BothPlayers)
@@ -237,6 +234,8 @@ namespace Assets.Scripts
 
         private void DamagePhase()
         {
+            //HoverManager.Activated = false;
+
             foreach (var player in Board.BothPlayers)
             {
                 var damageTaken = Math.Max(Board.GetPlayer(player.PlayerType.Opposite()).TotalAttack - player.TotalDefence, 0);
@@ -358,17 +357,17 @@ namespace Assets.Scripts
 
         private void ProcessBoardState()
         {
-            var allCreatureCards = Board.GetMatchingCards(new TargetConditions
+            var allCreatureCards = Board.GetMatchingTargets<CreatureCard>(new TargetConditions
             {
                 CardType = CardType.Creature,
                 Area = Area.PlayArea
-            }).OfType<CreatureCard>();
+            });
 
-            var fieldCreatureCards = Board.GetMatchingCards(new TargetConditions
+            var fieldCreatureCards = Board.GetMatchingTargets<CreatureCard>(new TargetConditions
             {
                 CardType = CardType.Creature,
                 Area = Area.Field
-            }).OfType<CreatureCard>();
+            });
 
             foreach (var creatureCard in allCreatureCards)
             {

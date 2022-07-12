@@ -7,6 +7,7 @@ using Assets.Scripts.Events;
 using UnityEngine;
 using Assets.Scripts.Bases;
 using Assets.Scripts.Extensions;
+using Assets.Scripts.Interfaces;
 
 namespace Assets.Scripts.UI
 {
@@ -23,16 +24,16 @@ namespace Assets.Scripts.UI
         private Color TargetColour { get; set; }
         private Sprite TargetSprite { get; set; }
 
-        private OnFinishTargeting<BaseSource> OnFinishTargeting { get; set; }
+        private OnFinishTargeting<ITargetable> OnFinishTargeting { get; set; }
 
         public bool IsProcessing { get; set; }
 
         public void Begin<T>(
             IEnumerable<BaseUIObject> validOptions,
             int maxTargets,
-            OnFinishTargeting<T> onFinishTargeting,
+            OnFinishTargeting<ITargetable> onFinishTargeting,
             SelectionType selectionType)
-            where T : BaseSource
+            where T : ITargetable
         {
             IsProcessing = true;
             ValidOptions = new HashSet<BaseUIObject>(validOptions);
@@ -135,7 +136,7 @@ namespace Assets.Scripts.UI
         {
             // Get Colliding Target
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, LayerMask.GetMask("Card"));
+            RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, LayerMask.GetMask("Card", "Slot", "Terrain"));
 
             // Null when not hovering
             var hoveredTarget = hit.collider?.GetComponentInParent<BaseUIObject>();

@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Bases;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
+using Assets.Scripts.Interfaces;
 using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace Assets.Scripts.Events
 {
     public abstract class BaseUITargetingEvent<TSource, TTarget> : BaseUIInteractionEvent<TSource>
         where TSource : BaseSource
-        where TTarget : BaseSource
+        where TTarget : ITargetable
     {
         protected TargetConditions TargetConditions { get; set; }
         public int Count { get; set; }
@@ -30,11 +31,15 @@ namespace Assets.Scripts.Events
         public override IEnumerable<BaseEvent> Process(UIManager uIManager, BoardState board)
         {
             BoardState = BoardState;
-            var allowableTargets = board.GetMatchingCards(TargetConditions).Cast<TTarget>();
-            uIManager.BeginTargeting<TTarget>(allowableTargets, OverrideTargets, Count, FinishSelection, SelectionType);
+
+            // Get targetable UI objects
+            var allowableTargets = OverrideTargets ?? board.GetMatchingTargets<TTarget>(TargetConditions);
+
+
+            uIManager.BeginTargeting(allowableTargets, Count, FinishSelection, SelectionType);
 
             // Events added to queue when targeting is complete
-            return Enumerable.Empty<BaseEvent>();
+            yield break;
         }
 
         // Return new events
@@ -202,7 +207,7 @@ namespace Assets.Scripts.Events
     // Keep track of source card
     public abstract class BaseCustomTargetEvent<TSource, TTarget> : BaseUITargetingEvent<TSource, TTarget>
         where TSource : BaseSource
-        where TTarget : BaseCard
+        where TTarget : ITargetable
     {
         public override string EventTitle => Message;
         private string Message { get; }
@@ -234,7 +239,7 @@ namespace Assets.Scripts.Events
 
     public class CustomSingleTargetEvent<TSource, TTarget> : BaseCustomTargetEvent<TSource, TTarget>
         where TSource : BaseSource
-        where TTarget : BaseCard
+        where TTarget : ITargetable
     {
         private SelectSingleTarget<TSource, TTarget> CustomFinishSelection { get; }
 

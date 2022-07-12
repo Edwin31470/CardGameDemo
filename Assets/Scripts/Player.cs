@@ -29,7 +29,7 @@ namespace Assets.Scripts
         public FieldSlot[] Field { get; set; } = Enumerable.Range(1, 5).Select(x => new FieldSlot()).ToArray();
         public List<BaseCard> Destroyed { get; set; } = new();
         public List<BaseCard> Eliminated { get; set; } = new();
-        public IEnumerable<FieldCard> FieldCards => Field.Select(x => x.Card).Where(x => x != null);
+        public IEnumerable<FieldCard> FieldCards => Field.Select(x => x.Occupier).Where(x => x != null);
         public IEnumerable<CreatureCard> FieldCreatures => FieldCards.OfType<CreatureCard>();
 
         public List<TokenType> Tokens { get; set; } = new();
@@ -56,7 +56,7 @@ namespace Assets.Scripts
         // Getting
         public FieldSlot GetRandomEmptySlot()
         {
-            return Field.Where(x => x.Card == null)
+            return Field.Where(x => x.Occupier == null)
                 .OrderBy(x => Guid.NewGuid())
                 .FirstOrDefault();
         }
@@ -88,11 +88,6 @@ namespace Assets.Scripts
                 return Items
                     .Contains(item);
             }
-            if (source is FieldSlot slot)
-            {
-                return Field
-                    .Contains(slot);
-            }
 
             return false;
         }
@@ -109,7 +104,7 @@ namespace Assets.Scripts
 
         public bool IsOnField(BaseCard card)
         {
-            return Field.Select(x => x.Card).Contains(card);
+            return Field.Select(x => x.Occupier).Contains(card);
         }
 
         public bool IsInDestroyed(BaseCard card)
@@ -140,9 +135,9 @@ namespace Assets.Scripts
         }
 
         // Should never try to add to an occupied slot
-        public IEnumerable<BaseEvent> AddToField(FieldCard card, int index)
+        public void AddToField(FieldCard card, int index)
         {
-            return Field[index].Add(card);
+            Field[index].AddCard(card);
         }
 
         public void AddToDestroyed(BaseCard card)
@@ -171,9 +166,9 @@ namespace Assets.Scripts
             Hand.Remove(card);
         }
 
-        public IEnumerable<BaseEvent> RemoveFromField(FieldCard card)
+        public void RemoveFromField(FieldCard card)
         {
-            return Field.Single(x => x.Card == card).Remove();
+            Field.Single(x => x.Occupier == card).RemoveCard();
         }
 
         public void RemoveFromDeck(BaseCard card)

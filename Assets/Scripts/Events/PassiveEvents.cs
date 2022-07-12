@@ -56,7 +56,7 @@ namespace Assets.Scripts.Events
 
         public override void Process(BoardState board)
         {
-            var cards = board.GetMatchingCards(TargetConditions).Cast<CreatureCard>();
+            var cards = board.GetMatchingTargets<CreatureCard>(TargetConditions);
             Action.Invoke((T)Source, board, cards);
         }
     }

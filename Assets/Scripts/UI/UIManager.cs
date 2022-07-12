@@ -8,17 +8,18 @@ using System.Threading.Tasks;
 using Assets.Scripts.Events;
 using UnityEngine;
 using Assets.Scripts.Bases;
+using Assets.Scripts.Terrains;
+using Assets.Scripts.Interfaces;
 
 namespace Assets.Scripts.UI
 {
+    // Manages the interaction between the game logic and the UI
     public class UIManager : MonoBehaviour
     {
-        public bool IsProcessing => SelectionManager.IsProcessing || DragAndDropManager.IsProcessing;
-
         private static CardObject CardObject { get; set; }
-        private TargetManager SelectionManager { get; set; }
+        private static TerrainObject TerrainObject { get; set; }
+        private TargetManager TargetManager { get; set; }
         private DragAndDropManager DragAndDropManager { get; set; }
-        private Action<IEnumerable<BaseEvent>> EnqueueEvents { get; set; }
 
         // Locations on screen
         private static Vector2 FrontDeckOrigin { get; set; }
@@ -30,19 +31,27 @@ namespace Assets.Scripts.UI
         private SpriteRenderer FrontTurnLight { get; set; }
         private SpriteRenderer BackTurnLight { get; set; }
 
+
         // Keep track of cards and slots
-        private HashSet<CardObject> CardObjects { get; set; }
-        private List<SlotObject> FieldSlotObjects { get; set; }
-        private HashSet<SlotObject> ManaSlotObjects { get; set; }
+        private HashSet<CardObject> CardObjects { get; set; } = new();
+        private List<SlotObject> FieldSlotObjects { get; set; } = new();
+        private HashSet<SlotObject> ManaSlotObjects { get; set; } = new();
+        private HashSet<TerrainObject> TerrainObjects { get; set; } = new();
         private IEnumerable<SlotObject> SlotObjects => FieldSlotObjects.Concat(ManaSlotObjects);
+
+        // MainController method to add events to the queue
+        private Action<IEnumerable<BaseEvent>> EnqueueEvents { get; set; }
+
+        public bool IsProcessing => TargetManager.IsProcessing || DragAndDropManager.IsProcessing;
 
         public void Start()
         {
             // Load Resources
             CardObject = Resources.Load<CardObject>("Prefabs/CardObject");
+            TerrainObject = Resources.Load<TerrainObject>("Prefabs/TerrainObject");
 
             // Setup Managers
-            SelectionManager = gameObject.AddComponent(typeof(TargetManager)) as TargetManager;
+            TargetManager = gameObject.AddComponent(typeof(TargetManager)) as TargetManager;
             DragAndDropManager = gameObject.AddComponent(typeof(DragAndDropManager)) as DragAndDropManager;
 
             // Get Locations
@@ -60,11 +69,7 @@ namespace Assets.Scripts.UI
         {
             EnqueueEvents = enqueueEvents;
 
-            // Initialize collections
-            CardObjects = new HashSet<CardObject>();
-            FieldSlotObjects = new List<SlotObject>();
-            ManaSlotObjects = new HashSet<SlotObject>();
-
+            // Find and register slot objects - TODO: Generate and place the slot objects here instead
             foreach (var player in board.BothPlayers)
             {
                 var slotObjects = FindObjectsOfType<SlotObject>().Where(x => x.Owner == player.PlayerType);
@@ -74,7 +79,7 @@ namespace Assets.Scripts.UI
 
                 foreach (var slotObject in fieldSlotObjects)
                 {
-                    slotObject.SourceReference = player.Field[slotObject.Index];
+                    slotObject.SlotReference = player.Field[slotObject.Index];
                 }
 
                 FieldSlotObjects.AddRange(fieldSlotObjects);
@@ -90,6 +95,15 @@ namespace Assets.Scripts.UI
 
             CardObjects.Add(newCard);
             return newCard;
+        }
+
+        private TerrainObject CreateTerrain(BaseTerrain terrain, SlotObject slotObject)
+        {
+            var terrainObject = Instantiate(TerrainObject, slotObject.transform.position, Quaternion.identity);
+            terrainObject.Initialize(terrain);
+
+            TerrainObjects.Add(terrainObject);
+            return terrainObject;
         }
 
         private IEnumerable<SlotObject> GetSlotObjects(PlayerType playerType, IEnumerable<FieldSlot> fieldSlots)
@@ -109,24 +123,33 @@ namespace Assets.Scripts.UI
 
         private IEnumerable<CardObject> GetCardObjects(IEnumerable<BaseCard> cardReferences)
         {
-            return GetObjects(cardReferences).Cast<CardObject>();
+            return GetObjects<BaseCard>(cardReferences).Cast<CardObject>();
         }
 
-        private IEnumerable<BaseUIObject> GetObjects<T>(IEnumerable<T> sourceReferences) where T : BaseSource
+        private IEnumerable<BaseUIObject> GetObjects<T>(IEnumerable<T> sourceReferences) where T : ITargetable
         {
             IEnumerable<BaseUIObject> sourceObjects;
 
             if (typeof(BaseCard).IsAssignableFrom(typeof(T))) {
                 sourceObjects = CardObjects;
             }
-            else if (typeof(FieldSlot).IsAssignableFrom(typeof(FieldSlot))) {
+            else if (typeof(FieldSlot).IsAssignableFrom(typeof(T))) {
                 sourceObjects = FieldSlotObjects;
             }
+            else if (typeof(BaseTerrain).IsAssignableFrom(typeof(T))) {
+                sourceObjects = TerrainObjects;
+            }
             else { 
-                throw new ArgumentOutOfRangeException(nameof(T), $"Type must be {typeof(BaseCard)} or {typeof(FieldSlot)}");
+                throw new ArgumentOutOfRangeException(nameof(T), $"Type must sub class of {typeof(BaseCard)}, {typeof(FieldSlot)} or {typeof(BaseTerrain)}");
             }
 
-            return sourceObjects.Where(x => sourceReferences.Contains(x.SourceReference));
+            foreach (var sourceObject in sourceObjects)
+            {
+                if (sourceReferences.Any(x => (ITargetable)x == sourceObject.SourceReference))
+                {
+                    yield return sourceObject;
+                }
+            }
         }
 
         private IEnumerable<Vector2> GetHandPoints(PlayerType player, int numberOfPoints)
@@ -185,18 +208,14 @@ namespace Assets.Scripts.UI
 
         public void BeginTargeting<T>(
             IEnumerable<T> allowableTargets,
-            IEnumerable<T> overrideTargets,
             int count,
             OnTargetsChosen<T> onTargetsChosen,
             SelectionType selectionType) 
-            where T : BaseSource
+            where T : ITargetable
         {
-            // TODO: null or empty?
-            var validTargets = overrideTargets != null ?
-                GetObjects(overrideTargets) :
-                GetObjects(allowableTargets);
+            var validTargets = GetObjects(allowableTargets);
 
-            SelectionManager.Begin<T>(
+            TargetManager.Begin<T>(
                 validTargets,
                 count,
                 FinishTargeting,
@@ -213,8 +232,6 @@ namespace Assets.Scripts.UI
             }
         }
 
-
-
         public void BeginDragAndDrop(
             IEnumerable<BaseCard> draggableCards,
             IEnumerable<FieldSlot> availableFieldSlots,
@@ -226,15 +243,34 @@ namespace Assets.Scripts.UI
             DragAndDropManager.Begin(
                 GetCardObjects(draggableCards),
                 GetSlotObjects(playingPlayer, availableFieldSlots),
-                onDrop,
-                onSacrifice,
-                onPass);
+                DroppedInSlot,
+                EnterPressed);
+
+            // Translates objects to sources and invokes event delegate
+            bool DroppedInSlot(CardObject cardObject, SlotObject slotObject)
+            {
+                if (slotObject.SlotType == SlotType.Mana)
+                {
+                    EnqueueEvents(onSacrifice.Invoke(cardObject.CardReference));
+                }
+                else
+                {
+                    var droppedEvents = onDrop.Invoke(cardObject.CardReference, slotObject.SlotReference).ToList();
+                    EnqueueEvents(droppedEvents);
+
+                    // Check if playing the card has been succesful - better way to do this?
+                    if (!droppedEvents.Any(x => x is NewTurnEvent))
+                        return false;
+                }
+
+                return true;
+            }
+
+            void EnterPressed()
+            {
+                EnqueueEvents(onPass.Invoke());
+            }
         }
-
-        //public IEnumerable<BaseEvent> FinishDragAndDrop(IEnumerable<MonoBehaviour> selectedCards)
-        //{
-
-        //}
 
         public void CreateInHand(PlayerType playerType, BaseCard card)
         {
@@ -253,6 +289,12 @@ namespace Assets.Scripts.UI
             var cardObject = GetCardObject(card);
             var slotObject = GetFieldSlotObject(slot);
             cardObject.SetTargetPosition(slotObject.transform.position);
+        }
+
+        public void CreateTerrainInSlot(BaseTerrain terrain, FieldSlot slot)
+        {
+            var slotObject = GetFieldSlotObject(slot);
+            var terrainObject = CreateTerrain(terrain, slotObject);
         }
 
         public void UpdateHand(PlayerType playerType, IEnumerable<BaseCard> handCards)
@@ -291,12 +333,6 @@ namespace Assets.Scripts.UI
             cardObject.DestroyWhenInPosition = true;
 
             CardObjects.Remove(cardObject);
-        }
-
-        public void UpdateSlotGlow(FieldSlot slot, EffectType type)
-        {
-            var slotObject = GetFieldSlotObject(slot);
-            slotObject.SetGlow(type);
         }
     }
 }

@@ -1,8 +1,12 @@
 ﻿using Assets.Scripts.Bases;
+using Assets.Scripts.Cards;
+using Assets.Scripts.Effects.TerrainEffects;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Events;
 using Assets.Scripts.Events.Interfaces;
 using Assets.Scripts.Items;
+using Assets.Scripts.Managers;
+using Assets.Scripts.Terrains;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,10 +40,25 @@ namespace Assets.Scripts.Effects.ItemEffects
         }
     }
 
-    //public class BlessedWord : CustomTargetSlotEffect<Item>
-    //{
-    //    public override int Id => 6;
-    //}
+
+    public class BlessedWord : CustomSingleTargetEffect<Item, FieldSlot>
+    {
+        public override int Id => 6;
+
+        protected override SelectionType SelectionType => SelectionType.PositiveTarget;
+
+        protected override string Message => "Choose a slot to add Blessed Soil to";
+
+        protected override IEnumerable<BaseEvent> Effect(Item source, BoardState boardState, FieldSlot target)
+        {
+            yield return new AddTerrainToSlotEvent<Item>(source, BaseTerrain.Create(TerrainManager.GetTerrain("Blessed Soil")), target);
+        }
+
+        protected override TargetConditions GetTargetConditions(Item source, BoardState board)
+        {
+            return new();
+        }
+    }
 
     public class GoodSoup : CustomTriggerEffect<Item>
     {

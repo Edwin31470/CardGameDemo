@@ -5,7 +5,9 @@ using Assets.Scripts.Bases;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Extensions;
+using Assets.Scripts.Interfaces;
 using Assets.Scripts.Items;
+using Assets.Scripts.Terrains;
 
 namespace Assets.Scripts
 {
@@ -38,12 +40,39 @@ namespace Assets.Scripts
             }
         }
 
-        public IEnumerable<BaseCard> GetMatchingCards(TargetConditions targetConditions)
+        public IEnumerable<T> GetMatchingTargets<T>(TargetConditions targetConditions) where T : ITargetable
         {
             var players = GetMatchingPlayers(targetConditions.PlayerType);
-            var areaCards = GetMatchingAreas(players, targetConditions.Area);
 
-            return areaCards.Where(targetConditions.IsMatch);
+            if (typeof(BaseCard).IsAssignableFrom(typeof(T)))
+            {
+                return GetMatchingAreas(players, targetConditions.Area).Where(targetConditions.IsMatch).Cast<T>();
+            } 
+            else if (typeof(FieldSlot).IsAssignableFrom(typeof(T))) 
+            {
+                return players.SelectMany(x => x.Field).Cast<T>();
+            }
+            else if (typeof(BaseTerrain).IsAssignableFrom(typeof(T))) 
+            {
+                return players.SelectMany(x => x.Field).Where(x => x.Terrain != null).Cast<T>();
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(T), $"Must be sub class of {nameof(BaseCard)}, {nameof(FieldSlot)} or {nameof(BaseTerrain)}");
+        }
+
+        public IEnumerable<FieldSlot> GetPlayerSlots(PlayerType playerType)
+        {
+            var slots = new List<FieldSlot>();
+
+            foreach(var player in BothPlayers)
+            {
+                if (playerType.HasFlag(player.PlayerType))
+                {
+                    slots.AddRange(player.Field);
+                }
+            }
+
+            return slots;
         }
 
         private IEnumerable<Player> GetMatchingPlayers(PlayerType playerType)
@@ -108,6 +137,17 @@ namespace Assets.Scripts
             }
 
             throw new ArgumentOutOfRangeException(nameof(source), "Source must be owned by a player");
+        }
+
+        public Player GetSourceOwner(FieldSlot fieldSlot)
+        {
+            foreach (var player in BothPlayers)
+            {
+                if (player.Field.Contains(fieldSlot))
+                    return player;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(fieldSlot), "Source must be owned by a player");
         }
     }
 }
