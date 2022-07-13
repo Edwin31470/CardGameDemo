@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2832634455401173710}
   - component: {fileID: 4688359629681034081}
-  m_Layer: 9
+  m_Layer: 7
   m_Name: Glow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -95,7 +95,7 @@ GameObject:
   - component: {fileID: 8130621655427948159}
   - component: {fileID: 4056755777830683137}
   - component: {fileID: 3737522376586971225}
-  m_Layer: 9
+  m_Layer: 7
   m_Name: TerrainObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7201026156931263497}
   - component: {fileID: 2661511778539688181}
   - component: {fileID: 7488639887223871965}
-  m_Layer: 6
+  m_Layer: 11
   m_Name: Name
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -90,7 +90,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8853086039802782717}
   - component: {fileID: 7229534051215430785}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: LargeCardHover
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -176,7 +176,7 @@ GameObject:
   - component: {fileID: 3443968711217072478}
   - component: {fileID: 9146283642373852054}
   - component: {fileID: 787358350122354565}
-  m_Layer: 6
+  m_Layer: 11
   m_Name: EffectText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -257,7 +257,7 @@ GameObject:
   - component: {fileID: 9156899972854786426}
   - component: {fileID: 3812494862826388626}
   - component: {fileID: 3996590078454584045}
-  m_Layer: 6
+  m_Layer: 11
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -359,7 +359,7 @@ GameObject:
   - component: {fileID: 2796195989686380803}
   - component: {fileID: 571672539474019796}
   - component: {fileID: 396949362428753429}
-  m_Layer: 6
+  m_Layer: 11
   m_Name: Types
   m_TagString: Untagged
   m_Icon: {fileID: 0}

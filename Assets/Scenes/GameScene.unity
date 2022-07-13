@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 4580977}
   - component: {fileID: 4580976}
   - component: {fileID: 4580975}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: ManaSlot
   m_TagString: Slot
   m_Icon: {fileID: 0}
@@ -229,7 +229,7 @@ GameObject:
   m_Component:
   - component: {fileID: 27443160}
   - component: {fileID: 27443161}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Glow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -424,7 +424,7 @@ GameObject:
   m_Component:
   - component: {fileID: 133482700}
   - component: {fileID: 133482701}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Glow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -547,7 +547,7 @@ GameObject:
   - component: {fileID: 184831344}
   - component: {fileID: 184831343}
   - component: {fileID: 184831345}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Slot
   m_TagString: Slot
   m_Icon: {fileID: 0}
@@ -644,7 +644,7 @@ GameObject:
   - component: {fileID: 296723628}
   - component: {fileID: 296723627}
   - component: {fileID: 296723629}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Slot
   m_TagString: Slot
   m_Icon: {fileID: 0}
@@ -1446,7 +1446,7 @@ GameObject:
   m_Component:
   - component: {fileID: 603361712}
   - component: {fileID: 603361713}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Glow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1530,7 +1530,7 @@ GameObject:
   m_Component:
   - component: {fileID: 623719746}
   - component: {fileID: 623719747}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Glow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1616,7 +1616,7 @@ GameObject:
   - component: {fileID: 630265231}
   - component: {fileID: 630265230}
   - component: {fileID: 630265229}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Slot
   m_TagString: Slot
   m_Icon: {fileID: 0}
@@ -1711,7 +1711,7 @@ GameObject:
   m_Component:
   - component: {fileID: 734665863}
   - component: {fileID: 734665864}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Glow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2166,7 +2166,7 @@ GameObject:
   - component: {fileID: 887013298}
   - component: {fileID: 887013297}
   - component: {fileID: 887013299}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Slot
   m_TagString: Slot
   m_Icon: {fileID: 0}
@@ -2261,7 +2261,7 @@ GameObject:
   m_Component:
   - component: {fileID: 901977032}
   - component: {fileID: 901977033}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Glow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2506,7 +2506,7 @@ GameObject:
   m_Component:
   - component: {fileID: 966747720}
   - component: {fileID: 966747721}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Glow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2709,7 +2709,7 @@ GameObject:
   - component: {fileID: 1130654625}
   - component: {fileID: 1130654624}
   - component: {fileID: 1130654626}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Slot
   m_TagString: Slot
   m_Icon: {fileID: 0}
@@ -2806,7 +2806,7 @@ GameObject:
   - component: {fileID: 1161295052}
   - component: {fileID: 1161295051}
   - component: {fileID: 1161295050}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Slot
   m_TagString: Slot
   m_Icon: {fileID: 0}
@@ -2903,7 +2903,7 @@ GameObject:
   - component: {fileID: 1267726504}
   - component: {fileID: 1267726503}
   - component: {fileID: 1267726505}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: ManaSlot
   m_TagString: Slot
   m_Icon: {fileID: 0}
@@ -3124,7 +3124,7 @@ GameObject:
   - component: {fileID: 1421727171}
   - component: {fileID: 1421727170}
   - component: {fileID: 1421727169}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Slot
   m_TagString: Slot
   m_Icon: {fileID: 0}
@@ -3219,7 +3219,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1424400164}
   - component: {fileID: 1424400165}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Glow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3927,7 +3927,7 @@ GameObject:
   - component: {fileID: 1589820464}
   - component: {fileID: 1589820466}
   - component: {fileID: 1589820465}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4025,7 +4025,7 @@ GameObject:
   - component: {fileID: 1613575030}
   - component: {fileID: 1613575029}
   - component: {fileID: 1613575028}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Slot
   m_TagString: Slot
   m_Icon: {fileID: 0}
@@ -4470,7 +4470,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1939367759}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: CurrentEventBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4506,7 +4506,7 @@ GameObject:
   - component: {fileID: 1947008333}
   - component: {fileID: 1947008332}
   - component: {fileID: 1947008334}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Slot
   m_TagString: Slot
   m_Icon: {fileID: 0}
@@ -4601,7 +4601,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1958401465}
   - component: {fileID: 1958401466}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Glow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4834,7 +4834,7 @@ GameObject:
   - component: {fileID: 1998480616}
   - component: {fileID: 1998480615}
   - component: {fileID: 1998480614}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Slot
   m_TagString: Slot
   m_Icon: {fileID: 0}
@@ -4929,7 +4929,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2055325242}
   - component: {fileID: 2055325243}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Glow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5173,7 +5173,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2085072272}
   - component: {fileID: 2085072273}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
