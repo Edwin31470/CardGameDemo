@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace Assets.Scripts.Events
 {
     // Events that trigger before anything else and end the game
-    public abstract class BaseGameEndEvent : BaseGameplayEvent
+    public abstract class BaseGameEndEvent : BaseEvent
     {
-        public virtual new string Process() => null;
+        public abstract string Process();
     }
 
     public class GameEndEvent : BaseGameEndEvent

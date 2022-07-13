@@ -33,9 +33,9 @@ namespace Assets.Scripts.Effects.ItemEffects
     {
         public override int Id => 1;
 
-        public override bool TryInterupt(Item source, BoardState boardState, BaseEvent triggeringEvent)
+        public override bool TryInterupt(Item source, BoardState boardState, IInteruptableEvent interuptableEvent)
         {
-            if (triggeringEvent is not IDamageEvent damageEvent)
+            if (interuptableEvent is not IDamageEvent damageEvent)
                 return false;
 
             if(boardState.GetSourceOwner(damageEvent.BaseSource) == boardState.GetSourceOwner(source))
@@ -60,13 +60,13 @@ namespace Assets.Scripts.Effects.ItemEffects
             yield return new CustomOnRoundStartEvent<Item>(source, OnRoundStart);
         }
 
-        private IEnumerable<BaseEvent> OnGameStart(Item source, BoardState board, BaseEvent triggeringEvent)
+        private IEnumerable<BaseEvent> OnGameStart(Item source, BoardState board, ITriggeringEvent triggeringEvent)
         {
             yield return new MessageEvent("Molten Gauntlets");
             yield return new AddTokensEvent(board.GetSourceOwner(source), TokenType.Claw, 6);
         }
 
-        private IEnumerable<BaseEvent> OnRoundStart(Item source, BoardState board, BaseEvent triggeringEvent)
+        private IEnumerable<BaseEvent> OnRoundStart(Item source, BoardState board, ITriggeringEvent triggeringEvent)
         {
             yield return new MessageEvent("Molten Gauntlets");
             yield return new AddTokensEvent(board.GetSourceOwner(source), TokenType.Cracked, 2);

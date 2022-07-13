@@ -26,9 +26,9 @@ namespace Assets.Scripts
         private RepeatingTimer Timer { get; set; }
         private EventQueue<BaseUIEvent> UIQueue { get; set; } = new();
         private EventQueue<BaseGameEndEvent> GameEndQueue { get; set; } = new();
-        private EventQueue<BaseGameplayEvent> EventQueue { get; set; } = new();
+        private EventQueue<IOnceEvent> EventQueue { get; set; } = new();
         private EventQueue<BasePhaseEvent> PhaseQueue { get; set; } = new();
-        private List<BasePassiveEvent> PassiveEvents { get; set; } = new();
+        private List<IPassiveEvent> PassiveEvents { get; set; } = new();
         private List<IInteruptEvent> InteruptEvents { get; set; } = new();
         private List<ITriggerEvent> TriggerEvents { get; set; } = new();
 
@@ -127,17 +127,17 @@ namespace Assets.Scripts
             {
                 TriggerEvents.Add(triggerEvent);
             }
+            else if (baseEvent is IPassiveEvent passiveEvent)
+            {
+                PassiveEvents.Add(passiveEvent);
+            }
             else if (baseEvent is BasePhaseEvent phaseEvent)
             {
                 PhaseQueue.Enqueue(phaseEvent);
             }
-            else if (baseEvent is BaseGameplayEvent gameplayEvent)
+            else if (baseEvent is IOnceEvent onceEvent)
             {
-                EventQueue.Enqueue(gameplayEvent);
-            }
-            else if (baseEvent is BasePassiveEvent passiveEvent)
-            {
-                PassiveEvents.Add(passiveEvent);
+                EventQueue.Enqueue(onceEvent);
             }
             else
             {
@@ -299,7 +299,6 @@ namespace Assets.Scripts
 
             ProcessBoardState();
             var baseEvent = ProcessNextEvent();
-            ProcessTriggerEvents(baseEvent);
 
             LabelManager.SetCurrentEvent(baseEvent.EventTitle);
 
@@ -333,15 +332,16 @@ namespace Assets.Scripts
             }
 
             // Process the gameplay queue until empty
-            var gameplayEvent = EventQueue.Dequeue();
-            if (gameplayEvent != null)
+            var onceEvent = EventQueue.Dequeue();
+            if (onceEvent != null)
             {
-                ProcessInteruptEvents(gameplayEvent);
+                ProcessInteruptEvents(onceEvent);
 
-                var newEvents = ProcessGameplayEvent(gameplayEvent);
-                EnqueueEvents(newEvents);
+                ProcessOnceEvent(onceEvent);
 
-                return gameplayEvent;
+                ProcessTriggerEvents(onceEvent);
+
+                return (BaseEvent)onceEvent;
             }
 
             // Process end of phase events
@@ -377,6 +377,9 @@ namespace Assets.Scripts
 
             foreach (var passiveEvent in PassiveEvents.ToList())
             {
+                if (passiveEvent.IsPrevented)
+                    continue;
+
                 if (!passiveEvent.IsValid(Board))
                 {
                     PassiveEvents.Remove(passiveEvent);
@@ -393,42 +396,85 @@ namespace Assets.Scripts
                     EnqueueEvent(new DestroyByDamageEvent(creatureCard));
                 }
             }
+
+            // Check if Interupt events, Trigger events or Passive events should be interupted or prevented
+            foreach (var interuptEvent in InteruptEvents.ToArray())
+            {
+                interuptEvent.IsPrevented = false;
+                ProcessInteruptEvents(interuptEvent);
+            }
+
+            foreach (var passiveEvent in PassiveEvents)
+            {
+                passiveEvent.IsPrevented = false;
+                ProcessInteruptEvents(passiveEvent);
+            }
+
+            foreach (var triggerEvent in TriggerEvents)
+            {
+                triggerEvent.IsPrevented = false;
+                ProcessInteruptEvents(triggerEvent);
+            }
         }
 
-        private void ProcessInteruptEvents(BaseGameplayEvent baseEvent)
+        private void ProcessInteruptEvents(IInteruptableEvent interuptingEvent)
         {
             foreach (var interuptEvent in InteruptEvents.ToList())
             {
-                if (!interuptEvent.IsValid(Board))
-                {
-                    InteruptEvents.Remove(interuptEvent);
+                if (interuptingEvent == interuptEvent)
                     continue;
-                }
 
-                var interupted = interuptEvent.Process(Board, baseEvent);
-
-                if (interupted && interuptEvent.TriggerOnce)
-                    InteruptEvents.Remove(interuptEvent);
+                TryInterupt(interuptingEvent, interuptEvent);
             }
         }
 
-        private IEnumerable<BaseEvent> ProcessGameplayEvent(BaseGameplayEvent gameplayEvent)
+        private bool TryInterupt(IInteruptableEvent interuptedEvent, IInteruptEvent interuptingEvent)
         {
-            switch (gameplayEvent)
+            if (!interuptingEvent.IsValid(Board)) {
+                InteruptEvents.Remove(interuptingEvent);
+                return false;
+            }
+
+            if (interuptingEvent.IsPrevented)
+                return false;
+
+            var wasInterupted = interuptingEvent.Process(Board, interuptedEvent);
+
+            if (wasInterupted && interuptingEvent.TriggerOnce)
+                InteruptEvents.Remove(interuptingEvent);
+
+            return wasInterupted;
+        }
+
+        private void ProcessOnceEvent(IOnceEvent onceEvent)
+        {
+            if (onceEvent.IsPrevented)
+                return;
+
+            IEnumerable<BaseEvent> newEvents;
+
+            switch (onceEvent)
             {
                 case IUIInteractionEvent uIInteractionEvent:
-                    return uIInteractionEvent.Process(UIManager, Board);
-                case BaseBoardEvent boardEvent:
-                    return boardEvent.Process(Board);
+                    newEvents = uIInteractionEvent.Process(UIManager, Board);
+                    break;
+                case IGameplayEvent boardEvent:
+                    newEvents = boardEvent.Process(Board);
+                    break;
                 default:
-                    return gameplayEvent.Process();
+                    throw new ArgumentOutOfRangeException(nameof(onceEvent), $"Event must be either {typeof(IUIInteractionEvent)} or {typeof(IGameplayEvent)}");
             }
+
+            EnqueueEvents(newEvents);
         }
 
-        private void ProcessTriggerEvents(BaseEvent triggeringEvent)
+        private void ProcessTriggerEvents(ITriggeringEvent triggeringEvent)
         {
             foreach(var triggerEvent in TriggerEvents.ToList())
             {
+                if (triggerEvent.IsPrevented)
+                    return;
+
                 if (triggerEvent.Conditions(Board, triggeringEvent))
                 {
                     if (triggerEvent.TriggerOnce || !triggerEvent.IsValid(Board)) {

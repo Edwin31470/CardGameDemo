@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Assets.Scripts.Events.Interfaces
 {
-    internal interface IUIInteractionEvent
+    internal interface IUIInteractionEvent : IOnceEvent
     {
         IEnumerable<BaseEvent> Process(UIManager uIManager, BoardState boardState);
     }

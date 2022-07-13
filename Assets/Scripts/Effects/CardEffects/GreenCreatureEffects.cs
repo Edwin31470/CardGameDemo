@@ -20,19 +20,34 @@ namespace Assets.Scripts.Effects.CardEffects
         }
     }
 
-    public class ChromaticBasilisk : BaseTargetingEffect<CreatureCard>
+    public class ChromaticBasilisk : CustomSingleTargetEffect<CreatureCard, CreatureCard>
     {
         public override int Id => 13;
+
+        protected override SelectionType SelectionType => SelectionType.NeutralTarget;
+
+        protected override string Message => "Choose a human to have no effect";
 
         protected override TargetConditions GetTargetConditions(CreatureCard source, BoardState boardState) => new()
         {
             CardType = CardType.Creature,
-            SubType = SubType.Human
+            //SubType = SubType.Human
         };
 
-        public override IEnumerable<BaseEvent> GetEffect(CreatureCard source, BoardState board)
+        protected override IEnumerable<BaseEvent> OnTargetChosen(CreatureCard source, BoardState boardState, CreatureCard target)
         {
-            yield return new DamageTargetsEvent<CreatureCard>(source, new(), 1, 0);
+            yield return new CustomInteruptEvent<CreatureCard>(source, StopEffectEvents, false);
+
+            bool StopEffectEvents(CreatureCard source, BoardState board, IInteruptableEvent interuptedEvent)
+            {
+                if (interuptedEvent is ISourceEvent sourceEvent && sourceEvent.BaseSource == target)
+                {
+                    sourceEvent.IsPrevented = true;
+                    return true;
+                }
+
+                return false;
+            }
         }
     }
 
@@ -40,11 +55,11 @@ namespace Assets.Scripts.Effects.CardEffects
     {
         public override int Id => 14;
 
-        public override bool TryInterupt(CreatureCard source, BoardState boardState, BaseEvent triggeringEvent)
+        public override bool TryInterupt(CreatureCard source, BoardState boardState, IInteruptableEvent interuptableEvent)
         {
-            if (triggeringEvent is IDamageEvent damageEvent && damageEvent.Target == source)
+            if (interuptableEvent is IDamageEvent damageEvent && damageEvent.Target == source)
             {
-                damageEvent.Value = 0;
+                damageEvent.IsPrevented = true;
                 return true;
             }
 

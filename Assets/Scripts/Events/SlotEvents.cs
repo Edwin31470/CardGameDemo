@@ -13,10 +13,6 @@ using Assets.Scripts.UI;
 
 namespace Assets.Scripts.Events
 {
-    public class BaseSlotEffectEvent : BaseGameplayEvent
-    {
-    }
-
     public abstract class BaseUITargetSlotsEvent<T> : BaseUIInteractionEvent<T> where T : BaseSource
     {
         public int Count { get; set; }
@@ -53,7 +49,7 @@ namespace Assets.Scripts.Events
         }
     }
 
-    public class AddTerrainToSlotEvent<T> : BaseSourceEvent<T> where T : BaseSource
+    public class AddTerrainToSlotEvent<T> : BaseGameplayEvent<T> where T : BaseSource
     {
         private BaseTerrain Terrain { get; set; }
         private FieldSlot Slot { get; set; }
@@ -86,18 +82,14 @@ namespace Assets.Scripts.Events
             OnTrigger = onTrigger;
         }
 
-        public override bool Conditions(BoardState boardState, BaseEvent triggeringEvent)
+        public override bool Conditions(BoardState boardState, ITriggeringEvent triggeringEvent)
         {
-            if (triggeringEvent is IEnterFieldEvent enterFieldEvent &&
+            return triggeringEvent is IEnterFieldEvent enterFieldEvent &&
                 enterFieldEvent.Slot.Terrain == Source &&
-                enterFieldEvent.BaseSource is T) {
-                return true;
-            }
-
-            return false;
+                enterFieldEvent.BaseSource is T;
         }
 
-        public override IEnumerable<BaseEvent> Process(BoardState boardState, BaseEvent triggeringEvent)
+        public override IEnumerable<BaseEvent> Process(BoardState boardState, ITriggeringEvent triggeringEvent)
         {
             var enterFieldEvent = (IEnterFieldEvent)triggeringEvent;
             var enteringCard = (T)enterFieldEvent.BaseSource;

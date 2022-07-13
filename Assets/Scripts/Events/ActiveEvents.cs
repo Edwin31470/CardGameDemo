@@ -6,17 +6,10 @@ using System.Collections.Generic;
 
 namespace Assets.Scripts.Events
 {
-    // Events that trigger once
 
-    public abstract class BaseActiveEvent<T> : BaseSourceEvent<T> where T : BaseSource
-    {
-        public BaseActiveEvent(T source) : base(source)
-        {
-        }
-    }
 
     // Source is where the damage/etc. is coming from, target is what is being damaged/etc.
-    public abstract class BaseStatEvent<T> : BaseActiveEvent<T>, IStatEvent where T : BaseSource
+    public abstract class BaseStatEvent<T> : BaseGameplayEvent<T>, IStatEvent where T : BaseSource
     {
         public CreatureCard Target { get; set; }
 
@@ -62,22 +55,6 @@ namespace Assets.Scripts.Events
     {
         public StrengthenCreatureEvent(T source, CreatureCard target, int value) : base(source, target, value, target.BaseAttack.Add)
         {
-        }
-    }
-
-    // TODO: not working (is it needed)
-    public class CustomActiveEvent<T> : BaseActiveEvent<T> where T : BaseCard
-    {
-        public Func<IEnumerable<BaseEvent>> Func { get; set; }
-
-        public CustomActiveEvent(T source, Func<IEnumerable<BaseEvent>> func) : base(source)
-        {
-            Func = func;
-        }
-
-        public override IEnumerable<BaseEvent> Process(BoardState board)
-        {
-            return Func.Invoke();
         }
     }
 }

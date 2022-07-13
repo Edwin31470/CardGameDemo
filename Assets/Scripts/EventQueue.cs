@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts
 {
-    public class EventQueue<T> where T : BaseEvent
+    public class EventQueue<T> where T : class
     {
         private Queue<T> Queue { get; set; }
         public bool IsLocked { get; set; }

@@ -11,7 +11,7 @@ namespace Assets.Scripts.Events
 {
     // Any event that may move cards from or to areas (hand, field, deck, destroyed, eliminated)
     // Usually returns a UI event
-    public abstract class BaseAreaEvent<T> : BaseSourceEvent<T> where T : BaseSource
+    public abstract class BaseAreaEvent<T> : BaseGameplayEvent<T> where T : BaseSource
     {
         protected BaseAreaEvent(T source) : base(source)
         {

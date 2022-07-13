@@ -14,33 +14,20 @@ namespace Assets.Scripts.Events
         public virtual float Delay => 0;
     }
 
+    // An event that causes something to change in the UI (Creating a card, moving a card etc.)
     public abstract class BaseUIEvent : BaseEvent
     {
         public abstract void Process(UIManager uIManager);
     }
 
-    // Gameplay events are events that go in to the normal queue
-    public abstract class BaseGameplayEvent : BaseEvent
-    {
-        public virtual IEnumerable<BaseEvent> Process()
-        {
-            throw new MethodAccessException($"{nameof(BaseGameplayEvent.Process)} should not be being called. Called by {GetType()}");
-        }
-    }
-
-    // A board event is something that affects the board state (card stats, card ownership, player stats) - most things
-    public abstract class BaseBoardEvent : BaseGameplayEvent
-    {
-        public virtual IEnumerable<BaseEvent> Process(BoardState board)
-        {
-            throw new MethodAccessException($"{nameof(BaseBoardEvent.Process)} should not be being called. Called by {GetType()}");
-        }
-    }
-
-    public abstract class BaseSourceEvent<T> : BaseBoardEvent, ISourceEvent where T : BaseSource
+    // An event that has a logical source (A card, item, player etc.)
+    // Should not be directly inherited from
+    public abstract class BaseSourceEvent<T> : BaseEvent, ISourceEvent where T : BaseSource
     {
         public T Source { get; set; }
         public BaseSource BaseSource => Source;
+
+        public bool IsPrevented { get; set; }
 
         protected BaseSourceEvent(T source)
         {
@@ -57,17 +44,55 @@ namespace Assets.Scripts.Events
         }
     }
 
-    // Like a board event but requires UI interaction
-    public abstract class BaseUIInteractionEvent<T> : BaseSourceEvent<T>, IUIInteractionEvent where T: BaseSource
+    // Events that happen once (i.e. not Passive or Trigger events) - most events
+    public abstract class BaseOnceEvent<T> : BaseSourceEvent<T>, IOnceEvent where T : BaseSource
+    {
+        public BaseOnceEvent(T source) : base(source)
+        {
+        }
+    }
+
+    // Processes with a board and returns events
+    public abstract class BaseGameplayEvent<T> : BaseOnceEvent<T>, IGameplayEvent where T : BaseSource
+    {
+        protected BaseGameplayEvent(T source) : base(source)
+        {
+        }
+
+        public abstract IEnumerable<BaseEvent> Process(BoardState board);
+    }
+
+    // Like a gameplay event but requires UI interaction and thus the UIManager
+    public abstract class BaseUIInteractionEvent<T> : BaseOnceEvent<T>, IUIInteractionEvent where T: BaseSource
     {
         protected BaseUIInteractionEvent(T source) : base(source)
         {
         }
 
-        public virtual IEnumerable<BaseEvent> Process(UIManager uIManager, BoardState board)
+        public abstract IEnumerable<BaseEvent> Process(UIManager uIManager, BoardState board);
+    }
+
+    // Processes with the board and an event and potentially modifies the event before that event is processed
+    public abstract class BaseInteruptEvent<T> : BaseSourceEvent<T>, IInteruptEvent where T : BaseSource
+    {
+        public bool TriggerOnce { get; set; }
+
+        protected BaseInteruptEvent(T source, bool triggerOnce) : base(source)
         {
-            throw new MethodAccessException($"{nameof(BaseUIInteractionEvent<T>.Process)} should not be being called. Called by {GetType()}");
+            TriggerOnce = triggerOnce;
         }
+
+        public abstract bool Process(BoardState boardState, IInteruptableEvent baseEvent);
+    }
+
+    // Processes with a board before any event is processed
+    public abstract class BasePassiveEvent<T> : BaseSourceEvent<T>, IPassiveEvent where T : BaseSource
+    {
+        protected BasePassiveEvent(T source) : base(source)
+        {
+        }
+
+        public abstract void Process(BoardState board);
     }
 
     public abstract class BasePhaseEvent : BaseEvent
@@ -76,7 +101,7 @@ namespace Assets.Scripts.Events
         public abstract void Process(MainController controller, BoardState boardState);
     }
 
-    public class MessageEvent : BaseGameplayEvent
+    public class MessageEvent : BaseUIEvent
     {
         public override string EventTitle => Message;
         public override float Delay => Time;
@@ -90,9 +115,8 @@ namespace Assets.Scripts.Events
             Time = time;
         }
 
-        public override IEnumerable<BaseEvent> Process()
+        public override void Process(UIManager uIManager)
         {
-            yield break;
         }
     }
 }

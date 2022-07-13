@@ -11,6 +11,6 @@ namespace Assets.Scripts.Events.Interfaces
     {
         bool TriggerOnce { get; set; }
 
-        bool Process(BoardState boardState, BaseEvent baseEvent);
+        bool Process(BoardState boardState, IInteruptableEvent baseEvent);
     }
 }

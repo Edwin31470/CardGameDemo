@@ -15,7 +15,7 @@ namespace Assets.Scripts.Effects.CardEffects
 
         public override IEnumerable<BaseEvent> GetEffect(PermanentCard source, BoardState board)
         {
-            yield return new CustomPassiveAllCreaturesEvent<PermanentCard>(
+            yield return new CustomPassiveAllEvent<PermanentCard, CreatureCard>(
                 source,
                 new TargetConditions()
                 {

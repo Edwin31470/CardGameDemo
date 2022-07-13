@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Bases;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
+using Assets.Scripts.Events.Interfaces;
 using Assets.Scripts.Interfaces;
 using Assets.Scripts.UI;
 using System;
@@ -9,11 +10,11 @@ using System.Linq;
 
 namespace Assets.Scripts.Events
 {
-    public abstract class BaseUITargetingEvent<TSource, TTarget> : BaseUIInteractionEvent<TSource>
+    public abstract class BaseUITargetingEvent<TSource, TTarget> : BaseUIInteractionEvent<TSource>, IInteruptableEvent
         where TSource : BaseSource
         where TTarget : ITargetable
     {
-        protected TargetConditions TargetConditions { get; set; }
+        public TargetConditions TargetConditions { get; set; }
         public int Count { get; set; }
         protected SelectionType SelectionType { get; set; }
 

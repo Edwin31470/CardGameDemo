@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Assets.Scripts.Events
 {
-    public class BaseTokenEvent : BasePlayerEvent
+    public abstract class BaseTokenEvent : BasePlayerEvent
     {
         public BaseTokenEvent(Player player) : base(player)
         {

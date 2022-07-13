@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Assets.Scripts.Effects.CardEffects
 {
-    public class RoilingElemental : CustomPassiveAllCreaturesEffect<CreatureCard>
+    public class RoilingElemental : CustomPassiveAllEffect<CreatureCard, CreatureCard>
     {
         public override int Id => 0;
         protected override TargetConditions GetTargetConditions(CreatureCard source, BoardState boardState) => new()

@@ -2,6 +2,7 @@
 using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Events;
+using Assets.Scripts.Events.Interfaces;
 using Assets.Scripts.Interfaces;
 using System.Collections.Generic;
 
@@ -11,14 +12,16 @@ namespace Assets.Scripts.Effects
     // Usually inherits from BaseCardEffect or a SimpleEffect
 
     // A passive effect with a source and many valid targets
-    public abstract class CustomPassiveAllCreaturesEffect<T> : BaseTargetingEffect<T> where T : BaseCard
+    public abstract class CustomPassiveAllEffect<TSource, TTarget> : BaseTargetingEffect<TSource>
+        where TSource : BaseSource
+        where TTarget : ITargetable
     {
-        public override IEnumerable<BaseEvent> GetEffect(T source, BoardState board)
+        public override IEnumerable<BaseEvent> GetEffect(TSource source, BoardState board)
         {
-            yield return new CustomPassiveAllCreaturesEvent<T>(source, GetTargetConditions(source, board), Effect);
+            yield return new CustomPassiveAllEvent<TSource, TTarget>(source, GetTargetConditions(source, board), Effect);
         }
 
-        protected abstract void Effect(T source, BoardState boardState, IEnumerable<CreatureCard> targets);
+        protected abstract void Effect(TSource source, BoardState boardState, IEnumerable<TTarget> targets);
     }
 
     // Apply an effect to a single target
@@ -70,7 +73,7 @@ namespace Assets.Scripts.Effects
             yield return new CustomInteruptEvent<T>(source, TryInterupt, TriggerOnce);
         }
 
-        public abstract bool TryInterupt(T source, BoardState boardState, BaseEvent triggeringEvent);
+        public abstract bool TryInterupt(T source, BoardState boardState, IInteruptableEvent interuptedEvent);
     }
 
     // Apply one effect on one trigger definition (default more than once)
@@ -83,11 +86,11 @@ namespace Assets.Scripts.Effects
             yield return new CustomTriggerEvent<T>(source, Conditions, OnTrigger, TriggerOnce);
         }
 
-        public abstract bool Conditions(T source, BoardState boardState, BaseEvent triggeringEvent);
-        public abstract IEnumerable<BaseEvent> OnTrigger(T source, BoardState boardState, BaseEvent triggeringEvent);
+        public abstract bool Conditions(T source, BoardState boardState, ITriggeringEvent triggeringEvent);
+        public abstract IEnumerable<BaseEvent> OnTrigger(T source, BoardState boardState, ITriggeringEvent triggeringEvent);
     }
 
-    // Apply one effect at the start of the game
+    // Adds events returned by OnGameStart to the queues at the start of every round
     public abstract class CustomOnGameStartEffect<T> : BaseSourceEffect<T> where T : BaseSource
     {
         public override IEnumerable<BaseEvent> GetEffect(T source, BoardState board)
@@ -95,10 +98,10 @@ namespace Assets.Scripts.Effects
             yield return new CustomOnGameStartEvent<T>(source, OnGameStart);
         }
 
-        public abstract IEnumerable<BaseEvent> OnGameStart(T source, BoardState boardState, BaseEvent triggeringEvent);
+        public abstract IEnumerable<BaseEvent> OnGameStart(T source, BoardState boardState, ITriggeringEvent triggeringEvent);
     }
 
-    // Apply one effect on every round start
+    // Adds events returned by OnRoundStart to the queues at the start of every round
     public abstract class CustomOnRoundStartEffect<T> : BaseSourceEffect<T> where T : BaseSource
     {
         public override IEnumerable<BaseEvent> GetEffect(T source, BoardState board)
@@ -106,6 +109,6 @@ namespace Assets.Scripts.Effects
             yield return new CustomOnRoundStartEvent<T>(source, OnRoundStart);
         }
 
-        public abstract IEnumerable<BaseEvent> OnRoundStart(T source, BoardState boardState, BaseEvent triggeringEvent);
+        public abstract IEnumerable<BaseEvent> OnRoundStart(T source, BoardState boardState, ITriggeringEvent roundStartEvent);
     }
 }

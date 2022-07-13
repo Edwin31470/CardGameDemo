@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.Events.Interfaces
 {
-    public interface IStatEvent : ISourceEvent
+    public interface IStatEvent : IOnceEvent, IGameplayEvent
     {
         CreatureCard Target { get; set; }
         int Value { get; set; }

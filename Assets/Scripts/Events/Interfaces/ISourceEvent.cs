@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.Events.Interfaces
 {
-    public interface ISourceEvent
+    public interface ISourceEvent : IInteruptableEvent, ITriggeringEvent
     {
         BaseSource BaseSource { get; }
         bool IsValid(BoardState board);

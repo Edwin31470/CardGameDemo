@@ -10,7 +10,7 @@ namespace Assets.Scripts.Events.Interfaces
     {
         bool TriggerOnce { get; set; }
 
-        bool Conditions(BoardState boardState, BaseEvent triggeringEvent);
-        IEnumerable<BaseEvent> Process(BoardState boardState, BaseEvent triggeringEvent);
+        bool Conditions(BoardState boardState, ITriggeringEvent triggeringEvent);
+        IEnumerable<BaseEvent> Process(BoardState boardState, ITriggeringEvent triggeringEvent);
     }
 }

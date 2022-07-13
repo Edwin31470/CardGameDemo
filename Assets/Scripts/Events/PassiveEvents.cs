@@ -1,35 +1,21 @@
-﻿using Assets.Scripts.Cards;
+﻿using Assets.Scripts.Bases;
+using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
+using Assets.Scripts.Events.Interfaces;
+using Assets.Scripts.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Assets.Scripts.Events
 {
-    public abstract class BasePassiveEvent : BaseEvent
-    {
-        public BaseCard Source { get; set; }
-
-        protected BasePassiveEvent(BaseCard source)
-        {
-            Source = source;
-        }
-
-        public abstract void Process(BoardState board);
-
-        // Passive events are only valid when their source is on the field
-        public bool IsValid(BoardState board)
-        {
-            return board.GetSourceOwner(Source).IsOnField(Source);
-        }
-    }
-
     // For events without targets
-    public class CustomPassiveEvent : BasePassiveEvent
+    // Not used
+    public class CustomPassiveEvent<T> : BasePassiveEvent<T>, IPassiveEvent where T : BaseSource
     {
-        private Action Action { get; set; } // Owner - Targets
+        private Action Action { get; set; }
 
-        public CustomPassiveEvent(BaseCard owner, Action action) : base(owner)
+        public CustomPassiveEvent(T source, Action action) : base(source)
         {
             Action = action;
         }
@@ -41,23 +27,23 @@ namespace Assets.Scripts.Events
     }
 
     // For events with creature targets
-    public class CustomPassiveAllCreaturesEvent<T> : BasePassiveEvent where T : BaseCard
+    public class CustomPassiveAllEvent<TSource, TTarget> : BasePassiveEvent<TSource>
+        where TSource : BaseSource
+        where TTarget : ITargetable
     {
         private TargetConditions TargetConditions { get; set; } // Filter out targets not matching these conditions
-        private Action<T, BoardState, IEnumerable<CreatureCard>> Action { get; set; } // Targets
+        private Action<TSource, BoardState, IEnumerable<TTarget>> Action { get; set; }
 
-        public CustomPassiveAllCreaturesEvent(T source, TargetConditions targetConditions, Action<T, BoardState, IEnumerable<CreatureCard>> action)
-            : base(source)
+        public CustomPassiveAllEvent(TSource source, TargetConditions targetConditions, Action<TSource, BoardState, IEnumerable<TTarget>> action) : base(source)
         {
-            targetConditions.CardType = CardType.Creature;
             TargetConditions = targetConditions;
             Action = action;
         }
 
         public override void Process(BoardState board)
         {
-            var cards = board.GetMatchingTargets<CreatureCard>(TargetConditions);
-            Action.Invoke((T)Source, board, cards);
+            var cards = board.GetMatchingTargets<TTarget>(TargetConditions);
+            Action.Invoke(Source, board, cards);
         }
     }
 }

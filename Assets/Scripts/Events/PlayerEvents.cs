@@ -5,9 +5,9 @@ using Assets.Scripts.Cards;
 
 namespace Assets.Scripts.Events
 {
-    // Events that affect the player's stats. The player being affected is the source of the event.
+    // Events that happen to a player. The player being affected is the source of the event.
 
-    public class BasePlayerEvent : BaseSourceEvent<Player>
+    public abstract class BasePlayerEvent : BaseGameplayEvent<Player>
     {
         public BasePlayerEvent(Player player) : base(player)
         {

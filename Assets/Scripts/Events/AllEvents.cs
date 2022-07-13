@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
+using Assets.Scripts.Events.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.Events
 {
-    // Active events that apply the same effect to all valid targets
+    // All events apply the same effect to all valid targets once
 
-    public abstract class BaseAllEvent<T> : BaseActiveEvent<T> where T : BaseCard
+    public abstract class BaseAllEvent<T> : BaseGameplayEvent<T> where T : BaseCard
     {
-        protected TargetConditions TargetConditions { get; set; }
+        public TargetConditions TargetConditions { get; set; }
 
         protected BaseAllEvent(T source, TargetConditions targetConditions) : base(source)
         {
