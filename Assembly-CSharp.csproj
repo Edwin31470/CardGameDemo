@@ -72,13 +72,15 @@
     <Compile Include="Assets\Scripts\UI\DragAndDropManager.cs" />
     <Compile Include="Assets\Scripts\Enums\StatType.cs" />
     <Compile Include="Assets\Scripts\FieldSlot.cs" />
+    <Compile Include="Assets\Scripts\Events\Interfaces\ITriggeringEvent.cs" />
     <Compile Include="Assets\Scripts\UI\UIManager.cs" />
     <Compile Include="Assets\Scripts\Cards\CardInfo.cs" />
     <Compile Include="Assets\Scripts\Items\ItemInfo.cs" />
+    <Compile Include="Assets\Scripts\Events\Interfaces\IPassiveEvent.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
     <Compile Include="Assets\Scripts\Items\Item.cs" />
     <Compile Include="Assets\Scripts\ManagePlayersController.cs" />
-    <Compile Include="Assets\Scripts\UI\BaseObject.cs" />
+    <Compile Include="Assets\Scripts\UI\BaseUIObject.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\GreenActionEffects.cs" />
     <Compile Include="Assets\Scripts\Enums\TokenType.cs" />
     <Compile Include="Assets\Scripts\Events\Interfaces\ISourceEvent.cs" />
@@ -95,7 +97,7 @@
     <Compile Include="Assets\Scripts\Extensions\UnityExtensions.cs" />
     <Compile Include="Assets\Scripts\Managers\ShowTokensManager.cs" />
     <Compile Include="Assets\Scripts\Enums\PileType.cs" />
-    <Compile Include="Assets\Scripts\Managers\PileManager.cs" />
+    <Compile Include="Assets\Scripts\UI\PileManager.cs" />
     <Compile Include="Assets\Scripts\IO\BaseData.cs" />
     <Compile Include="Assets\Scripts\Events\PassiveEvents.cs" />
     <Compile Include="Assets\Scripts\Managers\PlayerManager.cs" />
@@ -127,6 +129,7 @@
     <Compile Include="Assets\Scripts\Enums\ItemType.cs" />
     <Compile Include="Assets\Scripts\Enums\TerrainType.cs" />
     <Compile Include="Assets\Scripts\UI\SlotObject.cs" />
+    <Compile Include="Assets\Scripts\UI\OverlayObject.cs" />
     <Compile Include="Assets\Scripts\Enums\Area.cs" />
     <Compile Include="Assets\Scripts\Events\Interfaces\IStatEvents.cs" />
     <Compile Include="Assets\Scripts\UI\CardObject.cs" />
@@ -172,8 +175,7 @@
     <Compile Include="Assets\Scripts\MainController.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
     <Compile Include="Assets\Scripts\Managers\ItemManager.cs" />
-    <Compile Include="Assets\Scripts\Events\Interfaces\IPassiveEvent.cs" />
-    <Compile Include="Assets\Scripts\Events\Interfaces\ITriggeringEvent.cs" />
+    <Compile Include="Assets\Scripts\Managers\BaseUIObjectManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

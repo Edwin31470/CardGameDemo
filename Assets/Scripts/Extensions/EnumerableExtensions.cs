@@ -8,7 +8,7 @@ namespace Assets.Scripts.Extensions
 {
     public static class EnumerableExtensions
     {
-        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> enumerable) where T : class
+        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> enumerable)
         {
             return enumerable.OrderBy(x => Guid.NewGuid());
         }

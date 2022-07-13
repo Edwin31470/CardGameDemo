@@ -5,10 +5,11 @@ using System.Linq;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Events;
 using UnityEngine;
+using Assets.Scripts.Managers;
 
 namespace Assets.Scripts.UI
 {
-    class DragAndDropManager : MonoBehaviour
+    class DragAndDropManager : BaseUIObjectManager
     {
         private HashSet<CardObject> AvailableCards { get; set; }
         private HashSet<SlotObject> AvailableSlots { get; set; }
@@ -79,14 +80,16 @@ namespace Assets.Scripts.UI
         // Replace with OnMouseDrag() ?
         private void Update()
         {
-            if (!IsProcessing)
+            if (!IsProcessing || IsOverlayUp)
                 return;
 
             // On click
             if (Input.GetMouseButtonDown(0))
             {
+                var cardMask = IsOverlayUp ? LayerMask.GetMask("Card Overlay") : LayerMask.GetMask("Card");
+
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, LayerMask.GetMask("Card"));
+                RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, cardMask);
 
                 if (hit.collider != null)
                 {

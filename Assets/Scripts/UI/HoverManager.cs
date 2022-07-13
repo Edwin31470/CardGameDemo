@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Enums;
+using Assets.Scripts.Managers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,19 +12,19 @@ namespace Assets.Scripts.UI
 {
     // Responsible for displaying information about things hovered over
 
-    public class HoverManager : MonoBehaviour
+    public class HoverManager : BaseUIObjectManager
     {
         private GameObject _largeCardHover;
         private float _largeCardWidth;
         private float _largeCardHeight;
 
-        private GameObject LargeCardHover
+        private GameObject LargeCardHoverPrefab
         {
             get => _largeCardHover;
             set
             {
                 _largeCardHover = value;
-                var spriteRender = LargeCardHover.GetComponent<SpriteRenderer>();
+                var spriteRender = value.GetComponent<SpriteRenderer>();
 
                 // 1.25f because the sprite is scaled by 1.5 - may change later
                 _largeCardWidth = spriteRender.size.x * 1.25f;
@@ -40,7 +41,7 @@ namespace Assets.Scripts.UI
 
         private void Start()
         {
-            LargeCardHover = Resources.Load<GameObject>("Prefabs/LargeCardHover");
+            LargeCardHoverPrefab = Resources.Load<GameObject>("Prefabs/LargeCardHover");
 
             LargeCardSprites = new()
             {
@@ -79,7 +80,7 @@ namespace Assets.Scripts.UI
 
         private void CreateCardHover(CardObject hoveredCard)
         {
-            var hoverObject = Instantiate(LargeCardHover, GetHoverCoordiantes(hoveredCard), Quaternion.identity);
+            var hoverObject = Instantiate(LargeCardHoverPrefab, GetHoverCoordiantes(hoveredCard), Quaternion.identity);
 
             // set sprite colour
             hoverObject.GetComponent<SpriteRenderer>().sprite = LargeCardSprites[hoveredCard.CardReference.Colour];
@@ -96,7 +97,7 @@ namespace Assets.Scripts.UI
         // TODO: create a seperate graphic for terrain rather than using the red card graphic
         private void CreateTerrainHover(TerrainObject hoveredTerrain, bool hoveringOnCard)
         {
-            var hoverObject = Instantiate(LargeCardHover, GetHoverCoordiantes(hoveredTerrain, hoveringOnCard), Quaternion.identity);
+            var hoverObject = Instantiate(LargeCardHoverPrefab, GetHoverCoordiantes(hoveredTerrain, hoveringOnCard), Quaternion.identity);
 
             // set sprite colour
             hoverObject.GetComponent<SpriteRenderer>().sprite = LargeCardSprites[Colour.Red]; 
@@ -148,10 +149,13 @@ namespace Assets.Scripts.UI
 
         private (CardObject, TerrainObject) GetHoveredObjects()
         {
+            var cardMask = IsOverlayUp ? LayerMask.GetMask("Card Overlay") : LayerMask.GetMask("Card");
+            var terrainMask = IsOverlayUp ? LayerMask.GetMask() : LayerMask.GetMask("Terrain");
+
             // Get Colliding Targets
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit2D cardHit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, LayerMask.GetMask("Card"));
-            RaycastHit2D terrainHit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, LayerMask.GetMask("Terrain"));
+            RaycastHit2D cardHit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, cardMask);
+            RaycastHit2D terrainHit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, terrainMask);
 
             // Null when not hovering
             var hoveredCard = cardHit.collider?.GetComponentInParent<BaseUIObject>() as CardObject;

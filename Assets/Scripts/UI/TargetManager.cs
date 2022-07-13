@@ -8,10 +8,11 @@ using UnityEngine;
 using Assets.Scripts.Bases;
 using Assets.Scripts.Extensions;
 using Assets.Scripts.Interfaces;
+using Assets.Scripts.Managers;
 
 namespace Assets.Scripts.UI
 {
-    public class TargetManager : MonoBehaviour
+    public class TargetManager : BaseUIObjectManager
     {
         // Card Selection
         private HashSet<BaseUIObject> SelectedOptions { get; set; } = new();
@@ -134,9 +135,11 @@ namespace Assets.Scripts.UI
         // Gets the UI object the mouse is on and returns it if it is a valid target, otherwise returns null
         private BaseUIObject GetHoveredTarget()
         {
+            var cardMask = IsOverlayUp ? LayerMask.GetMask("Card Overlay") : LayerMask.GetMask("Card", "Slot", "Terrain");
+
             // Get Colliding Target
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, LayerMask.GetMask("Card", "Slot", "Terrain"));
+            RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, cardMask);
 
             // Null when not hovering
             var hoveredTarget = hit.collider?.GetComponentInParent<BaseUIObject>();
@@ -153,19 +156,28 @@ namespace Assets.Scripts.UI
 
             foreach (var renderTarget in addRenderTargets)
             {
-                var spriteRenderer = renderTarget.gameObject.AddComponent<SpriteRenderer>();
+                // Create new sprite object
+                var hoverSprite = GameObject.Instantiate(new GameObject());
+                hoverSprite.name = "HoverSprite";
+
+                // Set the sprite
+                var spriteRenderer = hoverSprite.gameObject.AddComponent<SpriteRenderer>();
                 spriteRenderer.sprite = TargetSprite;
                 spriteRenderer.color = TargetColour;
                 spriteRenderer.sortingLayerName = "Hover";
                 spriteRenderer.enabled = true;
+
+                // Attach sprite object to the target
+                hoverSprite.transform.SetParent(renderTarget.transform, false);
 
                 RenderedTargets.Add(renderTarget);
             }
 
             foreach (var renderTarget in removeRenderTargets)
             {
-                var spriteRenderer = renderTarget.gameObject.GetComponent<SpriteRenderer>();
-                Destroy(spriteRenderer);
+                // Destroy the sprite object
+                var hoverSprite = renderTarget.transform.Find("HoverSprite").gameObject;
+                Destroy(hoverSprite);
 
                 RenderedTargets.Remove(renderTarget);
             }

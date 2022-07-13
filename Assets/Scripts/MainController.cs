@@ -10,6 +10,7 @@ using Assets.Scripts.Extensions;
 using UnityEngine;
 using UnityEngine.UI;
 using Assets.Scripts.Events.Interfaces;
+using Assets.Scripts.Bases;
 
 namespace Assets.Scripts
 {
@@ -18,9 +19,6 @@ namespace Assets.Scripts
         // Managers
         private UIManager UIManager { get; set; }
         private LabelManager LabelManager { get; set; }
-        private PileManager PileManager { get; set; }
-        private ShowTokensManager ShowTokensManager { get; set; }
-        private HoverManager HoverManager { get; set; }
 
         // Queues and collections
         private RepeatingTimer Timer { get; set; }
@@ -50,11 +48,6 @@ namespace Assets.Scripts
 
             LabelManager = gameObject.AddComponent(typeof(LabelManager)) as LabelManager;
             LabelManager.Initialize(frontPlayer, backPlayer);
-
-            PileManager = gameObject.AddComponent(typeof(PileManager)) as PileManager;
-            ShowTokensManager = gameObject.AddComponent(typeof(ShowTokensManager)) as ShowTokensManager;
-
-            HoverManager = gameObject.AddComponent(typeof(HoverManager)) as HoverManager;
 
             // Register Buttons
             GameObject.Find("Canvas/FrontPlayer/DestroyedCount").GetComponent<Button>()
@@ -90,14 +83,26 @@ namespace Assets.Scripts
         {
             var player = Board.GetPlayer(playerType);
 
-            var cards = new List<BaseCard>();
+            IEnumerable<BaseSource> sources;
 
-            if (area == Area.Deck)
-                cards = player.Deck.OrderBy(x => x.Colour).ThenBy(x => x.Cost).ThenBy(x => x.Type).ThenBy(x => x.Name).ToList();
-            else if (area == Area.Destroyed)
-                cards = player.Destroyed;
+            switch (area)
+            {
+                case Area.Deck:
+                    sources = player.Deck
+                    .OrderBy(x => x.Colour)
+                    .ThenBy(x => x.Cost)
+                    .ThenBy(x => x.Type)
+                    .ThenBy(x => x.Name)
+                    .ToList();
+                    break;
+                case Area.Destroyed:
+                    sources = player.Destroyed;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(area), $"Must be {Area.Deck} or {Area.Destroyed}");
+            }
 
-            PileManager.ShowPile(cards);
+            UIManager.ShowPile(sources);
         }
 
         public void ShowTokens(StatType statType, PlayerType playerType)
@@ -106,7 +111,7 @@ namespace Assets.Scripts
 
             var tokens = player.GetTokens(statType);
 
-            ShowTokensManager.ShowTokens(tokens);
+            //UIManager.ShowTokens(tokens);
         }
 
         public void EnqueueEvent(BaseEvent baseEvent)

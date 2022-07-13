@@ -10,22 +10,29 @@ using UnityEngine;
 using Assets.Scripts.Bases;
 using Assets.Scripts.Terrains;
 using Assets.Scripts.Interfaces;
+using Assets.Scripts.Managers;
 
 namespace Assets.Scripts.UI
 {
     // Manages the interaction between the game logic and the UI
     public class UIManager : MonoBehaviour
     {
-        private static CardObject CardObject { get; set; }
-        private static TerrainObject TerrainObject { get; set; }
+        private static CardObject CardObjectPrefab { get; set; }
+        private static TerrainObject TerrainObjectPrefab { get; set; }
         private TargetManager TargetManager { get; set; }
         private DragAndDropManager DragAndDropManager { get; set; }
+        private PileManager PileManager { get; set; }
+        private ShowTokensManager ShowTokensManager { get; set; }
+        private HoverManager HoverManager { get; set; }
 
         // Locations on screen
         private static Vector2 FrontDeckOrigin { get; set; }
         private static Vector2 BackDeckOrigin { get; set; }
+        private Vector2 GetDeckOrigin(PlayerType playerType) => playerType == PlayerType.Front ? FrontDeckOrigin : BackDeckOrigin;
+
         private static Vector2 FrontDestroyLocation { get; set; }
         private static Vector2 BackDestroyLocation { get; set; }
+        private Vector2 GetDestroyedOrigin(PlayerType playerType) => playerType == PlayerType.Front ? FrontDestroyLocation : BackDestroyLocation;
 
         // Turn Light Sprites
         private SpriteRenderer FrontTurnLight { get; set; }
@@ -47,12 +54,23 @@ namespace Assets.Scripts.UI
         public void Start()
         {
             // Load Resources
-            CardObject = Resources.Load<CardObject>("Prefabs/CardObject");
-            TerrainObject = Resources.Load<TerrainObject>("Prefabs/TerrainObject");
+            CardObjectPrefab = Resources.Load<CardObject>("Prefabs/CardObject");
+            TerrainObjectPrefab = Resources.Load<TerrainObject>("Prefabs/TerrainObject");
 
             // Setup Managers
             TargetManager = gameObject.AddComponent(typeof(TargetManager)) as TargetManager;
+            TargetManager.Initialize(() => PileManager.IsShowing);
+
             DragAndDropManager = gameObject.AddComponent(typeof(DragAndDropManager)) as DragAndDropManager;
+            DragAndDropManager.Initialize(() => PileManager.IsShowing);
+
+            HoverManager = gameObject.AddComponent(typeof(HoverManager)) as HoverManager;
+            HoverManager.Initialize(() => PileManager.IsShowing);
+
+            PileManager = gameObject.AddComponent(typeof(PileManager)) as PileManager;
+
+            ShowTokensManager = gameObject.AddComponent(typeof(ShowTokensManager)) as ShowTokensManager;
+
 
             // Get Locations
             FrontDeckOrigin = GameObject.Find("FrontPlayer/DeckOrigin").transform.position;
@@ -63,6 +81,19 @@ namespace Assets.Scripts.UI
             // Get Turn Light Sprites
             FrontTurnLight = GameObject.Find("FrontPlayer/ActiveTurnLight").GetComponent<SpriteRenderer>();
             BackTurnLight = GameObject.Find("BackPlayer/ActiveTurnLight").GetComponent<SpriteRenderer>();
+        }
+
+        private Vector2 GetPileOrigin(Area area, PlayerType playerType)
+        {
+            switch (area)
+            {
+                case Area.Deck:
+                    return GetDeckOrigin(playerType);
+                case Area.Destroyed:
+                    return GetDestroyedOrigin(playerType);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(area), $"Must be {nameof(Area.Deck)} or {nameof(Area.Destroyed)}");
+            }
         }
 
         public void Initialize(BoardState board, Action<IEnumerable<BaseEvent>> enqueueEvents)
@@ -89,7 +120,7 @@ namespace Assets.Scripts.UI
 
         private CardObject CreateCard(PlayerType playerType, BaseCard card)
         {
-            var newCard = Instantiate(CardObject, playerType == PlayerType.Front ? FrontDeckOrigin : BackDeckOrigin, Quaternion.identity);
+            var newCard = Instantiate(CardObjectPrefab, GetDeckOrigin(playerType), Quaternion.identity);
             newCard.Initialize(card);
             newCard.SetSortingLayer("Card");
 
@@ -99,7 +130,7 @@ namespace Assets.Scripts.UI
 
         private TerrainObject CreateTerrain(BaseTerrain terrain, SlotObject slotObject)
         {
-            var terrainObject = Instantiate(TerrainObject, slotObject.transform.position, Quaternion.identity);
+            var terrainObject = Instantiate(TerrainObjectPrefab, slotObject.transform.position, Quaternion.identity);
             terrainObject.Initialize(terrain);
 
             TerrainObjects.Add(terrainObject);
@@ -123,7 +154,7 @@ namespace Assets.Scripts.UI
 
         private IEnumerable<CardObject> GetCardObjects(IEnumerable<BaseCard> cardReferences)
         {
-            return GetObjects<BaseCard>(cardReferences).Cast<CardObject>();
+            return GetObjects(cardReferences).Cast<CardObject>();
         }
 
         private IEnumerable<BaseUIObject> GetObjects<T>(IEnumerable<T> sourceReferences) where T : ITargetable
@@ -195,7 +226,6 @@ namespace Assets.Scripts.UI
                     points.Add(new Vector2(x, y));
                 }
             }
-
 
             return points;
         }
@@ -319,20 +349,24 @@ namespace Assets.Scripts.UI
             switch (area)
             {
                 case Area.Deck:
-                    location = playerType == PlayerType.Front ? FrontDeckOrigin : BackDeckOrigin;
+                    location = GetDeckOrigin(playerType);
                     break;
                 case Area.Destroyed:
-                    location = playerType == PlayerType.Front ? FrontDestroyLocation : BackDestroyLocation;
+                    location = GetDestroyedOrigin(playerType);
                     break;
                 default:
                     location = cardObject.transform.position;
                     break;
             }
 
-            cardObject.SetTargetPosition(location);
-            cardObject.DestroyWhenInPosition = true;
+            cardObject.SetTargetPosition(location, true);
 
             CardObjects.Remove(cardObject);
+        }
+
+        public void ShowPile(IEnumerable<BaseSource> sources)
+        {
+            PileManager.ShowPile(sources);
         }
     }
 }
