@@ -16,7 +16,7 @@ namespace Assets.Scripts.Effects.ItemEffects
     {
         public override int Id => 3;
 
-        public override bool TryInterupt(Item source, BoardState boardState, IInteruptableEvent interuptableEvent)
+        protected override bool TryInterupt(Item source, BoardState boardState, IInteruptableEvent interuptableEvent)
         {
             if (interuptableEvent is not IDamageEvent damageEvent)
                 return false;
@@ -43,14 +43,14 @@ namespace Assets.Scripts.Effects.ItemEffects
     {
         public override int Id => 4;
 
-        public override bool Conditions(Item source, BoardState boardState, ITriggeringEvent triggeringEvent)
+        protected override bool Conditions(Item source, BoardState boardState, ITriggeringEvent triggeringEvent)
         {
             return triggeringEvent is DamagePlayerEvent damagePlayerEvent &&
                 damagePlayerEvent.Source == boardState.GetSourceOwner(source) &&
                 damagePlayerEvent.Value > 10;
         }
 
-        public override IEnumerable<BaseEvent> OnTrigger(Item source, BoardState boardState, ITriggeringEvent triggeringEvent)
+        protected override IEnumerable<BaseEvent> OnTrigger(Item source, BoardState boardState, ITriggeringEvent triggeringEvent)
         {
             var damageEvent = (DamagePlayerEvent)triggeringEvent;
 

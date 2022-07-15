@@ -8,6 +8,8 @@ using System.Linq;
 using Assets.Scripts.Events;
 using Assets.Scripts.Bases;
 using Assets.Scripts.Managers;
+using Assets.Scripts.Tokens;
+using Assets.Scripts.Terrains;
 
 namespace Assets.Scripts
 {
@@ -31,12 +33,19 @@ namespace Assets.Scripts
         public List<BaseCard> Eliminated { get; set; } = new();
         public IEnumerable<FieldCard> FieldCards => Field.Select(x => x.Occupier).Where(x => x != null);
         public IEnumerable<CreatureCard> FieldCreatures => FieldCards.OfType<CreatureCard>();
+        public IEnumerable<BaseTerrain> Terrains => Field.Select(x => x.Terrain).Where(x => x != null);
 
-        public List<TokenType> Tokens { get; set; } = new();
-        private int TokenAttack => Tokens.Count(x => x == TokenType.Claw) - Tokens.Count(x => x == TokenType.Blunt);
-        private int TokenDefence => Tokens.Count(x => x == TokenType.Shell) - Tokens.Count(x => x == TokenType.Cracked);
+        public List<BaseToken> Tokens { get; set; } = new();
+        private int TokenCount(TokenType tokenType) => Tokens.Count(x => (TokenType)x.Id == tokenType);
+        private int TokenAttack => TokenCount(TokenType.Claw) - TokenCount(TokenType.Blunt);
+        private int TokenDefence => TokenCount(TokenType.Shell) - TokenCount(TokenType.Cracked);
 
         public List<Item> Items { get; set; } = new();
+
+        private IEnumerable<IEnumerable<BaseSource>> SourceCollections => new IEnumerable<BaseSource>[]
+        {
+            Deck, Hand, FieldCards, Destroyed, Eliminated, Terrains, Tokens, Items
+        };
 
         public Player(PlayerInfo playerInfo)
         {
@@ -61,32 +70,13 @@ namespace Assets.Scripts
                 .FirstOrDefault();
         }
 
-        public List<TokenType> GetTokens(StatType statType)
-        {
-            if (statType == StatType.Attack)
-                return Tokens.Where(x => x == TokenType.Claw || x == TokenType.Blunt).ToList();
-            else if (statType == StatType.Defence)
-                return Tokens.Where(x => x == TokenType.Shell || x == TokenType.Cracked).ToList();
-
-            return Tokens.ToList();
-        }
-
         // Exists
         public bool IsSourceOwner(BaseSource source)
         {
-            if (source is BaseCard card)
+            foreach (var collection in SourceCollections)
             {
-                return Hand
-                .Concat(FieldCards)
-                .Concat(Deck)
-                .Concat(Destroyed)
-                .Concat(Eliminated)
-                .Contains(card);
-            }
-            else if (source is Item item)
-            {
-                return Items
-                    .Contains(item);
+                if(collection.Contains(source))
+                    return true;
             }
 
             return false;
@@ -242,22 +232,18 @@ namespace Assets.Scripts
             }
         }
 
-        // Tokens
-        public void AddTokens(TokenType tokenType, int amount)
+        public BaseToken AddToken(TokenType tokenType)
         {
-            for (int i = 0; i < amount; i++)
-            {
-                Tokens.Add(tokenType);
-            }
+            var newToken = TokenManager.GetToken(tokenType);
+            Tokens.Add(newToken);
+            return newToken;
         }
 
-        // Removes as many as possible
-        public void RemoveTokens(TokenType tokenType, int amount)
+        public void RemoveToken(TokenType tokenType)
         {
-            for (int i = 0; i < amount; i++)
-            {
-                Tokens.Remove(tokenType);
-            }
+            var token = Tokens.FirstOrDefault(x => x.TokenType == tokenType);
+            if (token != null)
+                Tokens.Remove(token);
         }
     }
 }

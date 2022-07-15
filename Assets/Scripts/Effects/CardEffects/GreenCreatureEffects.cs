@@ -55,7 +55,7 @@ namespace Assets.Scripts.Effects.CardEffects
     {
         public override int Id => 14;
 
-        public override bool TryInterupt(CreatureCard source, BoardState boardState, IInteruptableEvent interuptableEvent)
+        protected override bool TryInterupt(CreatureCard source, BoardState boardState, IInteruptableEvent interuptableEvent)
         {
             if (interuptableEvent is IDamageEvent damageEvent && damageEvent.Target == source)
             {

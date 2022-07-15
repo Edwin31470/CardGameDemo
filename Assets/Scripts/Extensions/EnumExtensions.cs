@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Enums;
+using Assets.Scripts.Tokens;
 using System;
 
 namespace Assets.Scripts.Extensions
@@ -16,6 +17,22 @@ namespace Assets.Scripts.Extensions
             ulong flagVal = Convert.ToUInt64(flag);
 
             return (enumVal & flagVal) == flagVal;
+        }
+
+        // Basic tokens are tokens with no effects. They are not removed when they have no associated events, unlike other tokens
+        public static bool IsBasicToken(this BaseToken token)
+        {
+            switch (token.TokenType)
+            {
+                case TokenType.Surge:
+                case TokenType.Claw:
+                case TokenType.Blunt:
+                case TokenType.Shell:
+                case TokenType.Cracked:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }

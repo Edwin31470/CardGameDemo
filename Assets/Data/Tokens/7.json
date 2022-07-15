@@ -1,0 +1,7 @@
+{
+  "id": 7,
+  "name": "Shield",
+  "symbol": "Shield",
+  "effectText": "When one of your cards is destroyed, destroy this token intead. If the to be destroyed card is a creature it gets 1 defence.",
+  "flavourText": ""
+}

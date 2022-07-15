@@ -13,6 +13,7 @@ namespace Assets.Scripts.Items
 
         protected Item(ItemInfo itemInfo)
         {
+            Id = itemInfo.ItemData.Id;
             Name = itemInfo.ItemData.Name;
             EffectText = itemInfo.ItemData.EffectText;
             FlavourText = itemInfo.ItemData.FlavourText;

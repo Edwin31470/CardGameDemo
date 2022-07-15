@@ -1,9 +1,13 @@
 ﻿using System;
 using Assets.Scripts.Enums;
 using System.Collections.Generic;
+using Assets.Scripts.Tokens;
+using System.Linq;
+using Assets.Scripts.Managers;
 
 namespace Assets.Scripts.Events
 {
+    // An event that alters token piles (NOT an event used by tokens)
     public abstract class BaseTokenEvent : BasePlayerEvent
     {
         public BaseTokenEvent(Player player) : base(player)
@@ -27,8 +31,13 @@ namespace Assets.Scripts.Events
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            Source.AddTokens(TokenType, Amount);
-            yield break;
+            var events = new List<BaseEvent>();
+            for (var i = 0; i < Amount; i++)
+            {
+                events.AddRange(Source.AddToken(TokenType).GetEvents(board));
+            }
+
+            return events;
         }
     }
 
@@ -48,7 +57,10 @@ namespace Assets.Scripts.Events
 
         public override IEnumerable<BaseEvent> Process(BoardState board)
         {
-            Source.RemoveTokens(TokenType, Amount);
+            for (var i = 0; i < Amount; i++)
+            {
+                Source.RemoveToken(TokenType);
+            }            
             yield break;
         }
     }

@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Cards;
+﻿using Assets.Scripts.Bases;
+using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Events.Interfaces;
 using System;
@@ -11,7 +12,7 @@ namespace Assets.Scripts.Events
 {
     // All events apply the same effect to all valid targets once
 
-    public abstract class BaseAllEvent<T> : BaseGameplayEvent<T> where T : BaseCard
+    public abstract class BaseAllEvent<T> : BaseGameplayEvent<T> where T : BaseSource
     {
         public TargetConditions TargetConditions { get; set; }
 
@@ -22,7 +23,7 @@ namespace Assets.Scripts.Events
     }
 
     // Targets all field creatures
-    public class CustomAllCreaturesEvent<T> : BaseAllEvent<T> where T : BaseCard
+    public class CustomAllCreaturesEvent<T> : BaseAllEvent<T> where T : BaseSource
     {
         private Func<T, CreatureCard, BoardState, IEnumerable<BaseEvent>> Func { get; set; }
 

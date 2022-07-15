@@ -56,8 +56,12 @@ namespace Assets.Scripts.IO
             {
                 return "Assets/Data/Terrains";
             }
+            else if (dataType == typeof(TokenData))
+            {
+                return "Assets/Data/Tokens";
+            }
 
-            throw new ArgumentOutOfRangeException(nameof(dataType), $"Type must be {nameof(CardData)} or {nameof(ItemData)}");
+            throw new ArgumentOutOfRangeException(nameof(dataType), $"Type must be {nameof(CardData)}, {nameof(ItemData)}, {nameof(TerrainData)} or {nameof(TokenData)}");
         }
     }
 }

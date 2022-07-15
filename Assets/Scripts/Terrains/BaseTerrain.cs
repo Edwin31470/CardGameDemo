@@ -15,6 +15,7 @@ namespace Assets.Scripts.Terrains
 
         protected BaseTerrain(TerrainInfo terrainInfo)
         {
+            Id = terrainInfo.TerrainData.Id;
             Name = terrainInfo.TerrainData.Name;
             EffectText = terrainInfo.TerrainData.EffectText;
             FlavourText = terrainInfo.TerrainData.FlavourText;

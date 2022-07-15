@@ -33,7 +33,7 @@ namespace Assets.Scripts.Effects.ItemEffects
     {
         public override int Id => 1;
 
-        public override bool TryInterupt(Item source, BoardState boardState, IInteruptableEvent interuptableEvent)
+        protected override bool TryInterupt(Item source, BoardState boardState, IInteruptableEvent interuptableEvent)
         {
             if (interuptableEvent is not IDamageEvent damageEvent)
                 return false;

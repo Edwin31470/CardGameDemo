@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Assets.Scripts.Events.Interfaces;
 using Assets.Scripts.Bases;
+using Assets.Scripts.Tokens;
 
 namespace Assets.Scripts
 {
@@ -109,7 +110,7 @@ namespace Assets.Scripts
         {
             var player = Board.GetPlayer(playerType);
 
-            var tokens = player.GetTokens(statType);
+            //var tokens = player.GetTokens(statType);
 
             //UIManager.ShowTokens(tokens);
         }
@@ -374,6 +375,7 @@ namespace Assets.Scripts
                 Area = Area.Field
             });
 
+            // Process passive events
             foreach (var creatureCard in allCreatureCards)
             {
                 creatureCard.BonusAttack.Set(0);
@@ -394,11 +396,30 @@ namespace Assets.Scripts
                 passiveEvent.Process(Board);
             }
 
+            // Check if passive events have caused any creatures to die
             foreach (var creatureCard in fieldCreatureCards)
             {
                 if(creatureCard.Defence <= 0)
                 {
                     EnqueueEvent(new DestroyByDamageEvent(creatureCard));
+                }
+            }
+
+            // Check if any tokens should be destroyed (tokens must have at least one event present (except stat tokens))
+            foreach (var player in Board.BothPlayers)
+            {
+                foreach (var token in player.Tokens.Where(x => !x.IsBasicToken()).ToList())
+                {
+                    if (PassiveEvents.Any(x => x.BaseSource == token))
+                        continue;
+
+                    if (InteruptEvents.Any(x => x.BaseSource == token))
+                        continue;
+
+                    if (TriggerEvents.Any(x => x.BaseSource == token))
+                        continue;
+
+                    player.Tokens.Remove(token);
                 }
             }
 

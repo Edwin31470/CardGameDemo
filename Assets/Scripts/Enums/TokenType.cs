@@ -6,15 +6,16 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.Enums
 {
+    [Flags]
     public enum TokenType
     {
-        None,
+        Surge,
         Claw,
         Blunt,
         Shell,
         Cracked,
         Rage,
         Steadfast,
-        Surge
+        Shield,
     }
 }

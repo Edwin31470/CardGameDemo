@@ -32,7 +32,6 @@ namespace Assets.Scripts.Effects
         protected abstract SelectionType SelectionType { get; }
         protected abstract string Message { get; }
 
-
         public override IEnumerable<BaseEvent> GetEffect(TSource source, BoardState board)
         {
             yield return new CustomSingleTargetEvent<TSource, TTarget>(source, GetTargetConditions(source, board), OnTargetChosen, SelectionType, Message);
@@ -66,28 +65,28 @@ namespace Assets.Scripts.Effects
     // Apply one effect on one trigger definition (default more than once)
     public abstract class CustomInteruptEffect<T> : BaseSourceEffect<T> where T : BaseSource
     {
-        public virtual bool TriggerOnce => false;
+        protected virtual bool TriggerOnce => false;
 
         public override IEnumerable<BaseEvent> GetEffect(T source, BoardState board)
         {
             yield return new CustomInteruptEvent<T>(source, TryInterupt, TriggerOnce);
         }
 
-        public abstract bool TryInterupt(T source, BoardState boardState, IInteruptableEvent interuptedEvent);
+        protected abstract bool TryInterupt(T source, BoardState boardState, IInteruptableEvent interuptedEvent);
     }
 
     // Apply one effect on one trigger definition (default more than once)
     public abstract class CustomTriggerEffect<T> : BaseSourceEffect<T> where T : BaseSource
     {
-        public virtual bool TriggerOnce => false;
+        protected virtual bool TriggerOnce => false;
 
         public override IEnumerable<BaseEvent> GetEffect(T source, BoardState board)
         {
             yield return new CustomTriggerEvent<T>(source, Conditions, OnTrigger, TriggerOnce);
         }
 
-        public abstract bool Conditions(T source, BoardState boardState, ITriggeringEvent triggeringEvent);
-        public abstract IEnumerable<BaseEvent> OnTrigger(T source, BoardState boardState, ITriggeringEvent triggeringEvent);
+        protected abstract bool Conditions(T source, BoardState boardState, ITriggeringEvent triggeringEvent);
+        protected abstract IEnumerable<BaseEvent> OnTrigger(T source, BoardState boardState, ITriggeringEvent triggeringEvent);
     }
 
     // Adds events returned by OnGameStart to the queues at the start of every round
@@ -98,7 +97,7 @@ namespace Assets.Scripts.Effects
             yield return new CustomOnGameStartEvent<T>(source, OnGameStart);
         }
 
-        public abstract IEnumerable<BaseEvent> OnGameStart(T source, BoardState boardState, ITriggeringEvent triggeringEvent);
+        protected abstract IEnumerable<BaseEvent> OnGameStart(T source, BoardState boardState, ITriggeringEvent triggeringEvent);
     }
 
     // Adds events returned by OnRoundStart to the queues at the start of every round
@@ -109,6 +108,6 @@ namespace Assets.Scripts.Effects
             yield return new CustomOnRoundStartEvent<T>(source, OnRoundStart);
         }
 
-        public abstract IEnumerable<BaseEvent> OnRoundStart(T source, BoardState boardState, ITriggeringEvent roundStartEvent);
+        protected abstract IEnumerable<BaseEvent> OnRoundStart(T source, BoardState boardState, ITriggeringEvent roundStartEvent);
     }
 }

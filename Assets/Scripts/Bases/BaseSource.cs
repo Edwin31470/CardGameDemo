@@ -8,18 +8,18 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.Bases
 {
-    // A source is anything that can be the source of an event (players, cards, items, abilties)
+    // A source is anything that can be the source of an event (players, cards, items, abilties, tokens)
     public abstract class BaseSource
     {
-
+        public int Id { get; set; }
     }
 
-    // Cards, items and abilities have effects
+    // Cards, items, terrains and tokens can have effects
     public abstract class BaseEffectSource : BaseSource
     {
         public BaseEffect Effect { get; set; }
 
-        public IEnumerable<BaseEvent> GetEvents(BoardState board)
+        public virtual IEnumerable<BaseEvent> GetEvents(BoardState board)
         {
             return Effect?.GenerateEffects(this, board) ?? Enumerable.Empty<BaseEvent>();
         }

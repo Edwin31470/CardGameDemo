@@ -19,7 +19,7 @@ namespace Assets.Scripts.Effects.ItemEffects
     {
         public override int Id => 5;
 
-        public override IEnumerable<BaseEvent> OnRoundStart(Item source, BoardState boardState, ITriggeringEvent roundStartEvent)
+        protected override IEnumerable<BaseEvent> OnRoundStart(Item source, BoardState boardState, ITriggeringEvent roundStartEvent)
         {
             yield return new CustomTriggerEvent<Item>(source, Conditions, OnTrigger, true);
         }
@@ -64,14 +64,14 @@ namespace Assets.Scripts.Effects.ItemEffects
     {
         public override int Id => 7;
 
-        public override bool Conditions(Item source, BoardState boardState, ITriggeringEvent triggeringEvent)
+        protected override bool Conditions(Item source, BoardState boardState, ITriggeringEvent triggeringEvent)
         {
             return triggeringEvent is IFortifyEvent fortifyEvent &&
                 boardState.GetSourceOwner(fortifyEvent.BaseSource) == boardState.GetSourceOwner(source) &&
                 fortifyEvent.Value >= 3;
         }
 
-        public override IEnumerable<BaseEvent> OnTrigger(Item source, BoardState boardState, ITriggeringEvent triggeringEvent)
+        protected override IEnumerable<BaseEvent> OnTrigger(Item source, BoardState boardState, ITriggeringEvent triggeringEvent)
         {
             var target = ((IFortifyEvent)triggeringEvent).Target;
 

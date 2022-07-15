@@ -28,6 +28,7 @@ namespace Assets.Scripts.Cards
 
         protected BaseCard(CardInfo cardInfo)
         {
+            Id = cardInfo.CardData.Id;
             Name = cardInfo.CardData.Name;
             Colour = cardInfo.CardData.Colour;
             Cost = cardInfo.CardData.Cost;
