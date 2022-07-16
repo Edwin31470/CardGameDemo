@@ -23,7 +23,7 @@ namespace Assets.Scripts.UI
         {
             Sprite = GetComponent<SpriteRenderer>();
             SortingGroup = GetComponent<SortingGroup>();
-            Canvas = transform.Find("Canvas").GetComponent<Canvas>();
+            //Canvas = transform.Find("Canvas").GetComponent<Canvas>();
         }
 
         public void Destroy()
@@ -34,7 +34,7 @@ namespace Assets.Scripts.UI
         public void SetSortingLayer(string layer)
         {
             SortingGroup.sortingLayerName = layer;
-            Canvas.sortingLayerName = layer;
+            //Canvas.sortingLayerName = layer;
         }
 
         public void SetSortingOrder(int order)

@@ -9,7 +9,7 @@ using Assets.Scripts.Interfaces;
 
 namespace Assets.Scripts.Cards
 {
-    public abstract class BaseCard : BaseEffectSource, ITargetable
+    public abstract class BaseCard : BaseEffectSource
     {
         public string Name { get; set; }
         public Colour Colour { get; set; }

@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.Effects;
 using Assets.Scripts.Events;
+using Assets.Scripts.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace Assets.Scripts.Bases
     }
 
     // Cards, items, terrains and tokens can have effects
-    public abstract class BaseEffectSource : BaseSource
+    public abstract class BaseEffectSource : BaseSource, ITargetable
     {
         public BaseEffect Effect { get; set; }
 

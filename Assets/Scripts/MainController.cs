@@ -62,14 +62,14 @@ namespace Assets.Scripts
                 .onClick.AddListener(() => ShowPile(Area.Deck, PlayerType.Back));
 
             GameObject.Find("Canvas/FrontPlayer/TotalAttack").GetComponent<Button>()
-                .onClick.AddListener(() => ShowTokens(StatType.Attack, PlayerType.Front));
+                .onClick.AddListener(() => ShowTokens(PlayerType.Front));
             GameObject.Find("Canvas/BackPlayer/TotalAttack").GetComponent<Button>()
-                .onClick.AddListener(() => ShowTokens(StatType.Attack, PlayerType.Back));
+                .onClick.AddListener(() => ShowTokens(PlayerType.Back));
 
             GameObject.Find("Canvas/FrontPlayer/TotalDefence").GetComponent<Button>()
-                .onClick.AddListener(() => ShowTokens(StatType.Defence, PlayerType.Front));
+                .onClick.AddListener(() => ShowItems(PlayerType.Front));
             GameObject.Find("Canvas/BackPlayer/TotalDefence").GetComponent<Button>()
-                .onClick.AddListener(() => ShowTokens(StatType.Defence, PlayerType.Back));
+                .onClick.AddListener(() => ShowItems(PlayerType.Back));
 
             // Register Timer
             Timer = gameObject.AddComponent(typeof(RepeatingTimer)) as RepeatingTimer;
@@ -106,13 +106,22 @@ namespace Assets.Scripts
             UIManager.ShowPile(sources);
         }
 
-        public void ShowTokens(StatType statType, PlayerType playerType)
+        public void ShowTokens(PlayerType playerType)
         {
             var player = Board.GetPlayer(playerType);
 
-            //var tokens = player.GetTokens(statType);
+            var tokens = player.Tokens;
 
-            //UIManager.ShowTokens(tokens);
+            UIManager.ShowPile(tokens);
+        }
+
+        public void ShowItems(PlayerType playerType)
+        {
+            var player = Board.GetPlayer(playerType);
+
+            var items = player.Items;
+
+            UIManager.ShowPile(items);
         }
 
         public void EnqueueEvent(BaseEvent baseEvent)

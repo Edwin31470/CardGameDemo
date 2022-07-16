@@ -65,16 +65,26 @@ namespace Assets.Scripts.UI
             HoverObjects.Clear();
 
             // Get the new objects hovered over
-            (CardObject hoveredCard, TerrainObject hoveredTerrain) = GetHoveredObjects();
+            var hoveredObjects = GetHoveredObjects();
 
-            if (hoveredCard != null && hoveredCard.IsInPosition)
+            foreach (var baseObject in hoveredObjects)
             {
-                CreateCardHover(hoveredCard);
-            }
-
-            if (hoveredTerrain != null)
-            {
-                CreateTerrainHover(hoveredTerrain, hoveredCard != null);
+                switch (baseObject)
+                {
+                    case CardObject cardObject:
+                        if (cardObject.IsInPosition)
+                            CreateCardHover(cardObject);
+                        break;
+                    case TerrainObject terrainObject:
+                        CreateTerrainHover(terrainObject);
+                        break;
+                    case ItemObject itemObject:
+                        CreateItemHover(itemObject);
+                        break;
+                    case TokenObject tokenObject:
+                        CreateTokenHover(tokenObject);
+                        break;
+                }
             }
         }
 
@@ -94,10 +104,10 @@ namespace Assets.Scripts.UI
             HoverObjects.Add(hoverObject);
         }
 
-        // TODO: create a seperate graphic for terrain rather than using the red card graphic
-        private void CreateTerrainHover(TerrainObject hoveredTerrain, bool hoveringOnCard)
+        // TODO: create a seperate graphic for each rather than using the red card graphic
+        private void CreateTerrainHover(TerrainObject hoveredTerrain)
         {
-            var hoverObject = Instantiate(LargeCardHoverPrefab, GetHoverCoordiantes(hoveredTerrain, hoveringOnCard), Quaternion.identity);
+            var hoverObject = Instantiate(LargeCardHoverPrefab, GetHoverCoordiantes(hoveredTerrain), Quaternion.identity);
 
             // set sprite colour
             hoverObject.GetComponent<SpriteRenderer>().sprite = LargeCardSprites[Colour.Red]; 
@@ -111,7 +121,39 @@ namespace Assets.Scripts.UI
             HoverObjects.Add(hoverObject);
         }
 
-        private Vector2 GetHoverCoordiantes(CardObject hoveredCard)
+        private void CreateItemHover(ItemObject hoveredItem)
+        {
+            var hoverObject = Instantiate(LargeCardHoverPrefab, GetHoverCoordiantes(hoveredItem), Quaternion.identity);
+
+            // set sprite colour
+            hoverObject.GetComponent<SpriteRenderer>().sprite = LargeCardSprites[Colour.Red];
+
+            // set text
+            var canvas = hoverObject.transform.Find("Canvas");
+            canvas.transform.Find("Name").GetComponent<Text>().text = hoveredItem.ItemReference.Name;
+            canvas.transform.Find("EffectText").GetComponent<Text>().text = hoveredItem.ItemReference.EffectText;
+            canvas.transform.Find("Types").GetComponent<Text>().text = string.Empty;
+
+            HoverObjects.Add(hoverObject);
+        }
+
+        private void CreateTokenHover(TokenObject hoveredToken)
+        {
+            var hoverObject = Instantiate(LargeCardHoverPrefab, GetHoverCoordiantes(hoveredToken), Quaternion.identity);
+
+            // set sprite colour
+            hoverObject.GetComponent<SpriteRenderer>().sprite = LargeCardSprites[Colour.Red];
+
+            // set text
+            var canvas = hoverObject.transform.Find("Canvas");
+            canvas.transform.Find("Name").GetComponent<Text>().text = hoveredToken.TokenReference.Name;
+            canvas.transform.Find("EffectText").GetComponent<Text>().text = hoveredToken.TokenReference.EffectText;
+            canvas.transform.Find("Types").GetComponent<Text>().text = string.Empty;
+
+            HoverObjects.Add(hoverObject);
+        }
+
+        private Vector2 GetHoverCoordiantes(MoveableUIObject hoveredCard)
         {
             var pos = hoveredCard.transform.position;
 
@@ -123,7 +165,7 @@ namespace Assets.Scripts.UI
             return pos;
         }
 
-        private Vector2 GetHoverCoordiantes(TerrainObject hoveredTerrain, bool hoveringOnCard)
+        private Vector2 GetHoverCoordiantes(TerrainObject hoveredTerrain)
         {
             var pos = hoveredTerrain.transform.position;
 
@@ -147,21 +189,19 @@ namespace Assets.Scripts.UI
                 hoverObjectPos.x -= _largeCardWidth * 2f;
         }
 
-        private (CardObject, TerrainObject) GetHoveredObjects()
+        private IEnumerable<BaseUIObject> GetHoveredObjects()
         {
             var cardMask = IsOverlayUp ? LayerMask.GetMask("Card Overlay") : LayerMask.GetMask("Card");
             var terrainMask = IsOverlayUp ? LayerMask.GetMask() : LayerMask.GetMask("Terrain");
 
             // Get Colliding Targets
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit2D cardHit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, cardMask);
+            RaycastHit2D cardHit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, cardMask); // Items and Tokens also exist in the card layer for simplicity
             RaycastHit2D terrainHit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, terrainMask);
 
             // Null when not hovering
-            var hoveredCard = cardHit.collider?.GetComponentInParent<BaseUIObject>() as CardObject;
-            var hoveredTerrain = terrainHit.collider?.GetComponentInParent<BaseUIObject>() as TerrainObject;
-
-            return (hoveredCard, hoveredTerrain);
+            yield return cardHit.collider?.GetComponentInParent<BaseUIObject>();
+            yield return terrainHit.collider?.GetComponentInParent<BaseUIObject>();
         }
     }
 }
