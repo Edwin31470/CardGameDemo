@@ -1,1 +1,1 @@
-{"id":2,"name":"Boiling Elemental","colour":1,"cost":1,"cardType":1,"subTypes":1,"symbol":"Elemental","attack":5,"defence":3,"effectText":"Deal 4 damage to target creature.","flavourText":"Nobody expected the ocean to fight back.","hasPersistence":false,"isUnique":false}
+{"colour":1,"cost":1,"cardType":1,"subTypes":1,"symbol":"Bubbles","attack":5,"defence":3,"hasPersistence":false,"isUnique":false,"id":2,"name":"Boiling Elemental","effectText":"Deal 4 damage to target creature.","flavourText":"Nobody expected the ocean to fight back."}

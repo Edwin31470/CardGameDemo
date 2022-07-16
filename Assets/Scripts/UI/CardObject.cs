@@ -42,8 +42,7 @@ namespace Assets.Scripts.UI
 
             CostSymbol.sprite = cost != 0 ? Resources.Load<Sprite>($"Sprites/Symbols/Cost{cost}") : null;
 
-            CardSymbol.sprite = CardGraphicsManager.GetSymbolSprite(CardReference);
-            CardSymbol.color = CardGraphicsManager.GetSymbolColor(CardReference).Normalise();
+            CardSymbol.sprite = Resources.Load<Sprite>($"Sprites/Symbols/{cardReference.Symbol}Symbol");
 
             base.Initialize();
         }
