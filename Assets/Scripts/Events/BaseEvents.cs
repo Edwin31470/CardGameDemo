@@ -98,7 +98,7 @@ namespace Assets.Scripts.Events
     public abstract class BasePhaseEvent : BaseEvent
     {
         public override float Delay => 1f;
-        public abstract void Process(MainController controller, BoardState boardState);
+        public abstract void Process(GameSceneController controller, BoardState boardState);
     }
 
     public class MessageEvent : BaseUIEvent

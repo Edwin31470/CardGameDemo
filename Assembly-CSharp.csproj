@@ -82,7 +82,7 @@
     <Compile Include="Assets\Scripts\Events\Interfaces\IPassiveEvent.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
     <Compile Include="Assets\Scripts\Items\Item.cs" />
-    <Compile Include="Assets\Scripts\ManagePlayersController.cs" />
+    <Compile Include="Assets\Scripts\SceneControllers\ManagePlayersController.cs" />
     <Compile Include="Assets\Scripts\UI\BaseUIObject.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\GreenActionEffects.cs" />
     <Compile Include="Assets\Scripts\Tokens\BaseToken.cs" />
@@ -161,18 +161,18 @@
     <Compile Include="Assets\Scripts\IO\PlayerData.cs" />
     <Compile Include="Assets\Scripts\Enums\PlayerType.cs" />
     <Compile Include="Assets\Scripts\Events\GameEndEvents.cs" />
-    <Compile Include="Assets\Scripts\ManageItemsController.cs" />
+    <Compile Include="Assets\Scripts\SceneControllers\ManageItemsController.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\BlueActionEffects.cs" />
     <Compile Include="Assets\Scripts\Effects\BaseEffects.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumerableExtensions.cs" />
-    <Compile Include="Assets\Scripts\BaseManagerController.cs" />
+    <Compile Include="Assets\Scripts\SceneControllers\BaseManagerController.cs" />
     <Compile Include="Assets\Scripts\Events\UIEvents.cs" />
     <Compile Include="Assets\Scripts\Events\Interfaces\ITriggerEvent.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\RedCreatureEffects.cs" />
-    <Compile Include="Assets\Scripts\EditDeckController.cs" />
+    <Compile Include="Assets\Scripts\SceneControllers\ManageDecksController.cs" />
     <Compile Include="Assets\Scripts\LegendkeeperIntegration\Project.cs" />
     <Compile Include="Assets\Scripts\IO\DataIO.cs" />
-    <Compile Include="Assets\Scripts\ManageCardsController.cs" />
+    <Compile Include="Assets\Scripts\SceneControllers\ManageCardsController.cs" />
     <Compile Include="Assets\Scripts\Bases\BaseSource.cs" />
     <Compile Include="Assets\Scripts\UI\ItemObject.cs" />
     <Compile Include="Assets\Scripts\IO\TokenData.cs" />
@@ -181,9 +181,10 @@
     <Compile Include="Assets\Scripts\Enums\Colour.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\PurpleCreatureEffects.cs" />
     <Compile Include="Assets\Scripts\Managers\TerrainManager.cs" />
-    <Compile Include="Assets\Scripts\MainController.cs" />
+    <Compile Include="Assets\Scripts\SceneControllers\GameSceneController.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
     <Compile Include="Assets\Scripts\Managers\ItemManager.cs" />
+    <Compile Include="Assets\Scripts\SceneControllers\StartScreenController.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

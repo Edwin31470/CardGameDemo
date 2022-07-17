@@ -16,7 +16,7 @@ namespace Assets.Scripts.Events
             Phase = phase;
         }
 
-        public override void Process(MainController controller, BoardState boardState)
+        public override void Process(GameSceneController controller, BoardState boardState)
         {
             controller.NewPhase(Phase);
         }
@@ -33,7 +33,7 @@ namespace Assets.Scripts.Events
             OtherPlayerPassed = otherPlayerPassed;
         }
 
-        public override void Process(MainController controller, BoardState boardState)
+        public override void Process(GameSceneController controller, BoardState boardState)
         { 
             controller.EnqueueEvent(new PlayCardEvent(boardState.GetPlayer(PlayingPlayer), OtherPlayerPassed));
         }

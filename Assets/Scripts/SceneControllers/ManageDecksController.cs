@@ -5,11 +5,12 @@ using Assets.Scripts.Cards;
 using Assets.Scripts.IO;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Assets.Scripts
 {
-    public class EditDeckController : MonoBehaviour
+    public class ManageDecksController : MonoBehaviour
     {
         // Resources
         private Button CardRow { get; set; }
@@ -95,6 +96,14 @@ namespace Assets.Scripts
             DeckDropdown.AddOptions(new List<string>() { deckName });
 
             PlayerIO.WriteDeck(deckName, Enumerable.Empty<int>());
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                SceneManager.LoadScene("StartScreen");
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Assets.Scripts
@@ -127,6 +128,14 @@ namespace Assets.Scripts
             NameField.text = data.Name;
             EffectTextField.text = data.EffectText;
             FlavourTextField.text = data.FlavourText;
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                SceneManager.LoadScene("StartScreen");
+            }
         }
     }
 }

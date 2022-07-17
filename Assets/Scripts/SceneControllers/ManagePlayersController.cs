@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Assets.Scripts
@@ -103,6 +104,14 @@ namespace Assets.Scripts
             WeaponDropdown.value = data.WeaponId == -1 ? 0 : WeaponDropdown.options.FindIndex(x => x.text == Items[data.WeaponId + 1].Name);
             ArmourDropdown.value = data.ArmourId == -1 ? 0 : ArmourDropdown.options.FindIndex(x => x.text == Items[data.ArmourId + 1].Name);
             AccessoryDropdown.value = data.AccessoryId == -1 ? 0 : AccessoryDropdown.options.FindIndex(x => x.text == Items[data.AccessoryId + 1].Name);
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                SceneManager.LoadScene("StartScreen");
+            }
         }
     }
 }

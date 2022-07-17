@@ -15,7 +15,7 @@ using Assets.Scripts.Tokens;
 
 namespace Assets.Scripts
 {
-    public class MainController : MonoBehaviour
+    public class GameSceneController : MonoBehaviour
     {
         // Managers
         private UIManager UIManager { get; set; }
