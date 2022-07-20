@@ -6,13 +6,13 @@ using System.Collections.Generic;
 
 namespace Assets.Scripts.Managers
 {
-    public static class PlayerManager
+    public static class PlayersManager
     {
         public static PlayerInfo GetPlayer(PlayerType playerType)
         {
             var playerData = PlayerIO.ReadPlayer(playerType);
-            var deck = DeckManager.GetDeck(playerData);
-            var items = ItemManager.GetItems(playerData);
+            var deck = CardsManager.GetDeck(playerData);
+            var items = ItemsManager.GetItems(playerData);
 
             return new PlayerInfo
             {

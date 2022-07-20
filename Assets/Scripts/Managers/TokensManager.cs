@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.Managers
 {
-    public static class TokenManager
+    public static class TokensManager
     {
         private static readonly Dictionary<TokenType, TokenData> TokenLibrary = DataIO.ReadAll<TokenData>().ToDictionary(x => (TokenType)x.Id, x => x);
 

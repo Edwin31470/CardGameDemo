@@ -73,9 +73,10 @@
     <Compile Include="Assets\Scripts\UI\DragAndDropManager.cs" />
     <Compile Include="Assets\Scripts\Enums\StatType.cs" />
     <Compile Include="Assets\Scripts\FieldSlot.cs" />
-    <Compile Include="Assets\Scripts\Managers\TokenManager.cs" />
+    <Compile Include="Assets\Scripts\Managers\TokensManager.cs" />
     <Compile Include="Assets\Scripts\Events\Interfaces\ITriggeringEvent.cs" />
     <Compile Include="Assets\Scripts\UI\UIManager.cs" />
+    <Compile Include="Assets\Scripts\Managers\SpritesManager.cs" />
     <Compile Include="Assets\Scripts\Cards\CardInfo.cs" />
     <Compile Include="Assets\Scripts\Items\ItemInfo.cs" />
     <Compile Include="Assets\Scripts\Tokens\TokenInfo.cs" />
@@ -104,7 +105,7 @@
     <Compile Include="Assets\Scripts\UI\PileManager.cs" />
     <Compile Include="Assets\Scripts\IO\BaseData.cs" />
     <Compile Include="Assets\Scripts\Events\PassiveEvents.cs" />
-    <Compile Include="Assets\Scripts\Managers\PlayerManager.cs" />
+    <Compile Include="Assets\Scripts\Managers\PlayersManager.cs" />
     <Compile Include="Assets\Scripts\Cards\CreatureCard.cs" />
     <Compile Include="Assets\Scripts\Interfaces\ITargetable.cs" />
     <Compile Include="Assets\Scripts\Extensions\GameObjectExtensions.cs" />
@@ -115,7 +116,7 @@
     <Compile Include="Assets\Scripts\TargetConditions.cs" />
     <Compile Include="Assets\Scripts\Enums\SelectionType.cs" />
     <Compile Include="Assets\Scripts\Events\ActiveEvents.cs" />
-    <Compile Include="Assets\Scripts\Managers\DeckManager.cs" />
+    <Compile Include="Assets\Scripts\Managers\CardsManager.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\PurplePermanentEffects.cs" />
     <Compile Include="Assets\Scripts\Events\TokenEvents.cs" />
     <Compile Include="Assets\Scripts\Events\PlayerEvents.cs" />
@@ -138,6 +139,7 @@
     <Compile Include="Assets\Scripts\Events\Interfaces\IStatEvents.cs" />
     <Compile Include="Assets\Scripts\UI\CardObject.cs" />
     <Compile Include="Assets\Scripts\Events\Interfaces\IDestroyCardEvent.cs" />
+    <Compile Include="Assets\Scripts\SceneControllers\StartScreenController.cs" />
     <Compile Include="Assets\Scripts\Events\BaseEvents.cs" />
     <Compile Include="Assets\Scripts\Cards\PermanentCard.cs" />
     <Compile Include="Assets\Scripts\IO\PlayerIO.cs" />
@@ -147,8 +149,8 @@
     <Compile Include="Assets\Scripts\Managers\LabelManager.cs" />
     <Compile Include="Assets\Scripts\Events\Interfaces\IUIInteractionEvent.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\BlueCreatureEffects.cs" />
-    <Compile Include="Assets\Scripts\Effects\CardEffects\RedPermanentEffects.cs" />
     <Compile Include="Assets\Scripts\Terrains\BaseTerrain.cs" />
+    <Compile Include="Assets\Scripts\Effects\CardEffects\RedPermanentEffects.cs" />
     <Compile Include="Assets\Scripts\Managers\BaseUIObjectManager.cs" />
     <Compile Include="Assets\Scripts\LegendkeeperIntegration\Document.cs" />
     <Compile Include="Assets\Scripts\Extensions\MathExtensions.cs" />
@@ -180,11 +182,11 @@
     <Compile Include="Assets\Scripts\Effects\CardEffects\GreenPermanentEffects.cs" />
     <Compile Include="Assets\Scripts\Enums\Colour.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\PurpleCreatureEffects.cs" />
-    <Compile Include="Assets\Scripts\Managers\TerrainManager.cs" />
+    <Compile Include="Assets\Scripts\Managers\TerrainsManager.cs" />
     <Compile Include="Assets\Scripts\SceneControllers\GameSceneController.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
-    <Compile Include="Assets\Scripts\Managers\ItemManager.cs" />
-    <Compile Include="Assets\Scripts\SceneControllers\StartScreenController.cs" />
+    <Compile Include="Assets\Scripts\Managers\ItemsManager.cs" />
+    <Compile Include="Assets\Scripts\Metadata.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
@@ -1077,6 +1079,12 @@
     <Reference Include="Unity.VisualStudio.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.VisualStudio.Editor.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Sysroot.Linux_x86_64">
+      <HintPath>Library\ScriptAssemblies\Unity.Sysroot.Linux_x86_64.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Toolchain.Win-x86_64-Linux-x86_64">
+      <HintPath>Library\ScriptAssemblies\Unity.Toolchain.Win-x86_64-Linux-x86_64.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.Timeline.Editor.dll</HintPath>
     </Reference>
@@ -1109,6 +1117,9 @@
     </Reference>
     <Reference Include="Unity.VisualScripting.Core">
       <HintPath>Library\ScriptAssemblies\Unity.VisualScripting.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.SysrootPackage.Editor">
+      <HintPath>Library\ScriptAssemblies\Unity.SysrootPackage.Editor.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

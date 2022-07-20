@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Assets.Scripts.Managers
 {
-    public static class ItemManager
+    public static class ItemsManager
     {
         private static readonly Dictionary<int, ItemData> ItemLibrary = DataIO.ReadAll<ItemData>().ToDictionary(x => x.Id, x => x);
 

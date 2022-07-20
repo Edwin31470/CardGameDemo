@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace Assets.Scripts.Managers
 {
-    public static class TerrainManager
+    public static class TerrainsManager
     {
         private static readonly Dictionary<int, TerrainData> TerrainLibary = DataIO.ReadAll<TerrainData>().ToDictionary(x => x.Id, x => x);
 

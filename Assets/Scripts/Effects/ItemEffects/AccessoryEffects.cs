@@ -51,7 +51,7 @@ namespace Assets.Scripts.Effects.ItemEffects
 
         protected override IEnumerable<BaseEvent> OnTargetChosen(Item source, BoardState boardState, FieldSlot target)
         {
-            yield return new AddTerrainToSlotEvent<Item>(source, BaseTerrain.Create(TerrainManager.GetTerrain("Blessed Soil")), target);
+            yield return new AddTerrainToSlotEvent<Item>(source, BaseTerrain.Create(TerrainsManager.GetTerrain("Blessed Soil")), target);
         }
 
         protected override TargetConditions GetTargetConditions(Item source, BoardState board)

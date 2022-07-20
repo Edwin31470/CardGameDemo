@@ -10,7 +10,7 @@ using Assets.Scripts.IO;
 
 namespace Assets.Scripts.Managers
 {
-    public static class DeckManager
+    public static class CardsManager
     {
         private static readonly Dictionary<int, CardData> CardLibrary = DataIO.ReadAll<CardData>().ToDictionary(x => x.Id, x => x);
 
@@ -21,6 +21,17 @@ namespace Assets.Scripts.Managers
                         x.IsSubclassOf(typeof(BaseSourceEffect<PermanentCard>)))
             .Select(x => (BaseEffect)Activator.CreateInstance(x))
             .ToDictionary(x => x.Id, x => x);
+
+        public static List<CardInfo> GetAllCards()
+        {
+            var cardIds = DataIO.ReadAll<CardData>().Select(x => x.Id);
+
+            return cardIds.Select(x => new CardInfo
+            {
+                CardData = CardLibrary[x],
+                Effect = EffectLibrary.GetValueOrDefault(x),
+            }).ToList();
+        }
 
         public static List<CardInfo> GetDeck(string deckName)
         {

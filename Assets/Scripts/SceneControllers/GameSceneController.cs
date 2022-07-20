@@ -38,8 +38,8 @@ namespace Assets.Scripts
         void Start()
         {
             // Register Players
-            var frontPlayer = new Player(PlayerManager.GetPlayer(PlayerType.Front));
-            var backPlayer = new Player(PlayerManager.GetPlayer(PlayerType.Back));
+            var frontPlayer = new Player(PlayersManager.GetPlayer(PlayerType.Front));
+            var backPlayer = new Player(PlayersManager.GetPlayer(PlayerType.Back));
 
             Board = new BoardState(frontPlayer, backPlayer);
 

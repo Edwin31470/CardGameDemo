@@ -234,7 +234,7 @@ namespace Assets.Scripts
 
         public BaseToken AddToken(TokenType tokenType)
         {
-            var newToken = TokenManager.GetToken(tokenType);
+            var newToken = TokensManager.GetToken(tokenType);
             Tokens.Add(newToken);
             return newToken;
         }

@@ -5,13 +5,23 @@ using System.Linq;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
 using Assets.Scripts.IO;
+using Assets.Scripts.Managers;
+using Assets.Scripts.UI;
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Assets.Scripts
 {
-    public class ManageCardsController : BaseManagerController<CardData>
+    public class ManageCardsController : MonoBehaviour
     {
+        // Resources
+        private GameObject CardObject { get; set; }
+
+        // Fields for editing/creating
+        private InputField NameField { get; set; }
         private Dropdown ColourDropdown { get; set; }
         private Dropdown CostDropdown { get; set; }
         private Dropdown CardTypeDropdown { get; set; }
@@ -19,12 +29,23 @@ namespace Assets.Scripts
         private Dropdown SymbolDropdown { get; set; }
         private Dropdown AttackDropdown { get; set; }
         private Dropdown DefenceDropdown { get; set; }
+        private InputField EffectTextField { get; set; }
+        private InputField FlavourTextField { get; set; }
         private Toggle HasPersistenceToggle { get; set; }
         private Toggle IsUniqueToggle { get; set; }
 
 
-        public override void Start()
+        private Transform AllCardsTransform { get; set; }
+        private CardData CurrentlySelected { get; set; }
+
+        public void Start()
         {
+            // Load Resources
+            CardObject = Resources.Load<GameObject>("Prefabs/CardCanvasObject");
+
+            // Register Card Properties
+            NameField = GameObject.Find("Canvas/NameField").GetComponent<InputField>();
+
             ColourDropdown = GameObject.Find("Canvas/ColourDropdown").GetComponent<Dropdown>();
             ColourDropdown.AddOptions(GetEnumNames(typeof(Colour)));
 
@@ -46,10 +67,91 @@ namespace Assets.Scripts
             DefenceDropdown = GameObject.Find("Canvas/DefenceDropdown").GetComponent<Dropdown>();
             DefenceDropdown.AddOptions(GetRangeText(0, 20));
 
+            EffectTextField = GameObject.Find("Canvas/EffectTextField").GetComponent<InputField>();
+            FlavourTextField = GameObject.Find("Canvas/FlavourTextField").GetComponent<InputField>();
+
             HasPersistenceToggle = GameObject.Find("Canvas/HasPersistenceToggle").GetComponent<Toggle>();
             IsUniqueToggle = GameObject.Find("Canvas/IsUniqueToggle").GetComponent<Toggle>();
 
-            base.Start();
+            // Register All Card list
+            AllCardsTransform = GameObject.Find("Canvas/CardsView/Viewport/Content").transform;
+            PopulateAllCardsScrollView();
+
+            // Register button
+            GameObject.Find("Canvas/SubmitButton").GetComponent<Button>()
+                .onClick.AddListener(Submit);
+        }
+
+        private void PopulateAllCardsScrollView()
+        {
+            // Clear existing
+            for (var i = 0; i < AllCardsTransform.childCount; i++)
+            {
+                Destroy(AllCardsTransform.GetChild(i).gameObject);
+            }
+
+            // Fill new
+            var cards = DataIO.ReadAll<CardData>()
+                .OrderBy(x => x.Colour)
+                .ThenBy(x => x.CardType)
+                .ThenBy(x => x.Cost)
+                .ThenBy(x => x.Name);
+
+            foreach (var card in cards)
+            {
+                var cardCanvasObject = Instantiate(CardObject, Vector2.zero, Quaternion.identity, AllCardsTransform);
+                cardCanvasObject.AddComponent<Metadata>().AddData("id", card.Id);
+
+                cardCanvasObject.transform.localScale = Vector2.one * 2;
+                cardCanvasObject.transform.Find("Background").GetComponent<Image>().sprite = SpritesManager.GetSmallCard(card.Colour, card.CardType);
+                cardCanvasObject.transform.Find("Cost").GetComponent<Image>().sprite = SpritesManager.GetCostSymbol(card.Cost);
+                cardCanvasObject.transform.Find("Symbol").GetComponent<Image>().sprite = SpritesManager.GetCardSymbol(card.Symbol);
+
+                if (card.CardType == CardType.Creature)
+                {
+                    cardCanvasObject.transform.Find("Attack").GetComponent<TMP_Text>().text = card.Attack.ToString();
+                    cardCanvasObject.transform.Find("Defence").GetComponent<TMP_Text>().text = card.Defence.ToString();
+                }
+                else
+                {
+                    cardCanvasObject.transform.Find("Attack").GetComponent<TMP_Text>().text = "";
+                    cardCanvasObject.transform.Find("Defence").GetComponent<TMP_Text>().text = "";
+                }
+            }
+        }
+
+        private List<string> GetEnumNames(Type enumType)
+        {
+            if (enumType == typeof(Colour))
+            {
+                return new List<string>()
+                {
+                    "None",
+                    "Red",
+                    "Blue",
+                    "Green",
+                    "Purple",
+                    "Prismatic"
+                };
+            }
+
+            if (enumType == typeof(CardType))
+            {
+                return new List<string>()
+                {
+                    "None",
+                    "Creature",
+                    "Action",
+                    "Permanent"
+                };
+            }
+
+            return Enum.GetNames(enumType).ToList();
+        }
+
+        private List<string> GetRangeText(int min, int max)
+        {
+            return Enumerable.Range(0, max - min + 1).Select(x => x.ToString()).ToList();
         }
 
         private List<string> GetSymbolNames()
@@ -64,40 +166,132 @@ namespace Assets.Scripts
                 .ToList();
         }
 
-        protected override void Submit(CardData data)
+        private void Submit()
         {
-            // Retreive inherited properties from UI
-            data.Colour = (Colour)Enum.Parse(typeof(Colour), ColourDropdown.captionText.text);
-            data.Cost = int.Parse(CostDropdown.captionText.text);
+            // Retrieve or create id
+            int id;
+            if (CurrentlySelected == null)
+            {
+                var existingCards = DataIO.ReadAll<CardData>();
+                id = existingCards.Max(x => x.Id) + 1;
+            }
+            else
+            {
+                id = CurrentlySelected.Id;
+            }
 
-            data.CardType = (CardType)Enum.Parse(typeof(CardType), CardTypeDropdown.captionText.text);
-            data.SubTypes = (SubType)Enum.Parse(typeof(SubType), SubTypeDropdown.captionText.text);
+            // Retrieve data from the UI
+            var data = new CardData
+            {
+                Id = id,
+                Name = NameField.text,
 
-            data.Symbol = SymbolDropdown.captionText.text;
+                Colour = (Colour)Enum.Parse(typeof(Colour), ColourDropdown.captionText.text),
+                Cost = int.Parse(CostDropdown.captionText.text),
 
-            data.Attack = int.Parse(AttackDropdown.captionText.text);
-            data.Defence = int.Parse(DefenceDropdown.captionText.text);
+                CardType = (CardType)Enum.Parse(typeof(CardType), CardTypeDropdown.captionText.text),
+                SubTypes = (SubType)Enum.Parse(typeof(SubType), SubTypeDropdown.captionText.text),
 
-            data.HasPersistence = HasPersistenceToggle.isOn;
-            data.IsUnique = IsUniqueToggle.isOn;
+                Symbol = SymbolDropdown.captionText.text,
 
-            base.Submit(data);
+                Attack = int.Parse(AttackDropdown.captionText.text),
+                Defence = int.Parse(DefenceDropdown.captionText.text),
+
+                EffectText = EffectTextField.text,
+                FlavourText = FlavourTextField.text,
+
+                HasPersistence = HasPersistenceToggle.isOn,
+                IsUnique = IsUniqueToggle.isOn
+            };
+
+            // Write
+            DataIO.Write(data);
+
+            // Clear and prepare UI
+            PopulateComponents(new CardData());
+            PopulateAllCardsScrollView();
         }
 
-        protected override void PopulateComponents(CardData card)
+        private void PopulateComponents(CardData card)
         {
+            NameField.text = card.Name;
+
             ColourDropdown.value = ColourDropdown.options.FindIndex(x => x.text == card.Colour.ToString());
             CostDropdown.value = CostDropdown.options.FindIndex(x => x.text == card.Cost.ToString());
+
             CardTypeDropdown.value = CardTypeDropdown.options.FindIndex(x => x.text == card.CardType.ToString());
             SubTypeDropdown.value = SubTypeDropdown.options.FindIndex(x => x.text == card.SubTypes.ToString());
+
             SymbolDropdown.value = SymbolDropdown.options.FindIndex(x => x.text == card.Symbol?.ToString());
 
             AttackDropdown.value = AttackDropdown.options.FindIndex(x => x.text == card.Attack.ToString());
             DefenceDropdown.value = DefenceDropdown.options.FindIndex(x => x.text == card.Defence.ToString());
+
+            EffectTextField.text = card.EffectText;
+            FlavourTextField.text = card.FlavourText;
+
             HasPersistenceToggle.isOn = card.HasPersistence;
             IsUniqueToggle.isOn = card.IsUnique;
+        }
 
-            base.PopulateComponents(card);
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                SceneManager.LoadScene("StartScreen");
+            }
+
+            if (Input.GetKeyDown(KeyCode.Backspace))
+            {
+                CurrentlySelected = null;
+                PopulateComponents(new CardData());
+            }
+
+            var hoveredCard = GetHoveredCard();
+
+            // When not hovering, nothing changes
+            if (hoveredCard == null)
+                return;
+
+            // When clicking on a hovered card either select a card or deselect a card
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (CurrentlySelected?.Id == hoveredCard.Id)
+                {
+                    CurrentlySelected = null;
+                    PopulateComponents(new CardData());
+                }
+                else
+                {
+                    CurrentlySelected = hoveredCard;
+                    PopulateComponents(hoveredCard);
+                }
+            }
+
+            // If a card is hovered and nothing is selected, populate whatever is hovered
+            if (CurrentlySelected == null)
+            {
+                PopulateComponents(hoveredCard);
+            }
+        }
+
+        private CardData GetHoveredCard()
+        {
+            var mousePos = new PointerEventData(EventSystem.current) { position = Input.mousePosition };
+            var raycastResults = new List<RaycastResult>();
+
+            EventSystem.current.RaycastAll(mousePos, raycastResults);
+
+            var card = raycastResults
+                .Select(x => x.gameObject)
+                .FirstOrDefault(x => x.layer == LayerMask.NameToLayer("Card"));
+
+            if (card == null)
+                return null;
+
+            var id = card.GetComponentInParent<Metadata>().GetData<int>("id");
+
+            return DataIO.Read<CardData>(id);
         }
     }
 }
