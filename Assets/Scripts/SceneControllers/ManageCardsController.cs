@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Assets.Scripts.Cards;
 using Assets.Scripts.Enums;
+using Assets.Scripts.Extensions;
 using Assets.Scripts.IO;
 using Assets.Scripts.Managers;
 using Assets.Scripts.UI;
@@ -18,7 +18,11 @@ namespace Assets.Scripts
     public class ManageCardsController : MonoBehaviour
     {
         // Resources
-        private GameObject CardObject { get; set; }
+        private GameObject CardCanvasObject { get; set; }
+
+        // Managers
+        private CanvasHoverManager HoverManager { get; set; }
+
 
         // Fields for editing/creating
         private InputField NameField { get; set; }
@@ -34,14 +38,17 @@ namespace Assets.Scripts
         private Toggle HasPersistenceToggle { get; set; }
         private Toggle IsUniqueToggle { get; set; }
 
-
+        // Fields for UI
         private Transform AllCardsTransform { get; set; }
         private CardData CurrentlySelected { get; set; }
 
         public void Start()
         {
             // Load Resources
-            CardObject = Resources.Load<GameObject>("Prefabs/CardCanvasObject");
+            CardCanvasObject = Resources.Load<GameObject>("Prefabs/CardCanvasObject");
+
+            // Create Managers
+            HoverManager = gameObject.AddComponent<CanvasHoverManager>();
 
             // Register Card Properties
             NameField = GameObject.Find("Canvas/NameField").GetComponent<InputField>();
@@ -99,11 +106,10 @@ namespace Assets.Scripts
 
             foreach (var card in cards)
             {
-                var cardCanvasObject = Instantiate(CardObject, Vector2.zero, Quaternion.identity, AllCardsTransform);
+                var cardCanvasObject = Instantiate(CardCanvasObject, Vector2.zero, Quaternion.identity, AllCardsTransform);
                 cardCanvasObject.AddComponent<Metadata>().AddData("id", card.Id);
 
-                cardCanvasObject.transform.localScale = Vector2.one * 2;
-                cardCanvasObject.transform.Find("Background").GetComponent<Image>().sprite = SpritesManager.GetSmallCard(card.Colour, card.CardType);
+                cardCanvasObject.GetComponent<Image>().sprite = SpritesManager.GetSmallCard(card.Colour, card.CardType);
                 cardCanvasObject.transform.Find("Cost").GetComponent<Image>().sprite = SpritesManager.GetCostSymbol(card.Cost);
                 cardCanvasObject.transform.Find("Symbol").GetComponent<Image>().sprite = SpritesManager.GetCardSymbol(card.Symbol);
 
@@ -241,57 +247,26 @@ namespace Assets.Scripts
                 SceneManager.LoadScene("StartScreen");
             }
 
-            if (Input.GetKeyDown(KeyCode.Backspace))
-            {
-                CurrentlySelected = null;
-                PopulateComponents(new CardData());
-            }
+            var (hoveredCard, cardData) = EventSystem.current.GetHoveredCardAndData();
 
-            var hoveredCard = GetHoveredCard();
-
-            // When not hovering, nothing changes
             if (hoveredCard == null)
                 return;
 
-            // When clicking on a hovered card either select a card or deselect a card
             if (Input.GetMouseButtonDown(0))
             {
-                if (CurrentlySelected?.Id == hoveredCard.Id)
+                // Deselect a currently selected card
+                if (CurrentlySelected?.Id == cardData.Id)
                 {
                     CurrentlySelected = null;
                     PopulateComponents(new CardData());
                 }
+                // Select hovered card
                 else
                 {
-                    CurrentlySelected = hoveredCard;
-                    PopulateComponents(hoveredCard);
+                    CurrentlySelected = cardData;
+                    PopulateComponents(cardData);
                 }
             }
-
-            // If a card is hovered and nothing is selected, populate whatever is hovered
-            if (CurrentlySelected == null)
-            {
-                PopulateComponents(hoveredCard);
-            }
-        }
-
-        private CardData GetHoveredCard()
-        {
-            var mousePos = new PointerEventData(EventSystem.current) { position = Input.mousePosition };
-            var raycastResults = new List<RaycastResult>();
-
-            EventSystem.current.RaycastAll(mousePos, raycastResults);
-
-            var card = raycastResults
-                .Select(x => x.gameObject)
-                .FirstOrDefault(x => x.layer == LayerMask.NameToLayer("Card"));
-
-            if (card == null)
-                return null;
-
-            var id = card.GetComponentInParent<Metadata>().GetData<int>("id");
-
-            return DataIO.Read<CardData>(id);
         }
     }
 }

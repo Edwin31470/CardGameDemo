@@ -44,10 +44,10 @@ namespace Assets.Scripts
             Board = new BoardState(frontPlayer, backPlayer);
 
             // Register GameObject Managers
-            UIManager = gameObject.AddComponent(typeof(UIManager)) as UIManager;
+            UIManager = gameObject.AddComponent<UIManager>();
             UIManager.Initialize(Board, EnqueueEvents);
 
-            LabelManager = gameObject.AddComponent(typeof(LabelManager)) as LabelManager;
+            LabelManager = gameObject.AddComponent<LabelManager>();
             LabelManager.Initialize(frontPlayer, backPlayer);
 
             // Register Buttons
@@ -72,7 +72,7 @@ namespace Assets.Scripts
                 .onClick.AddListener(() => ShowItems(PlayerType.Back));
 
             // Register Timer
-            Timer = gameObject.AddComponent(typeof(RepeatingTimer)) as RepeatingTimer;
+            Timer = gameObject.AddComponent<RepeatingTimer>();
             Timer.Initialize(0.1f, NextEvent);
 
             EnqueueEvent(new NewPhaseEvent(Phase.GameStart));

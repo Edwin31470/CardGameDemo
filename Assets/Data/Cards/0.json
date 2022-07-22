@@ -1,1 +1,1 @@
-{"colour":4,"cost":3,"cardType":2,"subTypes":1,"symbol":"Club","attack":0,"defence":0,"hasPersistence":false,"isUnique":false,"id":0,"name":"Tes5","effectText":"","flavourText":""}
+{"colour":1,"cost":0,"cardType":1,"subTypes":1,"symbol":"Elemental","attack":1,"defence":1,"hasPersistence":false,"isUnique":false,"id":0,"name":"Roiling Elemental","effectText":"Has +1/+1 for each other elemental on the field.","flavourText":"Roil, roil, toil and trouble."}

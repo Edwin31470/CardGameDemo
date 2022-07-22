@@ -166,6 +166,7 @@
     <Compile Include="Assets\Scripts\SceneControllers\ManageItemsController.cs" />
     <Compile Include="Assets\Scripts\Effects\CardEffects\BlueActionEffects.cs" />
     <Compile Include="Assets\Scripts\Effects\BaseEffects.cs" />
+    <Compile Include="Assets\Scripts\Metadata.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumerableExtensions.cs" />
     <Compile Include="Assets\Scripts\SceneControllers\BaseManagerController.cs" />
     <Compile Include="Assets\Scripts\Events\UIEvents.cs" />
@@ -186,7 +187,8 @@
     <Compile Include="Assets\Scripts\SceneControllers\GameSceneController.cs" />
     <Compile Include="Assets\Scripts\Extensions\EnumExtensions.cs" />
     <Compile Include="Assets\Scripts\Managers\ItemsManager.cs" />
-    <Compile Include="Assets\Scripts\Metadata.cs" />
+    <Compile Include="Assets\Scripts\UI\CanvasHoverManager.cs" />
+    <Compile Include="Assets\Scripts\Extensions\EventSystemExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
