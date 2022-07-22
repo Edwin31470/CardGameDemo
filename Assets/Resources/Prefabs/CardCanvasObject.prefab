@@ -90,7 +90,6 @@ GameObject:
   - component: {fileID: 1714598896757378581}
   - component: {fileID: 2235877279850103456}
   - component: {fileID: 2217228887367662571}
-  - component: {fileID: 4109393469735136432}
   m_Layer: 8
   m_Name: CardCanvasObject
   m_TagString: Untagged
@@ -221,17 +220,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!210 &4109393469735136432
-SortingGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1156344605515476738}
-  m_Enabled: 1
-  m_SortingLayerID: -354616101
-  m_SortingLayer: 1
-  m_SortingOrder: 0
 --- !u!1 &3211177392693733656
 GameObject:
   m_ObjectHideFlags: 0
